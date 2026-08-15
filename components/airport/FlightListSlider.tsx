@@ -201,6 +201,9 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
     });
   }
 
+  // 00~05시 블록은 kstHour >= 6일 때만 익일 (자정~새벽엔 오늘로 표시)
+  const isNextDay = (blockIdx: number) => blockIdx < 2 && kstHour >= 6;
+
   // Header range: sort selected blocks in window order (06시 first, 00시 익일 last)
   const selectedBlocksSorted = Array.from(selectedGroups).sort((a, b) => {
     const w = (i: number) => i < 2 ? i + 8 : i;
@@ -208,8 +211,8 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
   });
   const firstBIdx = selectedBlocksSorted[0] ?? currentBlockIdx;
   const lastBIdx = selectedBlocksSorted[selectedBlocksSorted.length - 1] ?? currentBlockIdx;
-  const headerStart = `${firstBIdx < 2 ? "익일 " : ""}${String(FIXED_BLOCKS[firstBIdx].startH).padStart(2, "0")}:00`;
-  const headerEnd = `${lastBIdx < 2 ? "익일 " : ""}${String(FIXED_BLOCKS[lastBIdx].endH).padStart(2, "0")}:00`;
+  const headerStart = `${isNextDay(firstBIdx) ? "익일 " : ""}${String(FIXED_BLOCKS[firstBIdx].startH).padStart(2, "0")}:00`;
+  const headerEnd = `${isNextDay(lastBIdx) ? "익일 " : ""}${String(FIXED_BLOCKS[lastBIdx].endH).padStart(2, "0")}:00`;
 
   return (
     <>
@@ -250,14 +253,12 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
         <div className="grid grid-cols-4 gap-2">
           {FIXED_BLOCKS.map(({ label }, blockIdx) => {
             const isSelected = selectedGroups.has(blockIdx);
-            const isCurrent = blockIdx === currentBlockIdx;
             return (
               <button
                 key={blockIdx}
                 onClick={() => toggleGroup(blockIdx)}
                 className={`py-2 rounded-xl text-sm font-semibold text-center transition-colors ${
                   isSelected ? "bg-[#C4933F] text-white"
-                  : isCurrent ? "bg-amber-50 text-[#9A7020] ring-1 ring-[#C4933F]"
                   : "bg-gray-100 text-gray-600"
                 }`}
               >
