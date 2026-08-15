@@ -89,6 +89,7 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
   const [filterQuery, setFilterQuery] = useState("");
   const [selectedAirlines, setSelectedAirlines] = useState<Set<string> | null>(null);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [basis, setBasis] = useState<"exit" | "landing">("exit");
 
   // Slot indices for each fixed block:
   // Blocks 0-1 (00~05시) → tomorrowStr slots; Blocks 2-7 (06~23시) → todayStr slots
@@ -132,7 +133,21 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
     return result.sort((a, b) => a.localeCompare(b, "ko"));
   }, [slots]);
 
-  const selected = slots.filter((_, idx) => selectedSlotSet.has(idx));
+  const effectiveSlots = useMemo(() => {
+    if (basis === "exit") return slots;
+    const allFlights = new Map<string, (typeof slots)[0]["flights"][0]>();
+    for (const slot of slots) for (const f of slot.flights) allFlights.set(f.id, f);
+    return slots.map((slot) => {
+      const flights = Array.from(allFlights.values()).filter((f) => {
+        const t = f.landingTime;
+        const fd = `${t.getFullYear()}${String(t.getMonth()+1).padStart(2,"0")}${String(t.getDate()).padStart(2,"0")}`;
+        return fd === slot.date && t.getHours() === slot.hour;
+      });
+      return { ...slot, flights, flightCount: flights.length };
+    });
+  }, [slots, basis]);
+
+  const selected = effectiveSlots.filter((_, idx) => selectedSlotSet.has(idx));
 
   const isFiltered = selectedAirlines !== null;
   const selectedCount = selectedAirlines?.size ?? allAirlines.length;
@@ -156,10 +171,12 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
   // "지금" 구분선: 현재 시각 기준 첫 미래 항공편 위치
   const now = new Date();
   const nowDividerIdx = useMemo(() => {
-    const idx = allEntries.findIndex(({ flight }) => flight.exitTime >= now || flight.landingTime >= now);
+    const idx = allEntries.findIndex(({ flight }) =>
+      basis === "exit" ? flight.exitTime >= now : flight.landingTime >= now
+    );
     return idx >= 0 ? idx : allEntries.length;
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allEntries]);
+  }, [allEntries, basis]);
 
   const listRef = useRef<HTMLDivElement>(null);
   const dividerRef = useRef<HTMLDivElement>(null);
@@ -173,7 +190,7 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
     if (list && divider) {
       list.scrollTop = Math.max(0, divider.offsetTop - list.offsetTop - 8);
     }
-  }, [selectedGroups, isCurrentBlockSelected]);
+  }, [selectedGroups, isCurrentBlockSelected, basis]);
 
   function toggleAirline(airline: string) {
     setSelectedAirlines((prev) => {
@@ -197,9 +214,19 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
   return (
     <>
     <div className="flex items-center justify-between px-1 mb-2">
-      <p className="text-base font-bold text-gray-800 tabular-nums min-w-[3.5rem]">
-        {totalFlights > 0 ? `${totalFlights}편` : "—"}
-      </p>
+      <div className="flex items-center gap-2">
+        <p className="text-base font-bold text-gray-800 tabular-nums min-w-[3.5rem]">
+          {totalFlights > 0 ? `${totalFlights}편` : "—"}
+        </p>
+        <div className="flex rounded-lg overflow-hidden border border-gray-300 text-xs font-semibold">
+          {(["exit", "landing"] as const).map((b) => (
+            <button key={b} onClick={() => setBasis(b)}
+              className={`px-2.5 py-1.5 transition-colors ${basis === b ? "bg-gray-800 text-white" : "bg-white text-gray-600"}`}>
+              {b === "exit" ? "출구기준" : "착륙기준"}
+            </button>
+          ))}
+        </div>
+      </div>
       <button
         onClick={() => { setShowFilter(true); setFilterQuery(""); }}
         className={`text-sm px-3 py-1.5 rounded-full border font-medium transition-colors ${
