@@ -345,10 +345,10 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
                           </p>
                           <p className="text-base tabular-nums font-bold whitespace-nowrap flex items-center justify-end gap-1">
                             <span>실착 </span>
-                            <span style={{ color: isLate ? "#9B1B30" : "#3B82F6" }}>{lh}:{lm}</span>
                             <span className={`text-[10px] font-bold text-white px-1.5 py-0.5 rounded-md leading-none ${isLate ? "bg-[#9B1B30]" : "bg-blue-400"}`}>
                               {isLate ? "지연" : "단축"}
                             </span>
+                            <span style={{ color: isLate ? "#9B1B30" : "#3B82F6" }}>{lh}:{lm}</span>
                           </p>
                         </>
                       );
