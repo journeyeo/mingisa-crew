@@ -158,6 +158,12 @@ export function AirportDashboard({ terminal }: Props) {
           <p className="text-sm text-gray-400 mt-0.5">
             {now.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" })}
             {" · 5분 갱신"}
+            {data && (() => {
+              const t = new Date(data.nowISO);
+              const hh = String(t.getHours()).padStart(2, "0");
+              const mm = String(t.getMinutes()).padStart(2, "0");
+              return <span className="text-gray-300"> · {hh}:{mm} 업데이트</span>;
+            })()}
           </p>
         </div>
 
