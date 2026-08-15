@@ -306,14 +306,6 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
                         >+{extraIds.length}</button>
                       )}
                     </div>
-                    {flight.isDelayed && (() => {
-                        const diff = flight.landingTime.getTime() - flight.scheduledTime.getTime();
-                        return (
-                          <span className={`text-[10px] font-bold text-white px-1.5 py-0.5 rounded-md leading-none ${diff > 0 ? "bg-[#9B1B30]" : "bg-blue-400"}`}>
-                            {diff > 0 ? "지연" : "단축"}
-                          </span>
-                        );
-                      })()}
                     {extraIds.length > 0 && isExpanded && (
                       <div className="flex flex-col gap-0.5">
                         {extraIds.map((id) => (
@@ -347,9 +339,14 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
                       const lh = String(flight.landingTime.getHours()).padStart(2, "0");
                       const lm = String(flight.landingTime.getMinutes()).padStart(2, "0");
                       return (
-                        <p className="text-sm font-medium tabular-nums whitespace-nowrap text-gray-900">
-                          착륙 {sh}:{sm}→<span style={{ color: isLate ? "#9B1B30" : "#3B82F6" }}>{lh}:{lm}</span>
-                        </p>
+                        <div className="flex items-center justify-end gap-1">
+                          <p className="text-sm font-medium tabular-nums whitespace-nowrap text-gray-900">
+                            착륙 {sh}:{sm}→<span style={{ color: isLate ? "#9B1B30" : "#3B82F6" }}>{lh}:{lm}</span>
+                          </p>
+                          <span className={`text-[10px] font-bold text-white px-1.5 py-0.5 rounded-md leading-none ${isLate ? "bg-[#9B1B30]" : "bg-blue-400"}`}>
+                            {isLate ? "지연" : "단축"}
+                          </span>
+                        </div>
                       );
                     })() : (
                       <p className="text-sm text-gray-900 font-medium whitespace-nowrap">
