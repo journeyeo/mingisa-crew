@@ -196,9 +196,6 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
                           <span className="text-base tabular-nums font-semibold">{String(s.hour).padStart(2, "0")}시</span>
                           {s.isNoTransport && <span className="text-xs font-bold text-white px-2 py-0.5 rounded-full leading-none" style={{ background: "#9B1B30" }}>심야</span>}
                         </div>
-                        {isNow && (
-                          <span className="text-xs font-bold px-2 py-0.5 rounded-full text-white leading-none w-fit" style={{ background: "#C4933F" }}>지금</span>
-                        )}
                       </div>
                     </td>
                     <td className="py-2.5 text-right tabular-nums text-lg font-semibold" style={{ color: COLOR.normalDark }}>{s.foreignCount.toLocaleString()}</td>
