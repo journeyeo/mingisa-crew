@@ -60,7 +60,7 @@ function DurationBadge({ code }: { code?: string }) {
           : { background: "#F4F4F5", color: "#71717A" }
       }
     >
-      약 {h}h
+      약 {h}h 비행
     </span>
   );
 }
@@ -132,11 +132,25 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
   const selectedCount = selectedAirlines?.size ?? allAirlines.length;
 
   const selected = slots.slice(startIdx, endIdx + 1);
-  const allEntries = selected.flatMap((s) =>
-    s.flights
-      .filter((f) => selectedAirlines === null || selectedAirlines.has(f.airline))
-      .map((f) => ({ flight: f, isNoTransport: s.isNoTransport }))
-  );
+
+  // 공동운항(코드쉐어) 중복 제거: scheduledTime + origin이 같으면 동일 항공기
+  const allEntries = (() => {
+    const raw = selected.flatMap((s) =>
+      s.flights
+        .filter((f) => selectedAirlines === null || selectedAirlines.has(f.airline))
+        .map((f) => ({ flight: f, isNoTransport: s.isNoTransport }))
+    );
+    const seen = new Map<string, { flight: typeof raw[0]["flight"]; ids: string[]; isNoTransport: boolean }>();
+    for (const entry of raw) {
+      const key = `${entry.flight.scheduledTime.getTime()}-${entry.flight.origin}`;
+      if (seen.has(key)) {
+        seen.get(key)!.ids.push(entry.flight.id);
+      } else {
+        seen.set(key, { flight: entry.flight, ids: [entry.flight.id], isNoTransport: entry.isNoTransport });
+      }
+    }
+    return Array.from(seen.values());
+  })();
   const totalFlights = allEntries.length;
 
   function toggleAirline(airline: string) {
@@ -241,15 +255,17 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
             <span className="w-28 text-right">착륙 · 출구 도착</span>
           </div>
           <div className="divide-y divide-gray-100 overflow-y-auto max-h-80">
-            {allEntries.map(({ flight, isNoTransport }, i) => (
+            {allEntries.map(({ flight, ids, isNoTransport }, i) => (
               <div
-                key={`${flight.id}-${i}`}
+                key={`${ids[0]}-${i}`}
                 className={`flex items-center px-4 py-3 gap-3 ${flight.isDelayed ? "bg-rose-50/60" : isNoTransport ? "bg-amber-50/30" : ""}`}
               >
                 <div className="w-20 shrink-0 flex flex-col items-start gap-0.5">
-                  <span className="text-sm font-mono font-bold text-gray-900">{flight.id}</span>
+                  {ids.map((id) => (
+                    <span key={id} className="text-sm font-mono font-bold text-gray-900 leading-tight">{id}</span>
+                  ))}
                   {flight.isDelayed && (
-                    <span className="text-[10px] font-bold text-white bg-[#9B1B30] px-1.5 py-0.5 rounded-md leading-none">지연</span>
+                    <span className="text-[10px] font-bold text-white bg-[#9B1B30] px-1.5 py-0.5 rounded-md leading-none mt-0.5">지연</span>
                   )}
                 </div>
                 <div className="flex-1 flex flex-col justify-center min-w-0 gap-0.5">
