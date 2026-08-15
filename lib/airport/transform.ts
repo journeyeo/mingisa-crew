@@ -17,18 +17,26 @@ import {
   isNoTransport,
 } from "./constants";
 
+// 공항 API 시각은 항상 KST — 서버 타임존에 무관하게 +09:00 명시
 function parseDateTime(raw: string): Date {
   const clean = raw.trim();
   if (clean.includes("-") || clean.includes(" ")) {
-    return new Date(clean.replace(" ", "T") + ":00");
+    return new Date(clean.replace(" ", "T") + ":00+09:00");
   }
   // "202608112040" — YYYYMMDDHHMM (12자, 공백 없음)
   if (clean.length >= 12) {
     const y = clean.slice(0, 4), mo = clean.slice(4, 6), d = clean.slice(6, 8);
     const h = clean.slice(8, 10), mi = clean.slice(10, 12);
-    return new Date(`${y}-${mo}-${d}T${h}:${mi}:00`);
+    return new Date(`${y}-${mo}-${d}T${h}:${mi}:00+09:00`);
   }
   return new Date(NaN);
+}
+
+// UTC Date → KST 날짜/시각 추출
+function kstParts(d: Date) {
+  const k = new Date(d.getTime() + 9 * 3600_000);
+  const date = `${k.getUTCFullYear()}${String(k.getUTCMonth()+1).padStart(2,"0")}${String(k.getUTCDate()).padStart(2,"0")}`;
+  return { date, hour: k.getUTCHours() };
 }
 
 function addMinutes(date: Date, minutes: number): Date {
@@ -159,12 +167,12 @@ export function buildWindowSlots(
     forecastByKey.set(key, { foreign: prev.foreign + foreign, domestic: prev.domestic + (total - foreign) });
   }
 
-  // 항공편: (YYYYMMDD-hour) 키로 집계
+  // 항공편: (YYYYMMDD-hour) 키로 집계 — KST 기준
   const flightsByKey = new Map<string, Flight[]>();
   for (const flight of flights) {
     const t = basis === "exit" ? flight.exitTime : flight.landingTime;
-    const fd = `${t.getFullYear()}${String(t.getMonth()+1).padStart(2,"0")}${String(t.getDate()).padStart(2,"0")}`;
-    const key = `${fd}-${t.getHours()}`;
+    const { date: fd, hour } = kstParts(t);
+    const key = `${fd}-${hour}`;
     if (!flightsByKey.has(key)) flightsByKey.set(key, []);
     flightsByKey.get(key)!.push(flight);
   }
@@ -199,11 +207,11 @@ export function flightsFromStatus(
   return filtered.map((f) => {
     const hh = (f.scheduleDateTime ?? "0000").slice(0, 2);
     const mm = (f.scheduleDateTime ?? "0000").slice(2, 4);
-    const schedTime = new Date(`${y}-${mo}-${d}T${hh}:${mm}:00`);
+    const schedTime = new Date(`${y}-${mo}-${d}T${hh}:${mm}:00+09:00`);
     const ehh = (f.estimatedDateTime ?? "").slice(0, 2);
     const emm = (f.estimatedDateTime ?? "").slice(2, 4);
     let actualTime = f.estimatedDateTime
-      ? new Date(`${y}-${mo}-${d}T${ehh}:${emm}:00`)
+      ? new Date(`${y}-${mo}-${d}T${ehh}:${emm}:00+09:00`)
       : schedTime;
     // 자정 경계 보정: ±12시간 초과 차이는 하루 오차로 판단
     const rawDiff = actualTime.getTime() - schedTime.getTime();
