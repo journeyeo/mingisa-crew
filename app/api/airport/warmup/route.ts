@@ -6,8 +6,6 @@ import {
   fetchWeeklyFlights,
 } from "@/lib/airport/api-client";
 
-export const runtime = "nodejs";
-
 export async function GET() {
   const now = new Date();
   const toKST = (d: Date) =>
