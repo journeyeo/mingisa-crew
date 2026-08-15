@@ -38,7 +38,7 @@ export function WeeklyForecast({ days }: Props) {
     <div className="px-4 pt-3 pb-3">
       <table className="w-full">
         <thead>
-          <tr className="text-xs font-semibold text-gray-500 border-b border-gray-100">
+          <tr className="text-sm font-semibold text-gray-500 border-b border-gray-100">
             <th className="text-left pb-2 font-medium">날짜</th>
             <th className="text-right pb-2 font-medium">운항</th>
             <th className="text-right pb-2 font-medium">심야</th>
@@ -52,23 +52,24 @@ export function WeeklyForecast({ days }: Props) {
               : null;
             const isFirst = idx === 0;
             const barPct = Math.round((d.totalFlights / maxTotal) * 100);
+            const dateLabel = `${parseInt(d.date.slice(4, 6))}/${parseInt(d.date.slice(6, 8))}`;
             return (
               <tr
                 key={d.date}
                 className={`cursor-pointer ${isFirst ? "font-bold text-gray-900" : "text-gray-700"}`}
                 onClick={() => { setSelectedIdx(idx); setView("chart"); }}
               >
-                <td className="py-2.5">
-                  <span className={`text-sm ${isFirst ? "text-[#C4933F]" : ""}`}>{d.label}</span>
-                  <span className="text-xs text-gray-400 ml-1">{d.dayOfWeek}</span>
+                <td className="py-3">
+                  <span className={`text-base ${isFirst ? "text-[#C4933F]" : ""}`}>{d.label}</span>
+                  <span className="text-sm text-gray-400 ml-1.5">{dateLabel}</span>
                 </td>
-                <td className="py-2.5 text-right tabular-nums text-sm">
+                <td className="py-3 text-right tabular-nums text-base">
                   {d.totalFlights}편
                 </td>
-                <td className="py-2.5 text-right tabular-nums text-sm" style={{ color: d.goldenHourFlights > 0 ? "#9B1B30" : undefined }}>
+                <td className="py-3 text-right tabular-nums text-base" style={{ color: d.goldenHourFlights > 0 ? "#9B1B30" : undefined }}>
                   {d.goldenHourFlights > 0 ? `${d.goldenHourFlights}편` : <span className="text-gray-300">—</span>}
                 </td>
-                <td className="py-2.5 pl-3">
+                <td className="py-3 pl-3">
                   <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
                     <div
                       className="h-full rounded-full transition-all"
@@ -79,7 +80,7 @@ export function WeeklyForecast({ days }: Props) {
                     />
                   </div>
                   {peakSlot && (
-                    <span className="text-[10px] text-gray-400 tabular-nums">
+                    <span className="text-xs text-gray-400 tabular-nums">
                       피크 {String(peakSlot.hour).padStart(2, "0")}시
                     </span>
                   )}
