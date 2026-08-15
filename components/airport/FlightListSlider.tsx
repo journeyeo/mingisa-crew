@@ -317,14 +317,6 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
                         >접기</button>
                       </div>
                     )}
-                    {flight.isDelayed && (() => {
-                        const diff = flight.landingTime.getTime() - flight.scheduledTime.getTime();
-                        return (
-                          <span className={`text-[10px] font-bold text-white px-1.5 py-0.5 rounded-md leading-none mt-0.5 ${diff > 0 ? "bg-[#9B1B30]" : "bg-blue-400"}`}>
-                            {diff > 0 ? "지연" : "단축"}
-                          </span>
-                        );
-                      })()}
                   </div>
 
                   {/* 출발지 열 */}
@@ -347,7 +339,7 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
                       const lh = String(flight.landingTime.getHours()).padStart(2, "0");
                       const lm = String(flight.landingTime.getMinutes()).padStart(2, "0");
                       return (
-                        <p className="text-sm font-medium tabular-nums whitespace-nowrap text-gray-500">
+                        <p className="text-sm font-semibold tabular-nums whitespace-nowrap" style={{ color: isLate ? "#9B1B30" : "#3B82F6" }}>
                           착륙 {sh}:{sm}→{lh}:{lm}
                         </p>
                       );
