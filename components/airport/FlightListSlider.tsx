@@ -340,29 +340,9 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
 
                   {/* 시각 열 */}
                   <div className="w-28 text-right shrink-0">
-                    {flight.isDelayed ? (() => {
-                      const delayMin = Math.round((flight.landingTime.getTime() - flight.scheduledTime.getTime()) / 60_000);
-                      const isLate = delayMin > 0;
-                      const absDiff = Math.abs(delayMin);
-                      const sh = String(flight.scheduledTime.getHours()).padStart(2, "0");
-                      const sm = String(flight.scheduledTime.getMinutes()).padStart(2, "0");
-                      const lh = String(flight.landingTime.getHours()).padStart(2, "0");
-                      const lm = String(flight.landingTime.getMinutes()).padStart(2, "0");
-                      return (
-                        <>
-                          <p className="text-sm font-semibold tabular-nums" style={{ color: isLate ? "#9B1B30" : "#3B82F6" }}>
-                            착륙 {sh}:{sm}→{lh}:{lm}
-                          </p>
-                          <p className="text-xs font-semibold tabular-nums" style={{ color: isLate ? "#9B1B30" : "#3B82F6" }}>
-                            {isLate ? `+${absDiff}분` : `-${absDiff}분`}
-                          </p>
-                        </>
-                      );
-                    })() : (
-                      <p className="text-sm text-gray-500 font-medium">
-                        <TimeCell date={flight.landingTime} todayStr={todayStr} prefix="착륙" />
-                      </p>
-                    )}
+                    <p className={`text-sm font-medium ${flight.isDelayed ? (flight.landingTime > flight.scheduledTime ? "text-[#9B1B30]" : "text-blue-400") : "text-gray-500"}`}>
+                      <TimeCell date={flight.landingTime} todayStr={todayStr} prefix="착륙" />
+                    </p>
                     <p className={`text-base font-semibold leading-tight ${isNoTransport ? "text-[#9B1B30]" : "text-gray-900"}`}>
                       <TimeCell date={flight.exitTime} todayStr={todayStr} prefix={flight.exitGate ? `출구 ${flight.exitGate}` : "출구"} />
                       {isNoTransport && (
