@@ -321,7 +321,7 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
                         const diff = flight.landingTime.getTime() - flight.scheduledTime.getTime();
                         return (
                           <span className={`text-[10px] font-bold text-white px-1.5 py-0.5 rounded-md leading-none mt-0.5 ${diff > 0 ? "bg-[#9B1B30]" : "bg-blue-400"}`}>
-                            {diff > 0 ? "지연" : "조기"}
+                            {diff > 0 ? "지연" : "단축"}
                           </span>
                         );
                       })()}
