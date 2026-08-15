@@ -3,7 +3,6 @@ import { NextRequest } from "next/server";
 import {
   fetchArrivalsCongestion,
   fetchFlightStatus,
-  fetchParking,
   fetchPassengerForecast,
   fetchWeeklyFlights,
 } from "@/lib/airport/api-client";
@@ -13,7 +12,6 @@ import {
   findPeakSlot,
   flightsFromStatus,
   mergeFlightData,
-  summarizeParking,
 } from "@/lib/airport/transform";
 import type { Flight, Terminal } from "@/lib/airport/types";
 
@@ -45,7 +43,6 @@ export async function GET(req: NextRequest) {
     [flightsToday, flightsTomorrow],
     [forecastsToday, forecastsTomorrow],
     weeklyItems,
-    parkingItems,
   ] = await Promise.all([
     fetchArrivalsCongestion(terminal),
     Promise.all([
@@ -57,7 +54,6 @@ export async function GET(req: NextRequest) {
       fetchPassengerForecast(tomorrowStr).catch(() => []),
     ]),
     fetchWeeklyFlights(terminal),
-    fetchParking(),
   ]);
 
   const forecasts = [
@@ -103,7 +99,6 @@ export async function GET(req: NextRequest) {
     currentForeignWaiting,
     currentTotalWaiting,
     weeklyDays: buildWeeklyDays(weeklyItems, terminal),
-    parking: summarizeParking(parkingItems, terminal),
     todayStr,
     tomorrowStr,
     tomorrowLabel,

@@ -1,13 +1,12 @@
 "use client";
 
 import { Suspense, useState, useEffect, useRef } from "react";
-import type { Flight, HourlySlot, Terminal, WeeklyDay, ParkingSummary } from "@/lib/airport/types";
+import type { Flight, HourlySlot, Terminal, WeeklyDay } from "@/lib/airport/types";
 
 import { DashboardHeader } from "@/components/airport/DashboardHeader";
 import { TerminalToggle } from "@/components/airport/TerminalBasisToggle";
 import { PassengerChart } from "@/components/airport/PassengerChart";
 import { FlightListSlider } from "@/components/airport/FlightListSlider";
-import { ParkingStatus } from "@/components/airport/ParkingStatus";
 import { WeeklyForecast } from "@/components/airport/WeeklyForecast";
 import { Footer } from "@/components/Footer";
 
@@ -32,7 +31,6 @@ interface DashboardData {
   currentForeignWaiting: number;
   currentTotalWaiting: number;
   weeklyDays: WeeklyDay[];
-  parking: ParkingSummary;
   todayStr: string;
   tomorrowStr: string;
   tomorrowLabel: string;
@@ -191,7 +189,6 @@ export function AirportDashboard({ terminal }: Props) {
                 nowIdx={data.nowIdx}
               />
             </div>
-            <ParkingStatus parking={data.parking} />
             <div>
               <div className="flex items-baseline gap-1.5 mb-3">
                 <p className="text-sm font-semibold text-gray-500">주간 예측</p>

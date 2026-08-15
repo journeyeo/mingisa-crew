@@ -149,7 +149,7 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
           </span>
         </div>
         <div className="flex rounded-lg overflow-hidden border border-gray-100 text-[11px] font-semibold">
-          {(["chart", "table"] as const).map((v) => (
+          {(["table", "chart"] as const).map((v) => (
             <button
               key={v}
               onClick={() => setView(v)}

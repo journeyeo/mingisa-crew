@@ -51,7 +51,7 @@ function DurationBadge({ code }: { code?: string }) {
   const mid = h >= 3;
   return (
     <span
-      className="text-xs font-bold px-1.5 py-0.5 rounded leading-none"
+      className="text-xs font-bold px-1.5 py-0.5 rounded leading-none inline-flex items-center justify-center min-w-[5rem]"
       style={
         long
           ? { background: "#FDF0F2", color: "#9B1B30" }
