@@ -7,7 +7,7 @@ export function Footer() {
             MINGISA
             <span className="ml-1.5 text-[10px] font-normal text-[#1B5E36] tracking-widest">CREW</span>
           </p>
-          <p className="text-[10px] text-gray-300 mt-0.5">운영: TRAILABS</p>
+          <p className="text-xs text-gray-400 mt-0.5">운영: TRAILABS</p>
         </div>
         <p className="text-xs text-gray-300">© 2026 TRAILABS</p>
       </div>
