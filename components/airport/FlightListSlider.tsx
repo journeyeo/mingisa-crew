@@ -254,6 +254,9 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
         항공사{isFiltered && <span className="ml-1 opacity-70">{selectedCount}/{allAirlines.length}</span>}
       </button>
     </div>
+    {basis === "exit" && (
+      <p className="px-1 text-xs text-gray-400">* 출구 시각 = 착륙 후 약 55분 (외국인 입국 기준)</p>
+    )}
 
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
       <div className="px-4 pt-4 pb-3 border-b border-gray-100">
@@ -380,7 +383,6 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
               );
             })}
           </div>
-          <p className="px-4 py-2 text-sm text-gray-500">* 출구 시각 = 착륙 후 약 55분 (외국인 입국 기준)</p>
         </>
       )}
 
