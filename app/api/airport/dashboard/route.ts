@@ -1,5 +1,4 @@
 import { NextRequest } from "next/server";
-import { cacheLife } from "next/cache";
 
 import {
   fetchArrivalsCongestion,
@@ -27,9 +26,8 @@ function serializeFlight(f: Flight) {
   };
 }
 
-async function buildDashboard(terminal: Terminal) {
-  "use cache";
-  cacheLife(300);
+export async function GET(req: NextRequest) {
+  const terminal = (req.nextUrl.searchParams.get("terminal") === "T2" ? "T2" : "T1") as Terminal;
 
   const now = new Date();
   const toKST = (d: Date) =>
@@ -98,7 +96,7 @@ async function buildDashboard(terminal: Terminal) {
   const serializeSlots = (ss: typeof slots) =>
     ss.map((s) => ({ ...s, flights: s.flights.map(serializeFlight) }));
 
-  return {
+  return Response.json({
     slots: serializeSlots(slots),
     allSlots: serializeSlots(allSlots),
     peakSlot: peakSlot ? { ...peakSlot, flights: peakSlot.flights.map(serializeFlight) } : null,
@@ -111,11 +109,5 @@ async function buildDashboard(terminal: Terminal) {
     tomorrowLabel,
     nowIdx,
     nowISO: now.toISOString(),
-  };
-}
-
-export async function GET(req: NextRequest) {
-  const terminal = (req.nextUrl.searchParams.get("terminal") === "T2" ? "T2" : "T1") as Terminal;
-  const body = await buildDashboard(terminal);
-  return Response.json(body);
+  });
 }

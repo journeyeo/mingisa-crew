@@ -28,7 +28,7 @@ interface Props {
 }
 
 export function PassengerChart({ slots, tomorrowLabel }: Props) {
-  const [view, setView] = useState<"chart" | "table">("chart");
+  const [view, setView] = useState<"chart" | "table">("table");
 
   const labels = slots.map((s, i) => {
     const h = `${String(s.hour).padStart(2, "0")}시`;
