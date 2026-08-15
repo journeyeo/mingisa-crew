@@ -179,7 +179,7 @@ export function AirportDashboard({ terminal }: Props) {
             />
             <PassengerChart slots={data.slots.map(deserializeSlot)} tomorrowLabel={data.tomorrowLabel} />
             <div>
-              <p className="text-sm font-semibold text-gray-500 mb-3">시간대별 운항편</p>
+              <p className="text-sm font-semibold text-gray-700 mb-3">시간대별 운항편</p>
               <FlightListSlider
                 key={terminal}
                 terminal={terminal}
@@ -191,8 +191,8 @@ export function AirportDashboard({ terminal }: Props) {
             </div>
             <div>
               <div className="flex items-baseline gap-1.5 mb-3">
-                <p className="text-sm font-semibold text-gray-500">주간 예측</p>
-                <span className="text-xs text-gray-400">(T1/T2 통합)</span>
+                <p className="text-sm font-semibold text-gray-700">주간 예측</p>
+                <span className="text-xs text-gray-500">(T1/T2 통합)</span>
               </div>
               <WeeklyForecast days={data.weeklyDays} />
             </div>

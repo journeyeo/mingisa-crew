@@ -51,7 +51,7 @@ function DurationBadge({ code }: { code?: string }) {
   const mid = h >= 3;
   return (
     <span
-      className="text-xs font-bold px-1.5 py-0.5 rounded leading-none inline-flex items-center justify-center min-w-[5rem]"
+      className="text-xs font-bold px-1.5 py-0.5 rounded leading-none shrink-0"
       style={
         long
           ? { background: "#FDF0F2", color: "#9B1B30" }
@@ -280,12 +280,12 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
         <p className="px-4 py-6 text-gray-400 text-sm text-center">이 시간대 운항편 없음</p>
       ) : (
         <>
-          <div className="flex items-center px-4 pt-2 pb-1 gap-3 text-xs text-gray-500">
+          <div className="flex items-center px-4 pt-2 pb-1 gap-3 text-xs font-semibold text-gray-600">
             <span className="w-20 shrink-0">편명</span>
             <span className="flex-1">출발지</span>
             <span className="w-28 text-right">착륙 · 출구 도착</span>
           </div>
-          <div className="divide-y divide-gray-100 overflow-y-auto max-h-80">
+          <div className="divide-y divide-gray-100 overflow-y-auto max-h-[26rem]">
             {allEntries.map(({ flight, ids, isNoTransport }, i) => {
               const primaryId = ids[0];
               const extraIds = ids.slice(1);
@@ -318,18 +318,20 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
                       </div>
                     )}
                     {flight.airline && (
-                      <span className="text-xs text-gray-500 leading-tight truncate w-full">{flight.airline}</span>
+                      <span className="text-xs font-medium text-gray-600 leading-tight truncate w-full">{flight.airline}</span>
                     )}
                   </div>
 
                   {/* 출발지 열 */}
                   <div className="flex-1 flex flex-col justify-center min-w-0 gap-0.5 pt-0.5">
-                    <span className="text-base font-semibold text-gray-900 truncate">{flight.origin}</span>
-                    <DurationBadge code={flight.airportCode} />
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="text-base font-semibold text-gray-900 truncate">{flight.origin}</span>
+                      <DurationBadge code={flight.airportCode} />
+                    </div>
                   </div>
 
                   {/* 시각 열 */}
-                  <div className="shrink-0 text-right">
+                  <div className="shrink-0 text-right space-y-0.5">
                     {flight.isDelayed ? (() => {
                       const isLate = flight.landingTime > flight.scheduledTime;
                       const sh = String(flight.scheduledTime.getHours()).padStart(2, "0");
@@ -337,14 +339,18 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
                       const lh = String(flight.landingTime.getHours()).padStart(2, "0");
                       const lm = String(flight.landingTime.getMinutes()).padStart(2, "0");
                       return (
-                        <div className="flex items-center justify-end gap-1">
-                          <p className="text-base tabular-nums whitespace-nowrap text-gray-900">
-                            착륙 {sh}:{sm}→<span className="font-bold" style={{ color: isLate ? "#9B1B30" : "#3B82F6" }}>{lh}:{lm}</span>
+                        <>
+                          <p className="text-sm tabular-nums whitespace-nowrap text-gray-500">
+                            예정 {sh}:{sm}
                           </p>
-                          <span className={`text-[10px] font-bold text-white px-1.5 py-0.5 rounded-md leading-none ${isLate ? "bg-[#9B1B30]" : "bg-blue-400"}`}>
-                            {isLate ? "지연" : "단축"}
-                          </span>
-                        </div>
+                          <p className="text-base tabular-nums font-bold whitespace-nowrap flex items-center justify-end gap-1">
+                            <span>실착 </span>
+                            <span style={{ color: isLate ? "#9B1B30" : "#3B82F6" }}>{lh}:{lm}</span>
+                            <span className={`text-[10px] font-bold text-white px-1.5 py-0.5 rounded-md leading-none ${isLate ? "bg-[#9B1B30]" : "bg-blue-400"}`}>
+                              {isLate ? "지연" : "단축"}
+                            </span>
+                          </p>
+                        </>
                       );
                     })() : (
                       <p className="text-base text-gray-900 font-medium whitespace-nowrap">
