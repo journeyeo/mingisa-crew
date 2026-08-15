@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useRef, useEffect } from "react";
 import type { HourlySlot } from "@/lib/airport/types";
 
 // IATA 코드 → 인천 기준 편도 비행시간(분) 추정
@@ -79,6 +79,11 @@ function slotLabel(slot: HourlySlot | undefined, todayStr: string): string {
   return slot.date && slot.date !== todayStr ? `익일 ${h}` : h;
 }
 
+function slotChipLabel(slot: HourlySlot, todayStr: string): string {
+  const h = `${String(slot.hour).padStart(2, "0")}시`;
+  return slot.date && slot.date !== todayStr ? `익일 ${h}` : h;
+}
+
 function dateOf(date: Date): string {
   return `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, "0")}${String(date.getDate()).padStart(2, "0")}`;
 }
@@ -99,22 +104,37 @@ function TimeCell({ date, todayStr, prefix }: { date: Date; todayStr: string; pr
   );
 }
 
+const DEFAULT_WINDOW = 6;
+
 export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, nowIdx, terminal }: Props) {
   const maxIdx = Math.max(0, slots.length - 1);
   const [startIdx, setStartIdx] = useState(() => nowIdx);
-  const [endIdx, setEndIdx] = useState(() => Math.min(nowIdx + 6, maxIdx));
-  const [priority, setPriority] = useState<"start" | "end">("end");
+  const [endIdx, setEndIdx] = useState(() => Math.min(nowIdx + DEFAULT_WINDOW, maxIdx));
   const [showFilter, setShowFilter] = useState(false);
   const [filterQuery, setFilterQuery] = useState("");
   const [selectedAirlines, setSelectedAirlines] = useState<Set<string> | null>(null);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [basis, setBasis] = useState<"exit" | "landing">("exit");
 
-  const startPct = maxIdx > 0 ? (startIdx / maxIdx) * 100 : 0;
-  const endPct = maxIdx > 0 ? (endIdx / maxIdx) * 100 : 100;
-  const nowPct = maxIdx > 0 ? Math.min((nowIdx / maxIdx) * 100, 100) : 0;
+  const chipScrollRef = useRef<HTMLDivElement>(null);
 
-  // 전체 슬롯에서 항공사 목록 수집 (슬라이더 범위 변경과 무관하게 안정적)
+  // 현재 시간 칩이 보이도록 초기 스크롤
+  useEffect(() => {
+    const el = chipScrollRef.current;
+    if (!el) return;
+    const chip = el.children[nowIdx] as HTMLElement | undefined;
+    if (chip) {
+      const left = chip.offsetLeft - el.clientWidth / 2 + chip.clientWidth / 2;
+      el.scrollTo({ left: Math.max(0, left), behavior: "instant" });
+    }
+  }, [nowIdx]);
+
+  function handleChipClick(idx: number) {
+    const windowSize = endIdx - startIdx;
+    setStartIdx(idx);
+    setEndIdx(Math.min(idx + windowSize, maxIdx));
+  }
+
   const allAirlines = useMemo(() => {
     const seen = new Set<string>();
     const result: string[] = [];
@@ -129,7 +149,6 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
     return result.sort((a, b) => a.localeCompare(b, "ko"));
   }, [slots]);
 
-  // 착륙/출구 기준으로 같은 항공편을 재분류
   const effectiveSlots = useMemo(() => {
     if (basis === "exit") return slots;
     const allFlights = new Map<string, (typeof slots)[0]["flights"][0]>();
@@ -148,10 +167,8 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
 
   const isFiltered = selectedAirlines !== null;
   const selectedCount = selectedAirlines?.size ?? allAirlines.length;
-
   const selected = effectiveSlots.slice(startIdx, endIdx + 1);
 
-  // 공동운항(코드쉐어) 중복 제거: scheduledTime + origin이 같으면 동일 항공기
   const allEntries = (() => {
     const raw = selected.flatMap((s) =>
       s.flights
@@ -179,13 +196,6 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
       else next.add(airline);
       return next.size === allAirlines.length ? null : next;
     });
-  }
-
-  function handleTrackPointerDown(e: React.PointerEvent<HTMLDivElement>) {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const pct = (e.clientX - rect.left) / rect.width;
-    const clickIdx = Math.round(pct * maxIdx);
-    setPriority(Math.abs(clickIdx - startIdx) <= Math.abs(clickIdx - endIdx) ? "start" : "end");
   }
 
   return (
@@ -224,56 +234,41 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
     </div>
 
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-      {/* 슬라이더 영역 */}
-      <div className="px-4 pt-4 pb-4 border-b border-gray-100">
-        <div className="mb-4">
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-black text-[#9B1B30]">{terminal}</span>
-            <p className="text-3xl font-bold tabular-nums text-gray-900">
-              {slotLabel(slots[startIdx], todayStr)}
-              <span className="text-gray-300 mx-2">–</span>
-              {slotLabel(slots[endIdx], todayStr)}
-            </p>
-          </div>
+      {/* 시간대 선택 */}
+      <div className="px-4 pt-4 pb-3 border-b border-gray-100">
+        <div className="flex items-baseline gap-2 mb-3">
+          <span className="text-3xl font-black text-[#9B1B30]">{terminal}</span>
+          <p className="text-3xl font-bold tabular-nums text-gray-900">
+            {slotLabel(slots[startIdx], todayStr)}
+            <span className="text-gray-300 mx-2">–</span>
+            {slotLabel(slots[endIdx], todayStr)}
+          </p>
         </div>
 
-        {/* 듀얼 썸 슬라이더 */}
-        <div className="relative h-6 flex items-center" onPointerDown={handleTrackPointerDown}>
-          <div className="absolute left-0 right-0 h-2 bg-gray-100 rounded-full" />
-          <div
-            className="absolute h-2 rounded-full"
-            style={{ background: "#C4933F", left: `${startPct}%`, right: `${100 - endPct}%` }}
-          />
-          {Math.abs(nowPct - startPct) > 8 && Math.abs(nowPct - endPct) > 8 && nowPct > 5 && nowPct < 95 && (
-            <div
-              className="absolute w-0.5 h-4 rounded-full pointer-events-none"
-              style={{ background: "#C4933F", left: `${nowPct}%`, transform: "translateX(-50%)" }}
-            />
-          )}
-          <input
-            type="range" min={0} max={maxIdx} value={startIdx}
-            onChange={(e) => { const v = Number(e.target.value); setStartIdx(Math.min(v, endIdx)); }}
-            className="dual-thumb-input"
-            style={{ zIndex: priority === "start" ? 5 : 3 }}
-          />
-          <input
-            type="range" min={0} max={maxIdx} value={endIdx}
-            onChange={(e) => { const v = Number(e.target.value); setEndIdx(Math.max(v, startIdx)); }}
-            className="dual-thumb-input"
-            style={{ zIndex: priority === "end" ? 5 : 3 }}
-          />
-        </div>
-
-        {/* 눈금 */}
-        <div className="relative mt-2 h-4 text-xs text-gray-400">
-          <span className="absolute left-0">{slotLabel(slots[0], todayStr)}</span>
-          {nowPct > 12 && nowPct < 88 && (
-            <span
-              className="absolute -translate-x-1/2 font-medium"
-              style={{ color: "#C4933F", left: `${nowPct}%` }}
-            >지금</span>
-          )}
-          <span className="absolute right-0">{slotLabel(slots[maxIdx], todayStr)}</span>
+        {/* 시간대 칩 */}
+        <div
+          ref={chipScrollRef}
+          className="flex overflow-x-auto gap-1.5 pb-1 scrollbar-none -mx-4 px-4"
+        >
+          {slots.map((slot, idx) => {
+            const isSelected = idx >= startIdx && idx <= endIdx;
+            const isNow = idx === nowIdx;
+            return (
+              <button
+                key={idx}
+                onClick={() => handleChipClick(idx)}
+                className={`flex-shrink-0 px-3 py-2 rounded-full text-sm font-semibold transition-colors whitespace-nowrap ${
+                  isSelected
+                    ? "bg-[#C4933F] text-white"
+                    : isNow
+                    ? "bg-amber-50 text-[#C4933F] ring-1 ring-[#C4933F]"
+                    : "bg-gray-100 text-gray-600"
+                }`}
+              >
+                {slotChipLabel(slot, todayStr)}
+              </button>
+            );
+          })}
         </div>
       </div>
 
@@ -326,10 +321,8 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
 
                   {/* 출발지 열 */}
                   <div className="flex-1 flex flex-col justify-center min-w-0 gap-0.5 pt-0.5">
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      <span className="text-base font-semibold text-gray-900 truncate">{flight.origin}</span>
-                      <DurationBadge code={flight.airportCode} />
-                    </div>
+                    <span className="text-base font-semibold text-gray-900 truncate">{flight.origin}</span>
+                    <DurationBadge code={flight.airportCode} />
                   </div>
 
                   {/* 시각 열 */}
@@ -386,25 +379,19 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
             onClick={(e) => e.stopPropagation()}
           >
             <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
-
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm font-semibold text-gray-900">항공사 선택</p>
               <div className="flex gap-2">
                 <button
                   onClick={() => setSelectedAirlines(null)}
                   className="text-xs px-3 py-1.5 rounded-full border border-gray-200 text-gray-600 font-medium"
-                >
-                  전체 선택
-                </button>
+                >전체 선택</button>
                 <button
                   onClick={() => setSelectedAirlines(new Set())}
                   className="text-xs px-3 py-1.5 rounded-full border border-gray-200 text-gray-600 font-medium"
-                >
-                  전체 해제
-                </button>
+                >전체 해제</button>
               </div>
             </div>
-
             <input
               type="text"
               value={filterQuery}
@@ -413,7 +400,6 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
               className="w-full mb-3 px-3 py-2 text-sm border border-gray-200 rounded-xl outline-none focus:border-gray-400 placeholder-gray-300"
               autoFocus
             />
-
             <div className="space-y-0.5 max-h-52 overflow-y-auto">
               {allAirlines.filter((a) => a.includes(filterQuery.trim())).map((airline) => {
                 const checked = selectedAirlines === null || selectedAirlines.has(airline);
