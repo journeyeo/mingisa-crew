@@ -112,9 +112,5 @@ export async function GET(req: NextRequest) {
     nowISO: now.toISOString(),
   };
 
-  return Response.json(body, {
-    headers: {
-      "Cache-Control": "public, s-maxage=300, stale-while-revalidate=60",
-    },
-  });
+  return Response.json(body);
 }

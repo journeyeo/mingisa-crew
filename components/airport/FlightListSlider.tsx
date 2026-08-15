@@ -321,13 +321,13 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
 
                   {/* 출발지 열 */}
                   <div className="flex-1 flex flex-col justify-center min-w-0 gap-0.5 pt-0.5">
+                    <span className="text-sm font-semibold text-gray-900 truncate">{flight.origin}</span>
                     <div className="flex items-center gap-1.5 min-w-0">
-                      <span className="text-sm font-semibold text-gray-900 truncate">{flight.origin}</span>
+                      {flight.airline && (
+                        <span className="text-xs text-gray-400 truncate">{flight.airline}</span>
+                      )}
                       <DurationBadge code={flight.airportCode} />
                     </div>
-                    {flight.airline && (
-                      <span className="text-xs text-gray-400 truncate">{flight.airline}</span>
-                    )}
                   </div>
 
                   {/* 시각 열 */}

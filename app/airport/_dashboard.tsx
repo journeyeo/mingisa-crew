@@ -61,11 +61,11 @@ function Sk({ className }: { className: string }) {
 function MainContentSkeleton() {
   return (
     <>
-      <div className="grid grid-cols-3 gap-3">
-        {[0, 1, 2].map((i) => (
+      <div className="grid grid-cols-2 gap-3">
+        {[0, 1].map((i) => (
           <div key={i} className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-4 space-y-2">
             <Sk className="h-3 w-10" />
-            <Sk className="h-8 w-14" />
+            <Sk className="h-10 w-16" />
             <Sk className="h-3 w-16" />
           </div>
         ))}
