@@ -367,6 +367,7 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
               );
             })}
           </div>
+          <p className="px-4 py-2 text-[10px] text-gray-300">* 출구 시각 = 착륙 후 약 55분 (외국인 입국 기준)</p>
         </>
       )}
 
