@@ -55,7 +55,7 @@ function deserializeSlot(s: SerializedSlot): HourlySlot {
 // ─── Skeleton helpers ────────────────────────────────────────────────────────
 
 function Sk({ className }: { className: string }) {
-  return <div className={`animate-pulse bg-gray-100 rounded ${className}`} />;
+  return <div className={`skeleton ${className}`} />;
 }
 
 function MainContentSkeleton() {
@@ -76,7 +76,7 @@ function MainContentSkeleton() {
         </div>
         <div className="h-52 flex items-end gap-1">
           {[35, 55, 70, 45, 80, 60, 30, 50, 65, 40, 25, 45].map((h, i) => (
-            <div key={i} className="flex-1 animate-pulse bg-gray-100 rounded-sm" style={{ height: `${h}%` }} />
+            <div key={i} className="skeleton flex-1 rounded-sm" style={{ height: `${h}%`, animationDelay: `${i * 60}ms` }} />
           ))}
         </div>
         <div className="flex justify-between mt-2">
