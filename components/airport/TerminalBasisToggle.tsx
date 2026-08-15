@@ -23,7 +23,6 @@ export function TerminalToggle({ terminal }: Props) {
   }
 
   return (
-    <>
     <div className={`flex rounded-xl overflow-hidden border border-gray-200 text-sm font-semibold shadow-sm transition-opacity ${isPending ? "opacity-50 pointer-events-none" : ""}`}>
       {(["T1", "T2"] as Terminal[]).map((t) => (
         <button
