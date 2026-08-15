@@ -190,7 +190,7 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
                       : "text-gray-700"}
                   >
                     <td className="py-2.5 rounded-l-lg pl-1">
-                      <div className="flex items-center gap-1.5 flex-wrap">
+                      <div className="flex items-center gap-1.5 flex-nowrap">
                         {isNext && <span className="text-[10px] text-amber-500 leading-none">{tomorrowLabel}</span>}
                         <span className="text-base tabular-nums font-semibold">{String(s.hour).padStart(2, "0")}시</span>
                         {isNow && (
