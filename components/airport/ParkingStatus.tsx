@@ -5,10 +5,10 @@ interface Props {
 }
 
 const LEVEL_STYLE: Record<string, { barColor: string; textColor: string; bgColor: string }> = {
-  여유: { barColor: "#E8C47A", textColor: "#9A7020", bgColor: "#FDF8EE" },
-  보통: { barColor: "#C4933F", textColor: "#9A7020", bgColor: "#FDF3DE" },
+  여유: { barColor: "#81C784", textColor: "#BF360C", bgColor: "#FDF8EE" },
+  보통: { barColor: "#1B5E36", textColor: "#BF360C", bgColor: "#E8F5E9" },
   혼잡: { barColor: "#A86E20", textColor: "#7A4E10", bgColor: "#FAEBD4" },
-  만차: { barColor: "#9B1B30", textColor: "#9B1B30", bgColor: "#FDF0F2" },
+  만차: { barColor: "#E65100", textColor: "#E65100", bgColor: "#FFF3E0" },
 };
 
 function LotRow({ label, lot }: { label: string; lot: ParkingLot }) {
@@ -44,7 +44,7 @@ export function ParkingStatus({ parking }: Props) {
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-4 space-y-3">
       <div className="flex items-center gap-2">
         <p className="text-sm text-gray-400">주차 현황</p>
-        <span className="text-xs font-bold text-[#9B1B30]">{parking.terminal}</span>
+        <span className="text-xs font-bold text-[#E65100]">{parking.terminal}</span>
       </div>
       <LotRow label="단기" lot={parking.shortTerm} />
       <LotRow label="장기" lot={parking.longTerm} />

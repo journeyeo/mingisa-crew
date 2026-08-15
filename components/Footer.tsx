@@ -4,7 +4,7 @@ export function Footer() {
       <div className="max-w-lg mx-auto flex items-center justify-between">
         <p className="text-sm font-semibold tracking-widest text-gray-700">
           MINGISA
-          <span className="ml-1.5 text-[10px] font-normal text-[#C4933F] tracking-widest">CREW</span>
+          <span className="ml-1.5 text-[10px] font-normal text-[#1B5E36] tracking-widest">CREW</span>
         </p>
         <p className="text-xs text-gray-300">© 2026 TRAILABS</p>
       </div>

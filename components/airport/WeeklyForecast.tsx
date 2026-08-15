@@ -42,16 +42,16 @@ export function WeeklyForecast({ days }: Props) {
             <th className="text-left pb-2 font-medium">날짜</th>
             <th className="text-right pb-2 font-medium">운항</th>
             <th className="text-right pb-2 font-medium">심야</th>
-            <th className="pb-2 pl-3 w-20">분포</th>
+            <th className="pb-2 pl-3 w-20 text-right">피크</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-50">
           {days.map((d, idx) => {
-            const peakSlot = d.slots.length > 0
-              ? d.slots.reduce((max, s) => s.flightCount > max.flightCount ? s : max, d.slots[0])
-              : null;
+            const amSlots = d.slots.filter((s) => s.hour < 12);
+            const pmSlots = d.slots.filter((s) => s.hour >= 12);
+            const amPeak = amSlots.length > 0 ? amSlots.reduce((max, s) => s.flightCount > max.flightCount ? s : max, amSlots[0]) : null;
+            const pmPeak = pmSlots.length > 0 ? pmSlots.reduce((max, s) => s.flightCount > max.flightCount ? s : max, pmSlots[0]) : null;
             const isFirst = idx === 0;
-            const barPct = Math.round((d.totalFlights / maxTotal) * 100);
             const dateLabel = `${parseInt(d.date.slice(4, 6))}/${parseInt(d.date.slice(6, 8))}`;
             return (
               <tr
@@ -60,30 +60,20 @@ export function WeeklyForecast({ days }: Props) {
                 onClick={() => { setSelectedIdx(idx); setView("chart"); }}
               >
                 <td className="py-3">
-                  <span className={`text-base ${isFirst ? "text-[#C4933F]" : ""}`}>{d.label}</span>
+                  <span className={`text-base ${isFirst ? "text-[#1B5E36]" : ""}`}>{d.label}</span>
                   <span className="text-sm text-gray-400 ml-1.5">{dateLabel}</span>
                 </td>
                 <td className="py-3 text-right tabular-nums text-base">
                   {d.totalFlights}편
                 </td>
-                <td className="py-3 text-right tabular-nums text-base" style={{ color: d.goldenHourFlights > 0 ? "#9B1B30" : undefined }}>
+                <td className="py-3 text-right tabular-nums text-base" style={{ color: d.goldenHourFlights > 0 ? "#E65100" : undefined }}>
                   {d.goldenHourFlights > 0 ? `${d.goldenHourFlights}편` : <span className="text-gray-300">—</span>}
                 </td>
                 <td className="py-3 pl-3">
-                  <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
-                    <div
-                      className="h-full rounded-full transition-all"
-                      style={{
-                        width: `${barPct}%`,
-                        background: peakSlot?.isNoTransport ? "#9B1B30" : "#C4933F",
-                      }}
-                    />
+                  <div className="flex flex-col items-end gap-0.5 tabular-nums text-xs text-gray-500 leading-tight">
+                    <span>오전 {amPeak ? `${String(amPeak.hour).padStart(2, "0")}시` : "—"}</span>
+                    <span>오후 {pmPeak ? `${String(pmPeak.hour).padStart(2, "0")}시` : "—"}</span>
                   </div>
-                  {peakSlot && (
-                    <span className="text-xs text-gray-400 tabular-nums">
-                      피크 {String(peakSlot.hour).padStart(2, "0")}시
-                    </span>
-                  )}
                 </td>
               </tr>
             );
@@ -102,7 +92,7 @@ export function WeeklyForecast({ days }: Props) {
         label: "편수",
         data: day.slots.map((s) => s.flightCount),
         backgroundColor: day.slots.map((s) =>
-          s.isNoTransport || s.hour === AREX.lastTrain.hour ? "#9B1B30" : "#C4933F"
+          s.isNoTransport || s.hour === AREX.lastTrain.hour ? "#E65100" : "#1B5E36"
         ),
         borderRadius: 4,
       },
@@ -159,9 +149,9 @@ export function WeeklyForecast({ days }: Props) {
 
       const markers: { px: number; label: string; color: string }[] = [];
       if (firstTrainPx !== null && firstTrainPx >= chartArea.left)
-        markers.push({ px: firstTrainPx, label: "첫차", color: "#9B1B30" });
+        markers.push({ px: firstTrainPx, label: "첫차", color: "#E65100" });
       if (nowPx !== null && nowPx >= chartArea.left && nowPx <= chartArea.right)
-        markers.push({ px: nowPx, label: "지금", color: "#C4933F" });
+        markers.push({ px: nowPx, label: "지금", color: "#1B5E36" });
 
       ctx.save();
       ctx.font = "600 10px sans-serif";
@@ -212,7 +202,7 @@ export function WeeklyForecast({ days }: Props) {
             onClick={() => setSelectedIdx(idx)}
             className={`flex-shrink-0 flex flex-col items-center px-4 py-3 transition-colors border-b-2 ${
               idx === selectedIdx
-                ? "border-[#C4933F] text-gray-900"
+                ? "border-[#1B5E36] text-gray-900"
                 : "border-transparent text-gray-400 hover:text-gray-600"
             }`}
           >
@@ -220,7 +210,7 @@ export function WeeklyForecast({ days }: Props) {
             <span className="text-base font-bold tabular-nums mt-0.5 text-gray-800">
               {d.totalFlights - d.goldenHourFlights}편
             </span>
-            <span className={`text-xs tabular-nums font-semibold leading-none ${d.goldenHourFlights > 0 ? "text-[#9B1B30]" : "text-gray-300"}`}>
+            <span className={`text-xs tabular-nums font-semibold leading-none ${d.goldenHourFlights > 0 ? "text-[#E65100]" : "text-gray-300"}`}>
               심야 {d.goldenHourFlights}편
             </span>
           </button>
@@ -232,7 +222,7 @@ export function WeeklyForecast({ days }: Props) {
             {day.label} · 전체 {day.totalFlights}편
           </p>
           {day.goldenHourFlights > 0 && (
-            <span className="text-xs text-[#9B1B30] font-semibold">
+            <span className="text-xs text-[#E65100] font-semibold">
               심야(막차 이후) {day.goldenHourFlights}편
             </span>
           )}

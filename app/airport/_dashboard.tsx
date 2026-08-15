@@ -39,6 +39,7 @@ interface SummaryData {
 
 interface FlightsData {
   allSlots: SerializedSlot[];
+  allSlotsLanding: SerializedSlot[];
   weeklyDays: WeeklyDay[];
   todayStr: string;
   tomorrowStr: string;
@@ -183,7 +184,7 @@ export function AirportDashboard({ terminal }: Props) {
             <HeaderSkeleton />
             <div>
               <p className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-1.5">
-                <span className="inline-block w-1 h-4 rounded-full bg-[#C4933F]" />
+                <span className="inline-block w-1 h-4 rounded-full bg-[#1B5E36]" />
                 승객 예고
               </p>
               <PassengerSkeleton />
@@ -201,7 +202,7 @@ export function AirportDashboard({ terminal }: Props) {
             />
             <div>
               <p className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-1.5">
-                <span className="inline-block w-1 h-4 rounded-full bg-[#C4933F]" />
+                <span className="inline-block w-1 h-4 rounded-full bg-[#1B5E36]" />
                 승객 예고
               </p>
               <PassengerChart slots={summary.slots.map(deserializeSlot)} tomorrowLabel={summary.tomorrowLabel} />
@@ -219,13 +220,14 @@ export function AirportDashboard({ terminal }: Props) {
           <>
             <div>
               <p className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-1.5">
-                <span className="inline-block w-1 h-4 rounded-full bg-[#C4933F]" />
+                <span className="inline-block w-1 h-4 rounded-full bg-[#1B5E36]" />
                 시간대별 운항편
               </p>
               <FlightListSlider
                 key={terminal}
                 terminal={terminal}
                 slots={flights.allSlots.map(deserializeSlot)}
+                slotsLanding={flights.allSlotsLanding.map(deserializeSlot)}
                 todayStr={flights.todayStr}
                 tomorrowStr={flights.tomorrowStr}
                 kstHour={flights.kstHour}
@@ -233,7 +235,7 @@ export function AirportDashboard({ terminal }: Props) {
             </div>
             <div>
               <div className="flex items-center gap-1.5 mb-4">
-                <span className="inline-block w-1 h-4 rounded-full bg-[#C4933F]" />
+                <span className="inline-block w-1 h-4 rounded-full bg-[#1B5E36]" />
                 <p className="text-xl font-bold text-gray-800">주간 예측</p>
                 <span className="text-xs text-gray-500">(T1/T2 통합)</span>
               </div>

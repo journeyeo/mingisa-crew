@@ -114,16 +114,18 @@ export const getCachedFlights = unstable_cache(
       ).values()
     );
 
-    const allSlots = buildWindowSlots(forecasts, terminal, allStatusFlights, "exit", 6, 24, todayStr, tomorrowStr);
+    const allSlots = buildWindowSlots(forecasts, terminal, allStatusFlights, "exit", 0, 30, todayStr, tomorrowStr);
+    const allSlotsLanding = buildWindowSlots(forecasts, terminal, allStatusFlights, "landing", 0, 30, todayStr, tomorrowStr);
 
     return {
       allSlots: serializeSlots(allSlots),
+      allSlotsLanding: serializeSlots(allSlotsLanding),
       weeklyDays: buildWeeklyDays(weeklyItems, terminal),
       todayStr,
       tomorrowStr,
       kstHour,
     };
   },
-  ["airport-flights"],
+  ["airport-flights-v3"],
   { revalidate: 300 }
 );

@@ -12,7 +12,7 @@ export default function Loading() {
         <div
           className="h-full rounded-full"
           style={{
-            background: "#C4933F",
+            background: "#1B5E36",
             animation: "loading-bar 2.5s ease-in-out infinite",
           }}
         />

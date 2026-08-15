@@ -52,8 +52,8 @@ function DurationBadge({ code }: { code?: string }) {
   return (
     <span
       className="text-xs font-bold px-1.5 py-0.5 rounded leading-none shrink-0"
-      style={long ? { background: "#FDF0F2", color: "#9B1B30" }
-           : mid  ? { background: "#FDF3DE", color: "#9A7020" }
+      style={long ? { background: "#FFF3E0", color: "#E65100" }
+           : mid  ? { background: "#E8F5E9", color: "#BF360C" }
                   : { background: "#F4F4F5", color: "#71717A" }}
     >약 {h}시간 비행</span>
   );
@@ -73,6 +73,7 @@ const FIXED_BLOCKS = [
 
 interface Props {
   slots: HourlySlot[];
+  slotsLanding: HourlySlot[];
   todayStr: string;
   tomorrowStr: string;
   kstHour: number;
@@ -99,7 +100,7 @@ function TimeCell({ date, todayStr, prefix }: { date: Date; todayStr: string; pr
   );
 }
 
-export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, terminal }: Props) {
+export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, kstHour, terminal }: Props) {
   const [showFilter, setShowFilter] = useState(false);
   const [filterQuery, setFilterQuery] = useState("");
   const [selectedAirlines, setSelectedAirlines] = useState<Set<string> | null>(null);
@@ -110,13 +111,13 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
   // Blocks 0-1 (00~05시) → tomorrowStr slots; Blocks 2-7 (06~23시) → todayStr slots
   const fixedBlockSlotIndices = useMemo(() => {
     return FIXED_BLOCKS.map(({ startH, endH }, blockIdx) => {
-      const targetDate = blockIdx < 2 ? tomorrowStr : todayStr;
+      const targetDate = (blockIdx < 2 && kstHour >= 6) ? tomorrowStr : todayStr;
       return slots.reduce<number[]>((acc, slot, i) => {
         if (slot.date === targetDate && slot.hour >= startH && slot.hour <= endH) acc.push(i);
         return acc;
       }, []);
     });
-  }, [slots, todayStr, tomorrowStr]);
+  }, [slots, todayStr, tomorrowStr, kstHour]);
 
   // Block containing current hour (0~7)
   const currentBlockIdx = Math.floor(kstHour / 3);
@@ -148,19 +149,7 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
     return result.sort((a, b) => a.localeCompare(b, "ko"));
   }, [slots]);
 
-  const effectiveSlots = useMemo(() => {
-    if (basis === "exit") return slots;
-    const allFlights = new Map<string, (typeof slots)[0]["flights"][0]>();
-    for (const slot of slots) for (const f of slot.flights) allFlights.set(f.id, f);
-    return slots.map((slot) => {
-      const flights = Array.from(allFlights.values()).filter((f) => {
-        const t = f.landingTime;
-        const fd = `${t.getFullYear()}${String(t.getMonth()+1).padStart(2,"0")}${String(t.getDate()).padStart(2,"0")}`;
-        return fd === slot.date && t.getHours() === slot.hour;
-      });
-      return { ...slot, flights, flightCount: flights.length };
-    });
-  }, [slots, basis]);
+  const effectiveSlots = basis === "exit" ? slots : slotsLanding;
 
   const selected = effectiveSlots.filter((_, idx) => selectedSlotSet.has(idx));
 
@@ -262,7 +251,7 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
       <div className="px-4 pt-4 pb-3 border-b border-gray-100">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-black text-[#9B1B30]">{terminal}</span>
+            <span className="text-3xl font-black text-[#E65100]">{terminal}</span>
             <p className="text-3xl font-bold tabular-nums text-gray-900">
               {headerStart}
               <span className="text-gray-300 mx-2">–</span>
@@ -273,7 +262,7 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
             <button
               onClick={() => setSelectedGroups(new Set([currentBlockIdx]))}
               className="text-sm font-bold px-3 py-1.5 rounded-xl text-white shrink-0"
-              style={{ background: "#C4933F" }}
+              style={{ background: "#E65100" }}
             >
               지금으로
             </button>
@@ -287,7 +276,7 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
                 key={blockIdx}
                 onClick={() => toggleGroup(blockIdx)}
                 className={`py-2 rounded-xl text-sm font-semibold text-center transition-colors ${
-                  isSelected ? "bg-[#C4933F] text-white"
+                  isSelected ? "bg-[#1B5E36] text-white"
                   : "bg-gray-100 text-gray-600"
                 }`}
               >
@@ -317,13 +306,13 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
                   {i === nowDividerIdx && isCurrentBlockSelected && (
                     <div
                       ref={dividerRef}
-                      className="flex items-center gap-2 px-4 py-1.5 bg-amber-50 sticky top-0 z-10"
+                      className="flex items-center gap-2 px-4 py-2 bg-green-50 sticky top-0 z-10"
                     >
-                      <span className="text-xs font-bold px-2 py-0.5 rounded-full text-white leading-none" style={{ background: "#C4933F" }}>지금</span>
-                      <span className="text-xs text-[#9A7020] font-medium">이후 도착편</span>
+                      <span className="text-sm font-bold px-2.5 py-0.5 rounded-full text-white leading-none" style={{ background: "#1B5E36" }}>지금</span>
+                      <span className="text-sm text-[#BF360C] font-semibold">이후 도착편</span>
                     </div>
                   )}
-                  <div className={`flex items-start px-4 py-3 gap-3 ${flight.isDelayed ? "bg-rose-50/60" : isNoTransport ? "bg-amber-50/30" : ""}`}>
+                  <div className={`flex items-start px-4 py-3 gap-3 ${flight.isDelayed ? "bg-orange-50/60" : isNoTransport ? "bg-orange-50/30" : ""}`}>
                     <div className="w-24 shrink-0 flex flex-col items-start gap-0.5 pt-0.5">
                       <div className="flex items-center gap-1">
                         <span className="text-base font-mono font-bold text-gray-900 leading-tight">{primaryId}</span>
@@ -351,7 +340,8 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
 
                     <div className="shrink-0 text-right space-y-0.5">
                       {flight.isDelayed ? (() => {
-                        const isLate = flight.landingTime > flight.scheduledTime;
+                        const diffMin = Math.round((flight.landingTime.getTime() - flight.scheduledTime.getTime()) / 60000);
+                        const isLate = diffMin > 0;
                         const sh = String(flight.scheduledTime.getHours()).padStart(2, "0");
                         const sm = String(flight.scheduledTime.getMinutes()).padStart(2, "0");
                         const lh = String(flight.landingTime.getHours()).padStart(2, "0");
@@ -360,8 +350,8 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
                           <>
                             <p className="text-sm tabular-nums whitespace-nowrap text-gray-500">착륙예정 {sh}:{sm}</p>
                             <p className="text-base tabular-nums font-bold whitespace-nowrap flex items-center justify-end gap-1">
-                              <span className={`text-xs font-bold text-white px-2 py-0.5 rounded-md leading-none ${isLate ? "bg-[#9B1B30]" : "bg-blue-400"}`}>
-                                {isLate ? "지연" : "단축"}
+                              <span className={`text-xs font-bold text-white px-2 py-0.5 rounded-md leading-none ${isLate ? "bg-[#E65100]" : "bg-blue-400"}`}>
+                                {isLate ? `+${diffMin}분` : `${diffMin}분`}
                               </span>
                               <span>착륙 </span>
                               <span className="text-gray-900">{lh}:{lm}</span>
@@ -373,9 +363,9 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
                           <TimeCell date={flight.landingTime} todayStr={todayStr} prefix="착륙" />
                         </p>
                       )}
-                      <p className={`text-base font-semibold whitespace-nowrap ${isNoTransport ? "text-[#9B1B30]" : "text-gray-900"}`}>
+                      <p className={`text-base font-semibold whitespace-nowrap ${"text-gray-900"}`}>
                         <TimeCell date={flight.exitTime} todayStr={todayStr} prefix={flight.exitGate ? `출구 ${flight.exitGate}` : "출구"} />
-                        {isNoTransport && <span className="ml-1 text-[10px] font-bold text-white bg-[#9B1B30] px-1 rounded leading-[1.4] align-middle">심야</span>}
+                        {isNoTransport && <span className="ml-1 text-[10px] font-bold text-white bg-[#E65100] px-1 rounded leading-[1.4] align-middle">심야</span>}
                       </p>
                     </div>
                   </div>

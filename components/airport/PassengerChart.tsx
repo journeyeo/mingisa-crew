@@ -16,10 +16,10 @@ import type { HourlySlot } from "@/lib/airport/types";
 ChartJS.register(CategoryScale, LinearScale, BarElement, BarController, Tooltip);
 
 const COLOR = {
-  normalDark: "#C4933F",
-  normalLight: "#E8C47A",
-  alertDark: "#9B1B30",
-  alertLight: "#D4889A",
+  normalDark: "#1B5E36",
+  normalLight: "#81C784",
+  alertDark: "#E65100",
+  alertLight: "#FFAB76",
 };
 
 interface Props {
@@ -78,7 +78,7 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
         backgroundColor: "#fff",
         titleColor: "#111",
         bodyColor: "#52525b",
-        footerColor: "#9B1B30",
+        footerColor: "#E65100",
         borderColor: "#e4e4e7",
         borderWidth: 1,
         padding: 10,
@@ -117,14 +117,14 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
       ctx.save();
       if (nowIndex >= 0) {
         const px = x.getPixelForValue(nowIndex);
-        ctx.strokeStyle = "#C4933F";
+        ctx.strokeStyle = "#1B5E36";
         ctx.lineWidth = 2;
         ctx.setLineDash([]);
         ctx.beginPath();
         ctx.moveTo(px, y.top);
         ctx.lineTo(px, y.bottom);
         ctx.stroke();
-        ctx.fillStyle = "#C4933F";
+        ctx.fillStyle = "#1B5E36";
         ctx.font = "700 11px sans-serif";
         ctx.textAlign = "center";
         ctx.fillText("지금", px, y.top - 6);
@@ -186,7 +186,7 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
                   <tr
                     key={i}
                     className={isNow
-                      ? "bg-amber-50 font-bold text-gray-900"
+                      ? "bg-orange-50 font-bold text-gray-900"
                       : "text-gray-700"}
                   >
                     <td className="py-2 rounded-l-lg pl-1">
@@ -194,8 +194,8 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
                         <div className="flex items-center gap-1.5 flex-nowrap">
                           {isNext && <span className="text-[10px] text-amber-500 leading-none">{tomorrowLabel}</span>}
                           <span className="text-base tabular-nums font-semibold">{String(s.hour).padStart(2, "0")}시</span>
-                          {s.isNoTransport && <span className="text-xs font-bold text-white px-2 py-0.5 rounded-full leading-none" style={{ background: "#9B1B30" }}>심야</span>}
-                          {isNow && <span className="text-xs font-bold px-2 py-0.5 rounded-full text-white leading-none" style={{ background: "#C4933F" }}>지금</span>}
+                          {s.isNoTransport && <span className="text-xs font-bold text-white px-2 py-0.5 rounded-full leading-none" style={{ background: "#E65100" }}>심야</span>}
+                          {isNow && <span className="text-xs font-bold px-2 py-0.5 rounded-full text-white leading-none" style={{ background: "#1B5E36" }}>지금</span>}
                         </div>
                       </div>
                     </td>
