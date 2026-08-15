@@ -133,7 +133,7 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
     },
   };
 
-  const tableSlots = slots.filter((s) => s.foreignCount + s.domesticCount > 0);
+  const tableSlots = slots;
 
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 pt-4 pb-3">
