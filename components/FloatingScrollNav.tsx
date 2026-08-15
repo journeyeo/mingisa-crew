@@ -12,8 +12,8 @@ export function FloatingScrollNav() {
     pressTimer.current = setTimeout(() => {
       isLongPress.current = true;
       scrollInterval.current = setInterval(() => {
-        window.scrollBy({ top: dir === "up" ? -120 : 120 });
-      }, 80);
+        window.scrollBy({ top: dir === "up" ? -80 : 80 });
+      }, 120);
     }, 300);
   }
 
