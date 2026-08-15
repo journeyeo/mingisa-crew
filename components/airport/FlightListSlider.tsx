@@ -40,7 +40,7 @@ function DurationBadge({ code }: { code?: string }) {
       style={long ? { background: "#FDF0F2", color: "#9B1B30" }
            : mid  ? { background: "#FDF3DE", color: "#9A7020" }
                   : { background: "#F4F4F5", color: "#71717A" }}
-    >약 {h}h 비행</span>
+    >약 {h}시간 비행</span>
   );
 }
 
@@ -312,7 +312,7 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
                             className="text-[10px] text-gray-400 leading-tight text-left">접기</button>
                         </div>
                       )}
-                      {flight.airline && <span className="text-xs font-medium text-gray-600 leading-tight truncate w-full">{flight.airline}</span>}
+                      {flight.airline && <span className="text-sm font-medium text-gray-600 leading-tight truncate w-full">{flight.airline}</span>}
                     </div>
 
                     <div className="flex-1 flex flex-col items-start justify-center min-w-0 gap-0.5 pt-0.5">
