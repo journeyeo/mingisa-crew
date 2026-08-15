@@ -340,23 +340,23 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
 
                   {/* 시각 열 */}
                   <div className="shrink-0 text-right">
-                    <p className={`text-sm font-semibold tabular-nums whitespace-nowrap ${isNoTransport ? "text-[#9B1B30]" : "text-gray-900"}`}>
-                      {flight.isDelayed ? (() => {
-                        const isLate = flight.landingTime > flight.scheduledTime;
-                        const sh = String(flight.scheduledTime.getHours()).padStart(2, "0");
-                        const sm = String(flight.scheduledTime.getMinutes()).padStart(2, "0");
-                        const lh = String(flight.landingTime.getHours()).padStart(2, "0");
-                        const lm = String(flight.landingTime.getMinutes()).padStart(2, "0");
-                        return (
-                          <span className="text-xs font-semibold mr-1.5" style={{ color: isLate ? "#9B1B30" : "#3B82F6" }}>
-                            착륙 {sh}:{sm}→{lh}:{lm}
-                          </span>
-                        );
-                      })() : (
-                        <span className="text-xs text-gray-400 mr-1.5">
-                          <TimeCell date={flight.landingTime} todayStr={todayStr} prefix="착륙" />
-                        </span>
-                      )}
+                    {flight.isDelayed ? (() => {
+                      const isLate = flight.landingTime > flight.scheduledTime;
+                      const sh = String(flight.scheduledTime.getHours()).padStart(2, "0");
+                      const sm = String(flight.scheduledTime.getMinutes()).padStart(2, "0");
+                      const lh = String(flight.landingTime.getHours()).padStart(2, "0");
+                      const lm = String(flight.landingTime.getMinutes()).padStart(2, "0");
+                      return (
+                        <p className="text-sm font-semibold tabular-nums whitespace-nowrap" style={{ color: isLate ? "#9B1B30" : "#3B82F6" }}>
+                          착륙 {sh}:{sm}→{lh}:{lm}
+                        </p>
+                      );
+                    })() : (
+                      <p className="text-sm text-gray-500 font-medium whitespace-nowrap">
+                        <TimeCell date={flight.landingTime} todayStr={todayStr} prefix="착륙" />
+                      </p>
+                    )}
+                    <p className={`text-sm font-semibold whitespace-nowrap ${isNoTransport ? "text-[#9B1B30]" : "text-gray-900"}`}>
                       <TimeCell date={flight.exitTime} todayStr={todayStr} prefix={flight.exitGate ? `출구 ${flight.exitGate}` : "출구"} />
                       {isNoTransport && (
                         <span className="ml-1 text-[10px] font-bold text-white bg-[#9B1B30] px-1 rounded leading-[1.4] align-middle">심야</span>
