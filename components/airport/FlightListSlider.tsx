@@ -8,6 +8,7 @@ interface Props {
   todayStr: string;
   tomorrowStr: string;
   nowIdx: number;
+  terminal: string;
 }
 
 function slotLabel(slot: HourlySlot | undefined, todayStr: string): string {
@@ -36,7 +37,7 @@ function TimeCell({ date, todayStr, prefix }: { date: Date; todayStr: string; pr
   );
 }
 
-export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, nowIdx }: Props) {
+export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, nowIdx, terminal }: Props) {
   const maxIdx = Math.max(0, slots.length - 1);
   const [startIdx, setStartIdx] = useState(() => nowIdx);
   const [endIdx, setEndIdx] = useState(() => Math.min(nowIdx + 6, maxIdx));
@@ -99,11 +100,14 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
       <div className="px-4 pt-4 pb-4 border-b border-gray-100">
         <div className="flex items-end justify-between mb-4">
           <div>
-            <p className="text-2xl font-bold tabular-nums text-gray-900">
-              {slotLabel(slots[startIdx], todayStr)}
-              <span className="text-gray-300 mx-2">–</span>
-              {slotLabel(slots[endIdx], todayStr)}
-            </p>
+            <div className="flex items-baseline gap-2">
+              <span className="text-2xl font-black text-[#9B1B30]">{terminal}</span>
+              <p className="text-2xl font-bold tabular-nums text-gray-900">
+                {slotLabel(slots[startIdx], todayStr)}
+                <span className="text-gray-300 mx-2">–</span>
+                {slotLabel(slots[endIdx], todayStr)}
+              </p>
+            </div>
             <p className="text-sm mt-0.5 text-gray-400">
               {totalFlights > 0 ? `${totalFlights}편` : "운항편 없음"}
             </p>

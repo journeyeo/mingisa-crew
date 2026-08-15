@@ -180,11 +180,10 @@ export function AirportDashboard({ terminal }: Props) {
             />
             <PassengerChart slots={data.slots.map(deserializeSlot)} tomorrowLabel={data.tomorrowLabel} />
             <div>
-              <p className="text-sm font-semibold text-gray-400 mb-3">
-                시간대별 운항편 <span className="text-gray-300">({terminal})</span>
-              </p>
+              <p className="text-sm font-semibold text-gray-400 mb-3">시간대별 운항편</p>
               <FlightListSlider
                 key={terminal}
+                terminal={terminal}
                 slots={data.allSlots.map(deserializeSlot)}
                 todayStr={data.todayStr}
                 tomorrowStr={data.tomorrowStr}
