@@ -90,7 +90,6 @@ export function WeeklyForecast({ days }: Props) {
           })}
         </tbody>
       </table>
-      <p className="text-xs text-gray-400 mt-2">행 탭 → 시간대 그래프</p>
     </div>
   );
 
