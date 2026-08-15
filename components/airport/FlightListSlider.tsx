@@ -337,7 +337,7 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
                                 {isLate ? "지연" : "단축"}
                               </span>
                               <span>실착 </span>
-                              <span style={{ color: isLate ? "#9B1B30" : "#3B82F6" }}>{lh}:{lm}</span>
+                              <span className="text-gray-900">{lh}:{lm}</span>
                             </p>
                           </>
                         );
