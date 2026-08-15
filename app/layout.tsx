@@ -13,8 +13,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "MINGISA",
-  description: "인천공항 기사용 도구",
+  title: "민기사 크루",
+  description: "인천공항 시간대별 입국 수요 · 기사용",
+  openGraph: {
+    title: "민기사 크루",
+    description: "인천공항 시간대별 입국 수요 · 기사용",
+    images: [{ url: "/og-image.png" }],
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

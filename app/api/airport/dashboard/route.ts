@@ -1,4 +1,6 @@
 import { NextRequest } from "next/server";
+
+export const revalidate = 300; // 5분 캐시
 import {
   fetchArrivalsCongestion,
   fetchFlightStatus,
@@ -16,7 +18,6 @@ import {
 } from "@/lib/airport/transform";
 import type { Flight, Terminal } from "@/lib/airport/types";
 
-const WINDOW_SIZE = 13;
 
 function serializeFlight(f: Flight) {
   return {
@@ -38,6 +39,7 @@ export async function GET(req: NextRequest) {
   const tomorrowLabel = `${parseInt(tomorrowStr.slice(4, 6))}/${parseInt(tomorrowStr.slice(6, 8))}`;
   const kstHour = new Date(now.getTime() + 9 * 3600_000).getUTCHours();
   const windowStartHour = Math.max(0, kstHour - 1);
+  const windowSize = Math.min(30 - windowStartHour, 24); // 익일 06시까지, 최대 24시간
   const nowIdx = kstHour - windowStartHour;
 
   const [
@@ -78,8 +80,8 @@ export async function GET(req: NextRequest) {
     ).values()
   );
 
-  const slots = buildWindowSlots(forecasts, terminal, mergedFlights, "exit", windowStartHour, 12, todayStr, tomorrowStr);
-  const allSlots = buildWindowSlots(forecasts, terminal, allStatusFlights, "exit", windowStartHour, WINDOW_SIZE, todayStr, tomorrowStr);
+  const slots = buildWindowSlots(forecasts, terminal, mergedFlights, "exit", windowStartHour, windowSize, todayStr, tomorrowStr);
+  const allSlots = buildWindowSlots(forecasts, terminal, allStatusFlights, "exit", windowStartHour, windowSize, todayStr, tomorrowStr);
 
   const futureSlots = slots.filter(
     (s) => s.date === tomorrowStr || (s.date === todayStr && s.hour > kstHour)

@@ -39,7 +39,7 @@ export function WeeklyForecast({ days }: Props) {
         label: "편수",
         data: day.slots.map((s) => s.flightCount),
         backgroundColor: day.slots.map((s) =>
-          s.isNoTransport ? "#9B1B30" : "#C4933F"
+          s.isNoTransport || s.hour === AREX.lastTrain.hour ? "#9B1B30" : "#C4933F"
         ),
         borderRadius: 4,
       },
@@ -61,6 +61,7 @@ export function WeeklyForecast({ days }: Props) {
         },
       },
     },
+    layout: { padding: { top: 32 } },
     scales: {
       x: {
         ticks: { color: "#9ca3af", font: { size: 10 }, maxTicksLimit: 8 },
@@ -90,13 +91,6 @@ export function WeeklyForecast({ days }: Props) {
         ? (x.getPixelForValue(firstTransportIdx - 1) + x.getPixelForValue(firstTransportIdx)) / 2
         : null;
 
-      // 막차: 23:50 — 23시 바 내 50분 위치
-      const lastBarIdx = day.slots.length - 1;
-      const lastTrainPx = Math.min(
-        x.getPixelForValue(lastBarIdx) + barWidth * (AREX.lastTrain.minute / 60 - 0.5),
-        chartArea.right - 1
-      );
-
       // 지금: 오늘 탭일 때만
       const nowPx = isToday
         ? x.getPixelForValue(nowHour) + barWidth * (nowMinute / 60 - 0.5)
@@ -105,42 +99,47 @@ export function WeeklyForecast({ days }: Props) {
       const markers: { px: number; label: string; color: string }[] = [];
       if (firstTrainPx !== null && firstTrainPx >= chartArea.left)
         markers.push({ px: firstTrainPx, label: "첫차", color: "#9B1B30" });
-      markers.push({ px: lastTrainPx, label: "막차", color: "#9B1B30" });
       if (nowPx !== null && nowPx >= chartArea.left && nowPx <= chartArea.right)
         markers.push({ px: nowPx, label: "지금", color: "#C4933F" });
 
-      // 세로 점선 그리기
+      // 세로 점선 + 선 위 라벨
       ctx.save();
+      ctx.font = "600 10px sans-serif";
+      const LABEL_W = 28;
+      const OFFSET = 3;
+      const labelY = chartArea.top - 10;
+
+      // 겹침 방지: center 정렬 기준으로 px 순 정렬 후 row 배정
+      const HALF_W = LABEL_W / 2;
+      const sorted = [...markers].sort((a, b) => a.px - b.px);
+      const rowEdge: number[] = [];
+      const labelPositions: { centerPx: number; label: string; color: string; row: number }[] = [];
+      for (const { px, label, color } of sorted) {
+        // 캔버스 경계 클램프
+        const centerPx = Math.max(chartArea.left + HALF_W, Math.min(px, chartArea.right - HALF_W));
+        const left = centerPx - HALF_W;
+        const right = centerPx + HALF_W;
+        let row = 0;
+        while (rowEdge[row] !== undefined && left < rowEdge[row] + 4) row++;
+        rowEdge[row] = right;
+        labelPositions.push({ centerPx, label, color, row });
+      }
+
       for (const { px, color } of markers) {
         ctx.strokeStyle = color;
         ctx.lineWidth = 1.5;
         ctx.setLineDash([4, 3]);
         ctx.beginPath();
-        ctx.moveTo(px, y.top);
-        ctx.lineTo(px, y.bottom);
+        ctx.moveTo(px, chartArea.top);
+        ctx.lineTo(px, chartArea.bottom);
         ctx.stroke();
       }
 
-      // 라벨 — px 순 정렬 후 row 배정으로 겹침 방지
       ctx.setLineDash([]);
-      ctx.font = "600 11px sans-serif";
-      const LABEL_W = 26;   // 2글자 CJK + 여백 추정치
-      const OFFSET = 4;
-      const sorted = [...markers].sort((a, b) => a.px - b.px);
-      const rowEdge: number[] = []; // 각 row에서 마지막 라벨의 오른쪽 끝 px
-
-      for (const { px, label, color } of sorted) {
-        const nearRight = px + OFFSET + LABEL_W > chartArea.right;
-        const textLeft = nearRight ? px - OFFSET - LABEL_W : px + OFFSET;
-        const textRight = textLeft + LABEL_W;
-
-        let row = 0;
-        while (rowEdge[row] !== undefined && textLeft < rowEdge[row] + 4) row++;
-        rowEdge[row] = textRight;
-
+      ctx.textAlign = "center";
+      for (const { centerPx, label, color, row } of labelPositions) {
         ctx.fillStyle = color;
-        ctx.textAlign = "left";
-        ctx.fillText(label, textLeft, y.top + 13 + row * 14);
+        ctx.fillText(label, centerPx, labelY - row * 13);
       }
 
       ctx.restore();
