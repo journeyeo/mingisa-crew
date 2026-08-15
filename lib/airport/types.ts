@@ -59,6 +59,7 @@ export interface Flight {
   id: string;
   airline: string;
   origin: string;
+  airportCode?: string;  // IATA 코드 — 비행시간 추정용
   terminal: Terminal;
   scheduledTime: Date;  // 예정 착륙 시각
   landingTime: Date;

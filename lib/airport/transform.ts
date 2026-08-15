@@ -60,7 +60,8 @@ export function mergeFlightData(
     return {
       id: a.flightid,
       airline: f?.airline ?? a.airport,
-      origin: a.airport,
+      origin: f?.airport ?? a.airport,
+      airportCode: f?.airportCode,
       terminal,
       scheduledTime: schedTime,
       landingTime: actualTime,
@@ -213,6 +214,7 @@ export function flightsFromStatus(
       id: f.flightId,
       airline: f.airline,
       origin: f.airport,
+      airportCode: f.airportCode,
       terminal,
       scheduledTime: schedTime,
       landingTime: actualTime,
