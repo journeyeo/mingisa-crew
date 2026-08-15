@@ -166,14 +166,14 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
           <Bar data={data} options={options} plugins={[linePlugin]} />
         </div>
       ) : (
-        <div className="overflow-y-auto max-h-52">
-          <table className="w-full text-sm">
+        <div className="overflow-y-auto max-h-64">
+          <table className="w-full text-base">
             <thead>
-              <tr className="text-xs text-gray-400 border-b border-gray-100">
-                <th className="text-left pb-2 font-medium">시간</th>
-                <th className="text-right pb-2 font-medium">외국인</th>
-                <th className="text-right pb-2 font-medium">내국인</th>
-                <th className="text-right pb-2 font-medium">합계</th>
+              <tr className="text-sm text-gray-500 border-b border-gray-100">
+                <th className="text-left pb-2 font-semibold">시간</th>
+                <th className="text-right pb-2 font-semibold">외국인</th>
+                <th className="text-right pb-2 font-semibold">내국인</th>
+                <th className="text-right pb-2 font-semibold">합계</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-50">
@@ -186,19 +186,19 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
                     key={i}
                     className={isNow
                       ? "bg-amber-50 font-bold text-gray-900"
-                      : "text-gray-600"}
+                      : "text-gray-700"}
                   >
-                    <td className="py-2 tabular-nums rounded-l-lg pl-1">
-                      {isNext && <span className="text-[10px] text-amber-500 mr-1">{tomorrowLabel}</span>}
+                    <td className="py-2.5 tabular-nums rounded-l-lg pl-1">
+                      {isNext && <span className="text-xs text-amber-500 mr-1">{tomorrowLabel}</span>}
                       {String(s.hour).padStart(2, "0")}시
                       {isNow && (
                         <span className="ml-1.5 text-xs font-bold px-1.5 py-0.5 rounded-full text-white leading-none" style={{ background: "#C4933F" }}>지금</span>
                       )}
-                      {s.isNoTransport && <span className="ml-1 text-[10px] text-[#9B1B30] font-bold">심야</span>}
+                      {s.isNoTransport && <span className="ml-1 text-xs text-[#9B1B30] font-bold">심야</span>}
                     </td>
-                    <td className="py-2 text-right tabular-nums" style={{ color: COLOR.normalDark }}>{s.foreignCount.toLocaleString()}</td>
-                    <td className="py-2 text-right tabular-nums text-gray-500">{s.domesticCount.toLocaleString()}</td>
-                    <td className="py-2 text-right tabular-nums font-medium text-gray-900 pr-1 rounded-r-lg">{total.toLocaleString()}</td>
+                    <td className="py-2.5 text-right tabular-nums" style={{ color: COLOR.normalDark }}>{s.foreignCount.toLocaleString()}</td>
+                    <td className="py-2.5 text-right tabular-nums text-gray-500">{s.domesticCount.toLocaleString()}</td>
+                    <td className="py-2.5 text-right tabular-nums font-semibold text-gray-900 pr-1 rounded-r-lg">{total.toLocaleString()}</td>
                   </tr>
                 );
               })}
