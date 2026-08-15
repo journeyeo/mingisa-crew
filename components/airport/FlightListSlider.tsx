@@ -110,15 +110,7 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
   );
 
   function toggleGroup(groupIdx: number) {
-    setSelectedGroups((prev) => {
-      const next = new Set(prev);
-      if (next.has(groupIdx)) {
-        if (next.size > 1) next.delete(groupIdx);
-      } else {
-        next.add(groupIdx);
-      }
-      return next;
-    });
+    setSelectedGroups(new Set([groupIdx]));
   }
 
   const selectedSlotSet = useMemo(() => {
@@ -172,13 +164,16 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
   const listRef = useRef<HTMLDivElement>(null);
   const dividerRef = useRef<HTMLDivElement>(null);
 
+  const isCurrentBlockSelected = selectedGroups.has(currentBlockIdx);
+
   useEffect(() => {
+    if (!isCurrentBlockSelected) return;
     const list = listRef.current;
     const divider = dividerRef.current;
     if (list && divider) {
       list.scrollTop = Math.max(0, divider.offsetTop - list.offsetTop - 8);
     }
-  }, [selectedGroups]);
+  }, [selectedGroups, isCurrentBlockSelected]);
 
   function toggleAirline(airline: string) {
     setSelectedAirlines((prev) => {
@@ -262,7 +257,7 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
               const isExpanded = expandedIds.has(primaryId);
               return (
                 <Fragment key={`${primaryId}-${i}`}>
-                  {i === nowDividerIdx && (
+                  {i === nowDividerIdx && isCurrentBlockSelected && (
                     <div
                       ref={dividerRef}
                       className="flex items-center gap-2 px-4 py-1.5 bg-amber-50 sticky top-0 z-10"
