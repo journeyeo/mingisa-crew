@@ -3,6 +3,21 @@
 import { Fragment, useState, useMemo, useRef, useEffect } from "react";
 import type { HourlySlot } from "@/lib/airport/types";
 
+// 대형항공사 키워드 (포함 여부로 판단)
+const MAJOR_KEYWORDS = [
+  "대한항공", "아시아나",
+  "중국국제", "중국동방", "중국남방", "하이난", "샤먼", "사천",
+  "캐세이", "홍콩익스프레스",
+  "싱가포르", "말레이시아", "타이항공", "에어아시아", "필리핀", "베트남",
+  "일본항공", "전일본", "피치",
+  "가루다", "바틱",
+  "에미레이트", "카타르", "에티하드", "터키항공", "이스라엘",
+  "루프트한자", "영국항공", "에어프랑스", "KLM", "핀에어", "스칸디나비아",
+  "유나이티드", "아메리칸", "델타", "에어캐나다",
+  "에어인디아", "비스타라",
+];
+const isMajorAirline = (name: string) => MAJOR_KEYWORDS.some((k) => name.includes(k));
+
 const FLIGHT_MINUTES: Record<string, number> = {
   NRT:130, HND:130, KIX:135, FUK:115, CTS:145, OKA:175, NGO:130, SDJ:155, KOJ:160, OIT:140,
   PEK:200, PKX:200, PVG:185, SHA:185, TAO:110, DLC:90, SHE:90, CGO:130, WUH:140, CSX:155,
@@ -374,12 +389,20 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
           <div className="absolute inset-0 bg-black/30" />
           <div className="relative bg-white rounded-t-2xl w-full max-w-lg px-5 pt-5 pb-8" onClick={(e) => e.stopPropagation()}>
             <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between mb-3">
               <p className="text-sm font-semibold text-gray-900">항공사 선택</p>
-              <div className="flex gap-2">
-                <button onClick={() => setSelectedAirlines(null)} className="text-xs px-3 py-1.5 rounded-full border border-gray-200 text-gray-600 font-medium">전체 선택</button>
-                <button onClick={() => setSelectedAirlines(new Set())} className="text-xs px-3 py-1.5 rounded-full border border-gray-200 text-gray-600 font-medium">전체 해제</button>
-              </div>
+              <button onClick={() => setSelectedAirlines(null)} className="text-xs px-3 py-1.5 rounded-full border border-gray-200 text-gray-600 font-medium">전체 선택</button>
+            </div>
+            <div className="flex gap-2 mb-3">
+              {[
+                { label: "대형항공사", fn: () => setSelectedAirlines(new Set(allAirlines.filter(isMajorAirline))) },
+                { label: "전체 해제", fn: () => setSelectedAirlines(new Set()) },
+              ].map(({ label, fn }) => (
+                <button key={label} onClick={fn}
+                  className="text-sm font-semibold px-3 py-1.5 rounded-xl border border-gray-200 text-gray-700 bg-gray-50">
+                  {label}
+                </button>
+              ))}
             </div>
             <input type="text" value={filterQuery} onChange={(e) => setFilterQuery(e.target.value)}
               placeholder="항공사 검색"
