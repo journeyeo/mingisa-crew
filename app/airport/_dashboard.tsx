@@ -151,7 +151,7 @@ export function AirportDashboard({ terminal }: Props) {
 
   return (
     <main className="min-h-screen bg-gray-50 text-gray-900">
-      <div className="max-w-lg mx-auto px-4 py-6 space-y-5">
+      <div className="max-w-lg mx-auto px-4 py-6 pb-24 space-y-5">
 
         <div className="flex items-start justify-between">
           <div>
@@ -190,17 +190,26 @@ export function AirportDashboard({ terminal }: Props) {
                 nowIdx={data.nowIdx}
               />
             </div>
+            <ParkingStatus parking={data.parking} />
             <div>
               <p className="text-sm font-semibold text-gray-400 mb-3">주간 예측</p>
               <WeeklyForecast days={data.weeklyDays} />
             </div>
-            <ParkingStatus parking={data.parking} />
           </div>
         )}
 
         <p className="text-xs text-gray-300 pb-2">출처: 인천국제공항공사 공공데이터포털</p>
       </div>
       <Footer />
+
+      {/* 플로팅 터미널 토글 */}
+      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
+        <div className="shadow-lg rounded-xl overflow-hidden">
+          <Suspense>
+            <TerminalToggle terminal={terminal} />
+          </Suspense>
+        </div>
+      </div>
     </main>
   );
 }
