@@ -229,6 +229,15 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
             </button>
           ))}
         </div>
+        {!isCurrentBlockSelected && (
+          <button
+            onClick={() => setSelectedGroups(new Set([currentBlockIdx]))}
+            className="text-xs font-bold px-2.5 py-1.5 rounded-lg transition-colors text-white"
+            style={{ background: "#C4933F" }}
+          >
+            지금
+          </button>
+        )}
       </div>
       <button
         onClick={() => { setShowFilter(true); setFilterQuery(""); }}
