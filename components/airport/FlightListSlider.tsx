@@ -218,8 +218,8 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
     <>
     <div className="flex items-center justify-between px-1 mb-2">
       <div className="flex items-center gap-2">
-        <p className="text-base font-bold text-gray-800">
-          {totalFlights > 0 ? `${totalFlights}편` : "운항편 없음"}
+        <p className="text-base font-bold text-gray-800 tabular-nums min-w-[3.5rem]">
+          {totalFlights > 0 ? `${totalFlights}편` : "—"}
         </p>
         <div className="flex rounded-lg overflow-hidden border border-gray-300 text-xs font-semibold">
           {(["exit", "landing"] as const).map((b) => (
@@ -333,7 +333,7 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
                           <>
                             <p className="text-sm tabular-nums whitespace-nowrap text-gray-500">예정 {sh}:{sm}</p>
                             <p className="text-base tabular-nums font-bold whitespace-nowrap flex items-center justify-end gap-1">
-                              <span className={`text-[10px] font-bold text-white px-1.5 py-0.5 rounded-md leading-none ${isLate ? "bg-[#9B1B30]" : "bg-blue-400"}`}>
+                              <span className={`text-xs font-bold text-white px-2 py-0.5 rounded-md leading-none ${isLate ? "bg-[#9B1B30]" : "bg-blue-400"}`}>
                                 {isLate ? "지연" : "단축"}
                               </span>
                               <span>실착 </span>
