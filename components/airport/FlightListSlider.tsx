@@ -44,18 +44,24 @@ function DurationBadge({ code }: { code?: string }) {
   );
 }
 
+// 8 fixed 3-hour blocks (00~02 and 03~05 are tomorrow's, 06~23 are today's)
+const FIXED_BLOCKS = [
+  { startH: 0,  endH: 2,  label: "00~02시" },
+  { startH: 3,  endH: 5,  label: "03~05시" },
+  { startH: 6,  endH: 8,  label: "06~08시" },
+  { startH: 9,  endH: 11, label: "09~11시" },
+  { startH: 12, endH: 14, label: "12~14시" },
+  { startH: 15, endH: 17, label: "15~17시" },
+  { startH: 18, endH: 20, label: "18~20시" },
+  { startH: 21, endH: 23, label: "21~23시" },
+] as const;
+
 interface Props {
   slots: HourlySlot[];
   todayStr: string;
   tomorrowStr: string;
-  nowIdx: number;
+  kstHour: number;
   terminal: string;
-}
-
-function slotLabel(slot: HourlySlot | undefined, todayStr: string): string {
-  if (!slot) return "--:00";
-  const h = `${String(slot.hour).padStart(2, "0")}:00`;
-  return slot.date && slot.date !== todayStr ? `익일 ${h}` : h;
 }
 
 function dateOf(date: Date): string {
@@ -78,41 +84,30 @@ function TimeCell({ date, todayStr, prefix }: { date: Date; todayStr: string; pr
   );
 }
 
-const BLOCK_SIZE = 3;
-
-export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, nowIdx, terminal }: Props) {
+export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, terminal }: Props) {
   const [showFilter, setShowFilter] = useState(false);
   const [filterQuery, setFilterQuery] = useState("");
   const [selectedAirlines, setSelectedAirlines] = useState<Set<string> | null>(null);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [basis, setBasis] = useState<"exit" | "landing">("exit");
 
-  // 3시간 블록 (00~02시, 03~05시, ...) 고정 정렬
-  const hourGroups = useMemo(() => {
-    if (slots.length === 0) return [];
-    const buckets = new Map<string, number[]>();
-    slots.forEach((slot, idx) => {
-      const bucketH = Math.floor(slot.hour / BLOCK_SIZE) * BLOCK_SIZE;
-      const key = `${slot.date ?? ""}-${String(bucketH).padStart(2, "0")}`;
-      if (!buckets.has(key)) buckets.set(key, []);
-      buckets.get(key)!.push(idx);
+  // Slot indices for each fixed block:
+  // Blocks 0-1 (00~05시) → tomorrowStr slots; Blocks 2-7 (06~23시) → todayStr slots
+  const fixedBlockSlotIndices = useMemo(() => {
+    return FIXED_BLOCKS.map(({ startH, endH }, blockIdx) => {
+      const targetDate = blockIdx < 2 ? tomorrowStr : todayStr;
+      return slots.reduce<number[]>((acc, slot, i) => {
+        if (slot.date === targetDate && slot.hour >= startH && slot.hour <= endH) acc.push(i);
+        return acc;
+      }, []);
     });
-    return Array.from(buckets.entries())
-      .sort(([a], [b]) => a.localeCompare(b))
-      .map(([, indices]) => {
-        const first = slots[indices[0]];
-        const startH = Math.floor(first.hour / BLOCK_SIZE) * BLOCK_SIZE;
-        const endH = Math.min(startH + BLOCK_SIZE - 1, 23);
-        const isNext = first.date && first.date !== todayStr;
-        const label = `${isNext ? "익일 " : ""}${String(startH).padStart(2, "0")}~${String(endH).padStart(2, "0")}시`;
-        return { label, indices, containsNow: indices.includes(nowIdx) };
-      });
-  }, [slots, todayStr, nowIdx]);
+  }, [slots, todayStr, tomorrowStr]);
 
-  const defaultGroupIdx = Math.max(0, hourGroups.findIndex((g) => g.containsNow));
+  // Block containing current hour (0~7)
+  const currentBlockIdx = Math.floor(kstHour / 3);
 
   const [selectedGroups, setSelectedGroups] = useState<Set<number>>(
-    () => new Set([defaultGroupIdx])
+    () => new Set([currentBlockIdx])
   );
 
   function toggleGroup(groupIdx: number) {
@@ -129,11 +124,11 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
 
   const selectedSlotSet = useMemo(() => {
     const s = new Set<number>();
-    for (const gi of selectedGroups) {
-      hourGroups[gi]?.indices.forEach((i) => s.add(i));
+    for (const blockIdx of selectedGroups) {
+      fixedBlockSlotIndices[blockIdx]?.forEach((i) => s.add(i));
     }
     return s;
-  }, [selectedGroups, hourGroups]);
+  }, [selectedGroups, fixedBlockSlotIndices]);
 
   const allAirlines = useMemo(() => {
     const seen = new Set<string>();
@@ -209,9 +204,15 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
     });
   }
 
-  const sortedGroupIndices = Array.from(selectedSlotSet).sort((a, b) => a - b);
-  const rangeStart = sortedGroupIndices[0] ?? 0;
-  const rangeEnd = sortedGroupIndices[sortedGroupIndices.length - 1] ?? 0;
+  // Header range: sort selected blocks in window order (06시 first, 00시 익일 last)
+  const selectedBlocksSorted = Array.from(selectedGroups).sort((a, b) => {
+    const w = (i: number) => i < 2 ? i + 8 : i;
+    return w(a) - w(b);
+  });
+  const firstBIdx = selectedBlocksSorted[0] ?? currentBlockIdx;
+  const lastBIdx = selectedBlocksSorted[selectedBlocksSorted.length - 1] ?? currentBlockIdx;
+  const headerStart = `${firstBIdx < 2 ? "익일 " : ""}${String(FIXED_BLOCKS[firstBIdx].startH).padStart(2, "0")}:00`;
+  const headerEnd = `${lastBIdx < 2 ? "익일 " : ""}${String(FIXED_BLOCKS[lastBIdx].endH).padStart(2, "0")}:00`;
 
   return (
     <>
@@ -244,21 +245,22 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
         <div className="flex items-baseline gap-2 mb-3">
           <span className="text-3xl font-black text-[#9B1B30]">{terminal}</span>
           <p className="text-3xl font-bold tabular-nums text-gray-900">
-            {slotLabel(slots[rangeStart], todayStr)}
+            {headerStart}
             <span className="text-gray-300 mx-2">–</span>
-            {slotLabel(slots[rangeEnd], todayStr)}
+            {headerEnd}
           </p>
         </div>
-        <div className="flex flex-wrap gap-2">
-          {hourGroups.map(({ label, containsNow }, groupIdx) => {
-            const isSelected = selectedGroups.has(groupIdx);
+        <div className="grid grid-cols-4 gap-2">
+          {FIXED_BLOCKS.map(({ label }, blockIdx) => {
+            const isSelected = selectedGroups.has(blockIdx);
+            const isCurrent = blockIdx === currentBlockIdx;
             return (
               <button
-                key={groupIdx}
-                onClick={() => toggleGroup(groupIdx)}
-                className={`px-4 py-2.5 rounded-xl text-base font-semibold transition-colors whitespace-nowrap ${
+                key={blockIdx}
+                onClick={() => toggleGroup(blockIdx)}
+                className={`py-2 rounded-xl text-sm font-semibold text-center transition-colors ${
                   isSelected ? "bg-[#C4933F] text-white"
-                  : containsNow ? "bg-amber-50 text-[#9A7020] ring-1 ring-[#C4933F]"
+                  : isCurrent ? "bg-amber-50 text-[#9A7020] ring-1 ring-[#C4933F]"
                   : "bg-gray-100 text-gray-600"
                 }`}
               >

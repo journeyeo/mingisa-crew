@@ -35,6 +35,7 @@ interface DashboardData {
   tomorrowStr: string;
   tomorrowLabel: string;
   nowIdx: number;
+  kstHour: number;
   nowISO: string;
 }
 
@@ -195,7 +196,7 @@ export function AirportDashboard({ terminal }: Props) {
                 slots={data.allSlots.map(deserializeSlot)}
                 todayStr={data.todayStr}
                 tomorrowStr={data.tomorrowStr}
-                nowIdx={data.nowIdx}
+                kstHour={data.kstHour}
               />
             </div>
             <div>

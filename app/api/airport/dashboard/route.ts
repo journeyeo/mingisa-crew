@@ -75,7 +75,8 @@ export async function GET(req: NextRequest) {
   );
 
   const slots = buildWindowSlots(forecasts, terminal, mergedFlights, "exit", windowStartHour, windowSize, todayStr, tomorrowStr);
-  const allSlots = buildWindowSlots(forecasts, terminal, allStatusFlights, "exit", windowStartHour, windowSize, todayStr, tomorrowStr);
+  // allSlots: fixed window 06:00 today → 05:59 tomorrow (8 × 3h blocks)
+  const allSlots = buildWindowSlots(forecasts, terminal, allStatusFlights, "exit", 6, 24, todayStr, tomorrowStr);
 
   const futureSlots = allSlots.filter(
     (s) => s.date === tomorrowStr || (s.date === todayStr && s.hour > kstHour)
@@ -103,6 +104,7 @@ export async function GET(req: NextRequest) {
     tomorrowStr,
     tomorrowLabel,
     nowIdx,
+    kstHour,
     nowISO: now.toISOString(),
   });
 }

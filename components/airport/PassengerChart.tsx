@@ -170,7 +170,7 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
         <div className="overflow-y-auto max-h-64">
           <table className="w-full">
             <thead>
-              <tr className="text-sm text-gray-500 border-b border-gray-100">
+              <tr className="text-base text-gray-600 border-b border-gray-100">
                 <th className="text-left pb-2 font-semibold w-14">시간</th>
                 <th className="text-right pb-2 font-semibold">외국인</th>
                 <th className="text-right pb-2 font-semibold">내국인</th>
