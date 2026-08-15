@@ -128,20 +128,23 @@ export function AirportDashboard({ terminal }: Props) {
   const cache = useRef<Partial<Record<Terminal, DashboardData>>>({});
 
   useEffect(() => {
-    // 캐시된 데이터 있으면 즉시 표시
+    const controller = new AbortController();
+
     if (cache.current[terminal]) {
       setData(cache.current[terminal]!);
     } else {
       setData(null);
     }
-    // 백그라운드에서 항상 최신 데이터 갱신
-    fetch(`/api/airport/dashboard?terminal=${terminal}`)
+
+    fetch(`/api/airport/dashboard?terminal=${terminal}`, { signal: controller.signal })
       .then((r) => r.json())
       .then((raw: DashboardData) => {
         cache.current[terminal] = raw;
         setData(raw);
       })
-      .catch(() => {});
+      .catch((e) => { if (e.name !== "AbortError") console.error(e); });
+
+    return () => controller.abort();
   }, [terminal]);
 
   const now = new Date();
@@ -181,6 +184,7 @@ export function AirportDashboard({ terminal }: Props) {
                 시간대별 운항편 <span className="text-gray-300">({terminal})</span>
               </p>
               <FlightListSlider
+                key={terminal}
                 slots={data.allSlots.map(deserializeSlot)}
                 todayStr={data.todayStr}
                 tomorrowStr={data.tomorrowStr}
