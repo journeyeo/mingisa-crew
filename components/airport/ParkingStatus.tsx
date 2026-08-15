@@ -42,7 +42,10 @@ function LotRow({ label, lot }: { label: string; lot: ParkingLot }) {
 export function ParkingStatus({ parking }: Props) {
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-4 space-y-3">
-      <p className="text-sm text-gray-400">주차 현황</p>
+      <div className="flex items-center gap-2">
+        <p className="text-sm text-gray-400">주차 현황</p>
+        <span className="text-xs font-bold text-[#9B1B30]">{parking.terminal}</span>
+      </div>
       <LotRow label="단기" lot={parking.shortTerm} />
       <LotRow label="장기" lot={parking.longTerm} />
     </div>
