@@ -238,7 +238,11 @@ export function findPeakSlot(slots: HourlySlot[]): HourlySlot | null {
 const DOW_KO = ["일", "월", "화", "수", "목", "금", "토"];
 
 /** 주간 운항 데이터 → WeeklyDay[] (D+0~D+6) */
-export function buildWeeklyDays(items: WeeklyFlightItem[]): WeeklyDay[] {
+export function buildWeeklyDays(items: WeeklyFlightItem[], terminal: Terminal): WeeklyDay[] {
+  const filtered = terminal === "T1"
+    ? items.filter((f) => f.terminalid === "P01" || f.terminalid === "P02")
+    : items.filter((f) => f.terminalid === "P03");
+  items = filtered;
   return Array.from({ length: 7 }, (_, offset) => {
     const d = new Date();
     d.setDate(d.getDate() + offset);

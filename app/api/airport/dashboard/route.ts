@@ -102,7 +102,7 @@ export async function GET(req: NextRequest) {
     peakSlot: peakSlot ? { ...peakSlot, flights: peakSlot.flights.map(serializeFlight) } : null,
     currentForeignWaiting,
     currentTotalWaiting,
-    weeklyDays: buildWeeklyDays(weeklyItems),
+    weeklyDays: buildWeeklyDays(weeklyItems, terminal),
     parking: summarizeParking(parkingItems, terminal),
     todayStr,
     tomorrowStr,
