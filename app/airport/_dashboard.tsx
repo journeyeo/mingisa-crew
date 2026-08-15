@@ -151,18 +151,18 @@ export function AirportDashboard({ terminal }: Props) {
 
   return (
     <main className="min-h-screen bg-gray-50 text-gray-900">
-      <div className="max-w-lg mx-auto px-4 py-6 pb-24 space-y-5">
+      <div className="max-w-lg mx-auto px-4 py-6 pb-4 space-y-5">
 
         <div>
           <h1 className="text-xl font-bold text-gray-900">인천공항 입국 수요</h1>
-          <p className="text-sm text-gray-400 mt-0.5">
+          <p className="text-sm text-gray-500 mt-0.5">
             {now.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" })}
             {" · 5분 갱신"}
             {data && (() => {
               const t = new Date(data.nowISO);
               const hh = String(t.getHours()).padStart(2, "0");
               const mm = String(t.getMinutes()).padStart(2, "0");
-              return <span className="text-gray-300"> · {hh}:{mm} 업데이트</span>;
+              return <span className="text-gray-400"> · {hh}:{mm} 업데이트</span>;
             })()}
           </p>
         </div>
@@ -181,7 +181,7 @@ export function AirportDashboard({ terminal }: Props) {
             />
             <PassengerChart slots={data.slots.map(deserializeSlot)} tomorrowLabel={data.tomorrowLabel} />
             <div>
-              <p className="text-sm font-semibold text-gray-400 mb-3">시간대별 운항편</p>
+              <p className="text-sm font-semibold text-gray-500 mb-3">시간대별 운항편</p>
               <FlightListSlider
                 key={terminal}
                 terminal={terminal}
@@ -194,15 +194,15 @@ export function AirportDashboard({ terminal }: Props) {
             <ParkingStatus parking={data.parking} />
             <div>
               <div className="flex items-baseline gap-1.5 mb-3">
-                <p className="text-sm font-semibold text-gray-400">주간 예측</p>
-                <span className="text-xs text-gray-300">(T1/T2 통합)</span>
+                <p className="text-sm font-semibold text-gray-500">주간 예측</p>
+                <span className="text-xs text-gray-400">(T1/T2 통합)</span>
               </div>
               <WeeklyForecast days={data.weeklyDays} />
             </div>
           </div>
         )}
 
-        <p className="text-xs text-gray-300 pb-2">출처: 인천국제공항공사 공공데이터포털</p>
+        <p className="text-xs text-gray-400 pb-2">출처: 인천국제공항공사 공공데이터포털</p>
       </div>
       <Footer />
 

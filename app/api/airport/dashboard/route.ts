@@ -1,4 +1,5 @@
 import { NextRequest } from "next/server";
+import { cacheLife } from "next/cache";
 
 import {
   fetchArrivalsCongestion,
@@ -17,7 +18,6 @@ import {
 } from "@/lib/airport/transform";
 import type { Flight, Terminal } from "@/lib/airport/types";
 
-
 function serializeFlight(f: Flight) {
   return {
     ...f,
@@ -27,8 +27,9 @@ function serializeFlight(f: Flight) {
   };
 }
 
-export async function GET(req: NextRequest) {
-  const terminal = (req.nextUrl.searchParams.get("terminal") === "T2" ? "T2" : "T1") as Terminal;
+async function buildDashboard(terminal: Terminal) {
+  "use cache";
+  cacheLife(300);
 
   const now = new Date();
   const toKST = (d: Date) =>
@@ -38,7 +39,7 @@ export async function GET(req: NextRequest) {
   const tomorrowLabel = `${parseInt(tomorrowStr.slice(4, 6))}/${parseInt(tomorrowStr.slice(6, 8))}`;
   const kstHour = new Date(now.getTime() + 9 * 3600_000).getUTCHours();
   const windowStartHour = Math.max(0, kstHour - 1);
-  const windowSize = Math.min(30 - windowStartHour, 24); // 익일 06시까지, 최대 24시간
+  const windowSize = Math.min(30 - windowStartHour, 24);
   const nowIdx = kstHour - windowStartHour;
 
   const [
@@ -97,7 +98,7 @@ export async function GET(req: NextRequest) {
   const serializeSlots = (ss: typeof slots) =>
     ss.map((s) => ({ ...s, flights: s.flights.map(serializeFlight) }));
 
-  const body = {
+  return {
     slots: serializeSlots(slots),
     allSlots: serializeSlots(allSlots),
     peakSlot: peakSlot ? { ...peakSlot, flights: peakSlot.flights.map(serializeFlight) } : null,
@@ -111,6 +112,10 @@ export async function GET(req: NextRequest) {
     nowIdx,
     nowISO: now.toISOString(),
   };
+}
 
+export async function GET(req: NextRequest) {
+  const terminal = (req.nextUrl.searchParams.get("terminal") === "T2" ? "T2" : "T1") as Terminal;
+  const body = await buildDashboard(terminal);
   return Response.json(body);
 }

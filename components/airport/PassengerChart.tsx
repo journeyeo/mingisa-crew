@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   BarController,
   BarElement,
@@ -28,6 +28,8 @@ interface Props {
 }
 
 export function PassengerChart({ slots, tomorrowLabel }: Props) {
+  const [view, setView] = useState<"chart" | "table">("chart");
+
   const labels = slots.map((s, i) => {
     const h = `${String(s.hour).padStart(2, "0")}시`;
     if (s.hour === 0 && i > 0) return [h, tomorrowLabel];
@@ -38,7 +40,6 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
     return slots.findIndex((s) => s.hour === h);
   }, [slots]);
 
-  // 상위 3개 시간대 인덱스 (총 승객 기준)
   const ranked = useMemo(() =>
     slots
       .map((s, i) => ({ i, total: s.foreignCount + s.domesticCount }))
@@ -113,8 +114,6 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
     afterDraw(chart: ChartJS) {
       const { ctx, scales: { x, y } } = chart;
       ctx.save();
-
-      // 지금 선
       if (nowIndex >= 0) {
         const px = x.getPixelForValue(nowIndex);
         ctx.strokeStyle = "#C4933F";
@@ -129,27 +128,77 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
         ctx.textAlign = "left";
         ctx.fillText("지금", px + 4, y.top + 13);
       }
-
       ctx.restore();
     },
   };
 
+  const tableSlots = slots.filter((s) => s.foreignCount + s.domesticCount > 0);
+
   return (
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 pt-4 pb-3">
-      <div className="flex items-center gap-5 mb-4 text-sm text-gray-400">
-        <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded-sm inline-block" style={{ background: COLOR.normalDark }} />외국인
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded-sm inline-block" style={{ background: COLOR.normalLight }} />내국인
-        </span>
-        <span className="flex items-center gap-1.5">
-          <span className="w-3 h-3 rounded-sm inline-block" style={{ background: COLOR.alertDark }} />막차 이후
-        </span>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-4 text-sm text-gray-500">
+          <span className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-sm inline-block" style={{ background: COLOR.normalDark }} />외국인
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-sm inline-block" style={{ background: COLOR.normalLight }} />내국인
+          </span>
+          <span className="flex items-center gap-1.5">
+            <span className="w-3 h-3 rounded-sm inline-block" style={{ background: COLOR.alertDark }} />막차 이후
+          </span>
+        </div>
+        <div className="flex rounded-lg overflow-hidden border border-gray-100 text-[11px] font-semibold">
+          {(["chart", "table"] as const).map((v) => (
+            <button
+              key={v}
+              onClick={() => setView(v)}
+              className={`px-2.5 py-1 transition-colors ${view === v ? "bg-gray-800 text-white" : "bg-white text-gray-400"}`}
+            >
+              {v === "chart" ? "그래프" : "표"}
+            </button>
+          ))}
+        </div>
       </div>
-      <div className="h-52">
-        <Bar data={data} options={options} plugins={[linePlugin]} />
-      </div>
+
+      {view === "chart" ? (
+        <div className="h-52">
+          <Bar data={data} options={options} plugins={[linePlugin]} />
+        </div>
+      ) : (
+        <div className="overflow-y-auto max-h-52">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="text-xs text-gray-400 border-b border-gray-100">
+                <th className="text-left pb-2 font-medium">시간</th>
+                <th className="text-right pb-2 font-medium">외국인</th>
+                <th className="text-right pb-2 font-medium">내국인</th>
+                <th className="text-right pb-2 font-medium">합계</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {tableSlots.map((s, i) => {
+                const total = s.foreignCount + s.domesticCount;
+                const isNow = slots.indexOf(s) === nowIndex;
+                const isNext = s.hour === 0 && slots.indexOf(s) > 0;
+                return (
+                  <tr key={i} className={isNow ? "font-semibold text-gray-900" : "text-gray-600"}>
+                    <td className="py-1.5 tabular-nums">
+                      {isNext && <span className="text-[10px] text-amber-500 mr-1">{tomorrowLabel}</span>}
+                      {String(s.hour).padStart(2, "0")}시
+                      {isNow && <span className="ml-1 text-[10px] text-[#C4933F] font-bold">지금</span>}
+                      {s.isNoTransport && <span className="ml-1 text-[10px] text-[#9B1B30] font-bold">심야</span>}
+                    </td>
+                    <td className="py-1.5 text-right tabular-nums" style={{ color: COLOR.normalDark }}>{s.foreignCount.toLocaleString()}</td>
+                    <td className="py-1.5 text-right tabular-nums text-gray-500">{s.domesticCount.toLocaleString()}</td>
+                    <td className="py-1.5 text-right tabular-nums font-medium text-gray-900">{total.toLocaleString()}</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 }

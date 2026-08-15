@@ -302,32 +302,30 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
                       {extraIds.length > 0 && !isExpanded && (
                         <button
                           onClick={() => setExpandedIds((s) => new Set(s).add(primaryId))}
-                          className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-gray-100 text-gray-400 leading-none"
+                          className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 leading-none"
                         >+{extraIds.length}</button>
                       )}
                     </div>
                     {extraIds.length > 0 && isExpanded && (
                       <div className="flex flex-col gap-0.5">
                         {extraIds.map((id) => (
-                          <span key={id} className="text-xs font-mono text-gray-400 leading-tight">{id}</span>
+                          <span key={id} className="text-xs font-mono text-gray-500 leading-tight">{id}</span>
                         ))}
                         <button
                           onClick={() => setExpandedIds((s) => { const n = new Set(s); n.delete(primaryId); return n; })}
-                          className="text-[10px] text-gray-300 leading-tight text-left"
+                          className="text-[10px] text-gray-400 leading-tight text-left"
                         >접기</button>
                       </div>
+                    )}
+                    {flight.airline && (
+                      <span className="text-[11px] text-gray-500 leading-tight truncate w-full">{flight.airline}</span>
                     )}
                   </div>
 
                   {/* 출발지 열 */}
                   <div className="flex-1 flex flex-col justify-center min-w-0 gap-0.5 pt-0.5">
                     <span className="text-sm font-semibold text-gray-900 truncate">{flight.origin}</span>
-                    <div className="flex items-center gap-1.5 min-w-0">
-                      {flight.airline && (
-                        <span className="text-xs text-gray-400 truncate">{flight.airline}</span>
-                      )}
-                      <DurationBadge code={flight.airportCode} />
-                    </div>
+                    <DurationBadge code={flight.airportCode} />
                   </div>
 
                   {/* 시각 열 */}
