@@ -168,10 +168,10 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
         </div>
       ) : (
         <div className="overflow-y-auto max-h-64">
-          <table className="w-full text-base">
+          <table className="w-full">
             <thead>
               <tr className="text-sm text-gray-500 border-b border-gray-100">
-                <th className="text-left pb-2 font-semibold">시간</th>
+                <th className="text-left pb-2 font-semibold w-14">시간</th>
                 <th className="text-right pb-2 font-semibold">외국인</th>
                 <th className="text-right pb-2 font-semibold">내국인</th>
                 <th className="text-right pb-2 font-semibold">합계</th>
@@ -189,17 +189,19 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
                       ? "bg-amber-50 font-bold text-gray-900"
                       : "text-gray-700"}
                   >
-                    <td className="py-2.5 tabular-nums rounded-l-lg pl-1">
-                      {isNext && <span className="text-xs text-amber-500 mr-1">{tomorrowLabel}</span>}
-                      {String(s.hour).padStart(2, "0")}시
-                      {isNow && (
-                        <span className="ml-1.5 text-xs font-bold px-1.5 py-0.5 rounded-full text-white leading-none" style={{ background: "#C4933F" }}>지금</span>
-                      )}
-                      {s.isNoTransport && <span className="ml-1 text-xs text-[#9B1B30] font-bold">심야</span>}
+                    <td className="py-2.5 w-14 rounded-l-lg pl-1">
+                      <div className="flex flex-col items-start gap-0.5">
+                        {isNext && <span className="text-[10px] text-amber-500 leading-none">{tomorrowLabel}</span>}
+                        <span className="text-sm tabular-nums">{String(s.hour).padStart(2, "0")}시</span>
+                        {isNow && (
+                          <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white leading-none" style={{ background: "#C4933F" }}>지금</span>
+                        )}
+                        {s.isNoTransport && <span className="text-[10px] text-[#9B1B30] font-bold leading-none">심야</span>}
+                      </div>
                     </td>
-                    <td className="py-2.5 text-right tabular-nums" style={{ color: COLOR.normalDark }}>{s.foreignCount.toLocaleString()}</td>
-                    <td className="py-2.5 text-right tabular-nums text-gray-500">{s.domesticCount.toLocaleString()}</td>
-                    <td className="py-2.5 text-right tabular-nums font-semibold text-gray-900 pr-1 rounded-r-lg">{total.toLocaleString()}</td>
+                    <td className="py-2.5 text-right tabular-nums text-lg font-semibold" style={{ color: COLOR.normalDark }}>{s.foreignCount.toLocaleString()}</td>
+                    <td className="py-2.5 text-right tabular-nums text-lg text-gray-500">{s.domesticCount.toLocaleString()}</td>
+                    <td className="py-2.5 text-right tabular-nums text-lg font-bold text-gray-900 pr-1 rounded-r-lg">{total.toLocaleString()}</td>
                   </tr>
                 );
               })}
