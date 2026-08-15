@@ -24,9 +24,6 @@ export function TerminalToggle({ terminal }: Props) {
 
   return (
     <>
-    {isPending && (
-      <div className="fixed inset-0 bg-white/50 z-40 pointer-events-none transition-opacity" />
-    )}
     <div className={`flex rounded-xl overflow-hidden border border-gray-200 text-sm font-semibold shadow-sm transition-opacity ${isPending ? "opacity-50 pointer-events-none" : ""}`}>
       {(["T1", "T2"] as Terminal[]).map((t) => (
         <button
@@ -45,6 +42,5 @@ export function TerminalToggle({ terminal }: Props) {
         </button>
       ))}
     </div>
-    </>
   );
 }
