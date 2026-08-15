@@ -64,7 +64,7 @@ export function WeeklyForecast({ days }: Props) {
     layout: { padding: { top: 32 } },
     scales: {
       x: {
-        ticks: { color: "#9ca3af", font: { size: 10 }, maxTicksLimit: 8 },
+        ticks: { color: "#9ca3af", font: { size: 11 }, maxTicksLimit: 8 },
         grid: { display: false },
         border: { display: false },
       },
@@ -161,7 +161,7 @@ export function WeeklyForecast({ days }: Props) {
             }`}
           >
             <span className="text-xs">{d.label}</span>
-            <span className="text-sm font-bold tabular-nums mt-0.5 text-gray-800">
+            <span className="text-base font-bold tabular-nums mt-0.5 text-gray-800">
               {d.totalFlights - d.goldenHourFlights}편
             </span>
             <span className={`text-xs tabular-nums font-semibold leading-none ${d.goldenHourFlights > 0 ? "text-[#9B1B30]" : "text-gray-300"}`}>
@@ -174,7 +174,7 @@ export function WeeklyForecast({ days }: Props) {
       {/* 선택된 날 차트 */}
       <div className="px-4 pt-4 pb-3">
         <div className="flex items-center justify-between mb-3">
-          <p className="text-sm font-semibold text-gray-700">
+          <p className="text-base font-semibold text-gray-700">
             {day.label} · 전체 {day.totalFlights}편
           </p>
           {day.goldenHourFlights > 0 && (

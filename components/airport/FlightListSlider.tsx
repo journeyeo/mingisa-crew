@@ -344,10 +344,10 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
                             예정 {sh}:{sm}
                           </p>
                           <p className="text-base tabular-nums font-bold whitespace-nowrap flex items-center justify-end gap-1">
-                            <span>실착 </span>
                             <span className={`text-[10px] font-bold text-white px-1.5 py-0.5 rounded-md leading-none ${isLate ? "bg-[#9B1B30]" : "bg-blue-400"}`}>
                               {isLate ? "지연" : "단축"}
                             </span>
+                            <span>실착 </span>
                             <span style={{ color: isLate ? "#9B1B30" : "#3B82F6" }}>{lh}:{lm}</span>
                           </p>
                         </>
@@ -368,7 +368,7 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
               );
             })}
           </div>
-          <p className="px-4 py-2 text-xs text-gray-400">* 출구 시각 = 착륙 후 약 55분 (외국인 입국 기준)</p>
+          <p className="px-4 py-2 text-sm text-gray-500">* 출구 시각 = 착륙 후 약 55분 (외국인 입국 기준)</p>
         </>
       )}
 
