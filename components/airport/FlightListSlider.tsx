@@ -286,9 +286,14 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
                         >접기</button>
                       </div>
                     )}
-                    {flight.isDelayed && (
-                      <span className="text-[10px] font-bold text-white bg-[#9B1B30] px-1.5 py-0.5 rounded-md leading-none mt-0.5">지연</span>
-                    )}
+                    {flight.isDelayed && (() => {
+                        const diff = flight.landingTime.getTime() - flight.scheduledTime.getTime();
+                        return (
+                          <span className={`text-[10px] font-bold text-white px-1.5 py-0.5 rounded-md leading-none mt-0.5 ${diff > 0 ? "bg-[#9B1B30]" : "bg-blue-400"}`}>
+                            {diff > 0 ? "지연" : "조기"}
+                          </span>
+                        );
+                      })()}
                   </div>
 
                   {/* 출발지 열 */}
@@ -304,19 +309,26 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
 
                   {/* 시각 열 */}
                   <div className="w-28 text-right shrink-0">
-                    <p className="text-sm text-gray-500 font-medium">
-                      <TimeCell date={flight.landingTime} todayStr={todayStr} prefix="착륙" />
-                    </p>
-                    {flight.isDelayed && (() => {
+                    {flight.isDelayed ? (() => {
                       const delayMin = Math.round((flight.landingTime.getTime() - flight.scheduledTime.getTime()) / 60_000);
+                      const isLate = delayMin > 0;
+                      const absDiff = Math.abs(delayMin);
                       const sh = String(flight.scheduledTime.getHours()).padStart(2, "0");
                       const sm = String(flight.scheduledTime.getMinutes()).padStart(2, "0");
                       return (
-                        <p className="text-[11px] text-gray-400 leading-tight">
-                          예정 {sh}:{sm} <span className="text-rose-500 font-semibold">+{delayMin}분</span>
-                        </p>
+                        <>
+                          <p className="text-xs text-gray-400">예정 {sh}:{sm}</p>
+                          <p className="text-sm font-semibold" style={{ color: isLate ? "#9B1B30" : "#3B82F6" }}>
+                            <TimeCell date={flight.landingTime} todayStr={todayStr} prefix="착륙" />
+                            <span className="ml-1 text-xs">{isLate ? `+${absDiff}분` : `-${absDiff}분`}</span>
+                          </p>
+                        </>
                       );
-                    })()}
+                    })() : (
+                      <p className="text-sm text-gray-500 font-medium">
+                        <TimeCell date={flight.landingTime} todayStr={todayStr} prefix="착륙" />
+                      </p>
+                    )}
                     <p className={`text-base font-semibold leading-tight ${isNoTransport ? "text-[#9B1B30]" : "text-gray-900"}`}>
                       <TimeCell date={flight.exitTime} todayStr={todayStr} prefix={flight.exitGate ? `출구 ${flight.exitGate}` : "출구"} />
                       {isNoTransport && (
