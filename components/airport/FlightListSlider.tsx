@@ -344,7 +344,7 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
                         </p>
                       );
                     })() : (
-                      <p className="text-sm text-gray-500 font-medium whitespace-nowrap">
+                      <p className="text-sm text-gray-900 font-medium whitespace-nowrap">
                         <TimeCell date={flight.landingTime} todayStr={todayStr} prefix="착륙" />
                       </p>
                     )}
