@@ -125,13 +125,14 @@ function MainContentSkeleton() {
 
 export function AirportDashboard({ terminal }: Props) {
   const [data, setData] = useState<DashboardData | null>(null);
+  const [fetching, setFetching] = useState(false);
 
   useEffect(() => {
-    setData(null);
+    setFetching(true);
     fetch(`/api/airport/dashboard?terminal=${terminal}`)
       .then((r) => r.json())
-      .then((raw: DashboardData) => setData(raw))
-      .catch(() => {/* keep skeleton visible on error */});
+      .then((raw: DashboardData) => { setData(raw); setFetching(false); })
+      .catch(() => setFetching(false));
   }, [terminal]);
 
   const now = new Date();
@@ -156,7 +157,7 @@ export function AirportDashboard({ terminal }: Props) {
         {!data ? (
           <MainContentSkeleton />
         ) : (
-          <>
+          <div className={`space-y-5 transition-opacity duration-200 ${fetching ? "opacity-40 pointer-events-none" : "opacity-100"}`}>
             <DashboardHeader
               terminal={terminal}
               currentForeignWaiting={data.currentForeignWaiting}
@@ -182,7 +183,7 @@ export function AirportDashboard({ terminal }: Props) {
               <WeeklyForecast days={data.weeklyDays} />
             </div>
             <ParkingStatus parking={data.parking} />
-          </>
+          </div>
         )}
 
         <p className="text-xs text-gray-300 pb-2">출처: 인천국제공항공사 공공데이터포털</p>
