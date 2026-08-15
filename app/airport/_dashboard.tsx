@@ -187,7 +187,10 @@ export function AirportDashboard({ terminal }: Props) {
             </div>
             <ParkingStatus parking={data.parking} />
             <div>
-              <p className="text-sm font-semibold text-gray-400 mb-3">주간 예측</p>
+              <div className="flex items-baseline gap-1.5 mb-3">
+                <p className="text-sm font-semibold text-gray-400">주간 예측</p>
+                <span className="text-xs text-gray-300">(T1/T2 통합)</span>
+              </div>
               <WeeklyForecast days={data.weeklyDays} />
             </div>
           </div>
