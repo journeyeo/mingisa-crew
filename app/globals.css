@@ -24,3 +24,47 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* 듀얼 썸 슬라이더 — 트랙은 숨기고 thumb만 이벤트 받음 */
+.dual-thumb-input {
+  pointer-events: none;
+  background: transparent;
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  margin: 0;
+  outline: none;
+  border: none;
+  accent-color: transparent;
+  box-shadow: none;
+}
+.dual-thumb-input:focus { outline: none; }
+.dual-thumb-input::-webkit-slider-thumb {
+  pointer-events: all;
+  appearance: none;
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #9B1B30;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+  border: 2.5px solid white;
+}
+.dual-thumb-input::-moz-range-thumb {
+  pointer-events: all;
+  appearance: none;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #9B1B30;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.25);
+  border: 2.5px solid white;
+}
+.dual-thumb-input::-webkit-slider-runnable-track { background: transparent; }
+.dual-thumb-input::-moz-range-track { background: transparent; }
+.dual-thumb-input::-moz-range-progress { background: transparent; }
