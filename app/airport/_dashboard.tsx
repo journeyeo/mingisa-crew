@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useEffect } from "react";
+import { Suspense, useState, useEffect, useRef } from "react";
 import type { Flight, HourlySlot, Terminal, WeeklyDay, ParkingSummary } from "@/lib/airport/types";
 
 import { DashboardHeader } from "@/components/airport/DashboardHeader";
@@ -125,14 +125,23 @@ function MainContentSkeleton() {
 
 export function AirportDashboard({ terminal }: Props) {
   const [data, setData] = useState<DashboardData | null>(null);
-  const [fetching, setFetching] = useState(false);
+  const cache = useRef<Partial<Record<Terminal, DashboardData>>>({});
 
   useEffect(() => {
-    setFetching(true);
+    // 캐시된 데이터 있으면 즉시 표시
+    if (cache.current[terminal]) {
+      setData(cache.current[terminal]!);
+    } else {
+      setData(null);
+    }
+    // 백그라운드에서 항상 최신 데이터 갱신
     fetch(`/api/airport/dashboard?terminal=${terminal}`)
       .then((r) => r.json())
-      .then((raw: DashboardData) => { setData(raw); setFetching(false); })
-      .catch(() => setFetching(false));
+      .then((raw: DashboardData) => {
+        cache.current[terminal] = raw;
+        setData(raw);
+      })
+      .catch(() => {});
   }, [terminal]);
 
   const now = new Date();
@@ -157,7 +166,7 @@ export function AirportDashboard({ terminal }: Props) {
         {!data ? (
           <MainContentSkeleton />
         ) : (
-          <div className={`space-y-5 transition-opacity duration-200 ${fetching ? "opacity-40 pointer-events-none" : "opacity-100"}`}>
+          <div className="space-y-5">
             <DashboardHeader
               terminal={terminal}
               currentForeignWaiting={data.currentForeignWaiting}
