@@ -106,8 +106,8 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
   const [priority, setPriority] = useState<"start" | "end">("end");
   const [showFilter, setShowFilter] = useState(false);
   const [filterQuery, setFilterQuery] = useState("");
-  // null = 전체 선택, Set = 선택된 항공사만
   const [selectedAirlines, setSelectedAirlines] = useState<Set<string> | null>(null);
+  const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
 
   const startPct = maxIdx > 0 ? (startIdx / maxIdx) * 100 : 0;
   const endPct = maxIdx > 0 ? (endIdx / maxIdx) * 100 : 100;
@@ -255,51 +255,80 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
             <span className="w-28 text-right">착륙 · 출구 도착</span>
           </div>
           <div className="divide-y divide-gray-100 overflow-y-auto max-h-80">
-            {allEntries.map(({ flight, ids, isNoTransport }, i) => (
-              <div
-                key={`${ids[0]}-${i}`}
-                className={`flex items-center px-4 py-3 gap-3 ${flight.isDelayed ? "bg-rose-50/60" : isNoTransport ? "bg-amber-50/30" : ""}`}
-              >
-                <div className="w-20 shrink-0 flex flex-col items-start gap-0.5">
-                  {ids.map((id) => (
-                    <span key={id} className="text-sm font-mono font-bold text-gray-900 leading-tight">{id}</span>
-                  ))}
-                  {flight.isDelayed && (
-                    <span className="text-[10px] font-bold text-white bg-[#9B1B30] px-1.5 py-0.5 rounded-md leading-none mt-0.5">지연</span>
-                  )}
-                </div>
-                <div className="flex-1 flex flex-col justify-center min-w-0 gap-0.5">
-                  <div className="flex items-center gap-1.5 min-w-0">
-                    <span className="text-sm font-semibold text-gray-900 truncate">{flight.origin}</span>
-                    <DurationBadge code={flight.airportCode} />
-                  </div>
-                  {flight.airline && (
-                    <span className="text-xs text-gray-400 truncate">{flight.airline}</span>
-                  )}
-                </div>
-                <div className="w-28 text-right shrink-0">
-                  <p className="text-xs text-gray-400">
-                    <TimeCell date={flight.landingTime} todayStr={todayStr} prefix="착륙" />
-                  </p>
-                  {flight.isDelayed && (() => {
-                    const delayMin = Math.round((flight.landingTime.getTime() - flight.scheduledTime.getTime()) / 60_000);
-                    const sh = String(flight.scheduledTime.getHours()).padStart(2, "0");
-                    const sm = String(flight.scheduledTime.getMinutes()).padStart(2, "0");
-                    return (
-                      <p className="text-[11px] text-gray-400 leading-tight">
-                        예정 {sh}:{sm} <span className="text-rose-500 font-semibold">+{delayMin}분</span>
-                      </p>
-                    );
-                  })()}
-                  <p className={`text-base font-semibold leading-tight ${isNoTransport ? "text-[#9B1B30]" : "text-gray-900"}`}>
-                    <TimeCell date={flight.exitTime} todayStr={todayStr} prefix="출구" />
-                    {isNoTransport && (
-                      <span className="ml-1 text-[10px] font-bold text-white bg-[#9B1B30] px-1 rounded leading-[1.4] align-middle">심야</span>
+            {allEntries.map(({ flight, ids, isNoTransport }, i) => {
+              const primaryId = ids[0];
+              const extraIds = ids.slice(1);
+              const isExpanded = expandedIds.has(primaryId);
+              return (
+                <div
+                  key={`${primaryId}-${i}`}
+                  className={`flex items-start px-4 py-3 gap-3 ${flight.isDelayed ? "bg-rose-50/60" : isNoTransport ? "bg-amber-50/30" : ""}`}
+                >
+                  {/* 편명 열 */}
+                  <div className="w-20 shrink-0 flex flex-col items-start gap-0.5 pt-0.5">
+                    <span className="text-sm font-mono font-bold text-gray-900 leading-tight">{primaryId}</span>
+                    {extraIds.length > 0 && (
+                      isExpanded ? (
+                        <div className="flex flex-col gap-0.5">
+                          {extraIds.map((id) => (
+                            <span key={id} className="text-xs font-mono text-gray-400 leading-tight">{id}</span>
+                          ))}
+                          <button
+                            onClick={() => setExpandedIds((s) => { const n = new Set(s); n.delete(primaryId); return n; })}
+                            className="text-[10px] text-gray-300 leading-tight text-left"
+                          >접기</button>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={() => setExpandedIds((s) => new Set(s).add(primaryId))}
+                          className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-gray-100 text-gray-400 leading-none"
+                        >+{extraIds.length}</button>
+                      )
                     )}
-                  </p>
+                    {flight.isDelayed && (
+                      <span className="text-[10px] font-bold text-white bg-[#9B1B30] px-1.5 py-0.5 rounded-md leading-none mt-0.5">지연</span>
+                    )}
+                  </div>
+
+                  {/* 출발지 열 */}
+                  <div className="flex-1 flex flex-col justify-center min-w-0 gap-0.5 pt-0.5">
+                    <div className="flex items-center gap-1.5 min-w-0">
+                      <span className="text-sm font-semibold text-gray-900 truncate">{flight.origin}</span>
+                      <DurationBadge code={flight.airportCode} />
+                    </div>
+                    {flight.airline && (
+                      <span className="text-xs text-gray-400 truncate">{flight.airline}</span>
+                    )}
+                  </div>
+
+                  {/* 시각 열 */}
+                  <div className="w-28 text-right shrink-0">
+                    {flight.exitGate && (
+                      <p className="text-xs font-medium text-gray-500 mb-0.5">입국장 {flight.exitGate}</p>
+                    )}
+                    <p className="text-sm text-gray-500 font-medium">
+                      <TimeCell date={flight.landingTime} todayStr={todayStr} prefix="착륙" />
+                    </p>
+                    {flight.isDelayed && (() => {
+                      const delayMin = Math.round((flight.landingTime.getTime() - flight.scheduledTime.getTime()) / 60_000);
+                      const sh = String(flight.scheduledTime.getHours()).padStart(2, "0");
+                      const sm = String(flight.scheduledTime.getMinutes()).padStart(2, "0");
+                      return (
+                        <p className="text-[11px] text-gray-400 leading-tight">
+                          예정 {sh}:{sm} <span className="text-rose-500 font-semibold">+{delayMin}분</span>
+                        </p>
+                      );
+                    })()}
+                    <p className={`text-base font-semibold leading-tight ${isNoTransport ? "text-[#9B1B30]" : "text-gray-900"}`}>
+                      <TimeCell date={flight.exitTime} todayStr={todayStr} prefix="출구" />
+                      {isNoTransport && (
+                        <span className="ml-1 text-[10px] font-bold text-white bg-[#9B1B30] px-1 rounded leading-[1.4] align-middle">심야</span>
+                      )}
+                    </p>
+                  </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </>
       )}
