@@ -188,11 +188,12 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
   const isCurrentBlockSelected = selectedGroups.has(currentBlockIdx);
 
   useEffect(() => {
-    if (!isCurrentBlockSelected) return;
     const list = listRef.current;
-    const divider = dividerRef.current;
-    if (list && divider) {
-      list.scrollTop = Math.max(0, divider.offsetTop - list.offsetTop - 8);
+    if (!list) return;
+    if (isCurrentBlockSelected && dividerRef.current) {
+      list.scrollTop = Math.max(0, dividerRef.current.offsetTop - list.offsetTop - 8);
+    } else {
+      list.scrollTop = 0;
     }
   }, [selectedGroups, isCurrentBlockSelected, basis]);
 
