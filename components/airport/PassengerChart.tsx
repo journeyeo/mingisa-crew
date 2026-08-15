@@ -189,10 +189,10 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
                       ? "bg-amber-50 font-bold text-gray-900"
                       : "text-gray-700"}
                   >
-                    <td className="py-2.5 w-14 rounded-l-lg pl-1">
-                      <div className="flex flex-col items-start gap-0.5">
+                    <td className="py-2.5 rounded-l-lg pl-1">
+                      <div className="flex items-center gap-1.5 flex-wrap">
                         {isNext && <span className="text-[10px] text-amber-500 leading-none">{tomorrowLabel}</span>}
-                        <span className="text-sm tabular-nums">{String(s.hour).padStart(2, "0")}시</span>
+                        <span className="text-sm tabular-nums font-semibold">{String(s.hour).padStart(2, "0")}시</span>
                         {isNow && (
                           <span className="text-xs font-bold px-2 py-0.5 rounded-full text-white leading-none" style={{ background: "#C4933F" }}>지금</span>
                         )}

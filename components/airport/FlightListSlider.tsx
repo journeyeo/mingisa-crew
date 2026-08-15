@@ -1,40 +1,26 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { Fragment, useState, useMemo, useRef, useEffect } from "react";
 import type { HourlySlot } from "@/lib/airport/types";
 
-// IATA 코드 → 인천 기준 편도 비행시간(분) 추정
 const FLIGHT_MINUTES: Record<string, number> = {
-  // 일본 (~2h)
   NRT:130, HND:130, KIX:135, FUK:115, CTS:145, OKA:175, NGO:130, SDJ:155, KOJ:160, OIT:140,
-  // 중국 근거리 (~2-3h)
   PEK:200, PKX:200, PVG:185, SHA:185, TAO:110, DLC:90, SHE:90, CGO:130, WUH:140, CSX:155,
   HGH:160, NKG:150, TNA:115, TYN:145, HET:185, HRB:150, SJW:130,
-  // 홍콩·마카오·대만 (~3h)
   HKG:215, MFM:215, TPE:175, KHH:200,
-  // 중국 서부 (~3.5-4h)
   CAN:210, SZX:210, XMN:190, CTU:250, CKG:260, XIY:225, KMG:270, URC:330,
-  // 몽골·러시아 극동 (~2.5-3h)
   ULN:195, VVO:195, KHV:185, YKS:245,
-  // 동남아 (~4-6h)
   MNL:250, HAN:260, SGN:305, BKK:360, DMK:360, CNX:375, REP:355, VTE:325,
   KUL:360, SIN:375, CGK:390, DPS:390, RGN:365, MDL:350,
-  // 남아시아 (~6-8h)
   DAC:330, DEL:475, BOM:500, KTM:420, CMB:515, CCU:360, MAA:550, HYD:540, BLR:560,
-  // 중앙아시아 (~7h)
   ALA:430, TAS:445, FRU:440, GYD:525,
-  // 러시아 서부 (~9h)
   SVO:580, DME:580, LED:615,
-  // 중동 (~9-10h)
   DXB:545, DOH:570, AUH:585, BAH:590, KWI:585, MCT:575, RUH:590,
   AMM:615, CAI:625, TLV:625, IST:665, SAW:665,
-  // 유럽 (~11-13h)
   CDG:695, FRA:715, LHR:700, AMS:715, ZRH:720, MUC:715, VIE:720,
   FCO:735, MAD:745, BCN:735, BRU:720, CPH:725, ARN:740, OSL:745,
   WAW:720, PRG:715, BUD:720,
-  // 미주 (~12-14h)
   LAX:635, SFO:645, SEA:605, YVR:605, JFK:810, ORD:825, YYZ:845, YYC:645,
-  // 오세아니아 (~10h)
   SYD:665, MEL:695, BNE:665, AKL:770,
 };
 
@@ -47,21 +33,14 @@ function estimateHours(code?: string): number | null {
 function DurationBadge({ code }: { code?: string }) {
   const h = estimateHours(code);
   if (!h) return null;
-  const long = h >= 7;
-  const mid = h >= 3;
+  const long = h >= 7, mid = h >= 3;
   return (
     <span
       className="text-xs font-bold px-1.5 py-0.5 rounded leading-none shrink-0"
-      style={
-        long
-          ? { background: "#FDF0F2", color: "#9B1B30" }
-          : mid
-          ? { background: "#FDF3DE", color: "#9A7020" }
-          : { background: "#F4F4F5", color: "#71717A" }
-      }
-    >
-      약 {h}h 비행
-    </span>
+      style={long ? { background: "#FDF0F2", color: "#9B1B30" }
+           : mid  ? { background: "#FDF3DE", color: "#9A7020" }
+                  : { background: "#F4F4F5", color: "#71717A" }}
+    >약 {h}h 비행</span>
   );
 }
 
@@ -77,15 +56,6 @@ function slotLabel(slot: HourlySlot | undefined, todayStr: string): string {
   if (!slot) return "--:00";
   const h = `${String(slot.hour).padStart(2, "0")}:00`;
   return slot.date && slot.date !== todayStr ? `익일 ${h}` : h;
-}
-
-const BLOCK_SIZE = 3;
-
-function blockLabel(startSlot: HourlySlot, endSlot: HourlySlot, todayStr: string): string {
-  const s = `${String(startSlot.hour).padStart(2, "0")}`;
-  const e = `${String(endSlot.hour).padStart(2, "0")}`;
-  const prefix = startSlot.date && startSlot.date !== todayStr ? "익일 " : "";
-  return `${prefix}${s}~${e}시`;
 }
 
 function dateOf(date: Date): string {
@@ -108,41 +78,69 @@ function TimeCell({ date, todayStr, prefix }: { date: Date; todayStr: string; pr
   );
 }
 
-const DEFAULT_WINDOW = 6;
+const BLOCK_SIZE = 3;
 
 export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, nowIdx, terminal }: Props) {
-  const maxIdx = Math.max(0, slots.length - 1);
-  const [startIdx, setStartIdx] = useState(() => nowIdx);
-  const [endIdx, setEndIdx] = useState(() => Math.min(nowIdx + DEFAULT_WINDOW, maxIdx));
   const [showFilter, setShowFilter] = useState(false);
   const [filterQuery, setFilterQuery] = useState("");
   const [selectedAirlines, setSelectedAirlines] = useState<Set<string> | null>(null);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [basis, setBasis] = useState<"exit" | "landing">("exit");
 
-  // 3시간 블록 목록
-  const blocks = useMemo(() => {
-    const result: { start: number; end: number }[] = [];
-    for (let i = 0; i <= maxIdx; i += BLOCK_SIZE) {
-      result.push({ start: i, end: Math.min(i + BLOCK_SIZE - 1, maxIdx) });
-    }
-    return result;
-  }, [maxIdx]);
+  // 3시간 블록 (00~02시, 03~05시, ...) 고정 정렬
+  const hourGroups = useMemo(() => {
+    if (slots.length === 0) return [];
+    const buckets = new Map<string, number[]>();
+    slots.forEach((slot, idx) => {
+      const bucketH = Math.floor(slot.hour / BLOCK_SIZE) * BLOCK_SIZE;
+      const key = `${slot.date ?? ""}-${String(bucketH).padStart(2, "0")}`;
+      if (!buckets.has(key)) buckets.set(key, []);
+      buckets.get(key)!.push(idx);
+    });
+    return Array.from(buckets.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([, indices]) => {
+        const first = slots[indices[0]];
+        const startH = Math.floor(first.hour / BLOCK_SIZE) * BLOCK_SIZE;
+        const endH = Math.min(startH + BLOCK_SIZE - 1, 23);
+        const isNext = first.date && first.date !== todayStr;
+        const label = `${isNext ? "익일 " : ""}${String(startH).padStart(2, "0")}~${String(endH).padStart(2, "0")}시`;
+        return { label, indices, containsNow: indices.includes(nowIdx) };
+      });
+  }, [slots, todayStr, nowIdx]);
 
-  function handleBlockClick(start: number, end: number) {
-    setStartIdx(start);
-    setEndIdx(end);
+  const defaultGroupIdx = Math.max(0, hourGroups.findIndex((g) => g.containsNow));
+
+  const [selectedGroups, setSelectedGroups] = useState<Set<number>>(
+    () => new Set([defaultGroupIdx])
+  );
+
+  function toggleGroup(groupIdx: number) {
+    setSelectedGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(groupIdx)) {
+        if (next.size > 1) next.delete(groupIdx);
+      } else {
+        next.add(groupIdx);
+      }
+      return next;
+    });
   }
+
+  const selectedSlotSet = useMemo(() => {
+    const s = new Set<number>();
+    for (const gi of selectedGroups) {
+      hourGroups[gi]?.indices.forEach((i) => s.add(i));
+    }
+    return s;
+  }, [selectedGroups, hourGroups]);
 
   const allAirlines = useMemo(() => {
     const seen = new Set<string>();
     const result: string[] = [];
     for (const slot of slots) {
-      for (const flight of slot.flights) {
-        if (flight.airline && !seen.has(flight.airline)) {
-          seen.add(flight.airline);
-          result.push(flight.airline);
-        }
+      for (const f of slot.flights) {
+        if (f.airline && !seen.has(f.airline)) { seen.add(f.airline); result.push(f.airline); }
       }
     }
     return result.sort((a, b) => a.localeCompare(b, "ko"));
@@ -151,9 +149,7 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
   const effectiveSlots = useMemo(() => {
     if (basis === "exit") return slots;
     const allFlights = new Map<string, (typeof slots)[0]["flights"][0]>();
-    for (const slot of slots) {
-      for (const f of slot.flights) allFlights.set(f.id, f);
-    }
+    for (const slot of slots) for (const f of slot.flights) allFlights.set(f.id, f);
     return slots.map((slot) => {
       const flights = Array.from(allFlights.values()).filter((f) => {
         const t = f.landingTime;
@@ -164,9 +160,10 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
     });
   }, [slots, basis]);
 
+  const selected = effectiveSlots.filter((_, idx) => selectedSlotSet.has(idx));
+
   const isFiltered = selectedAirlines !== null;
   const selectedCount = selectedAirlines?.size ?? allAirlines.length;
-  const selected = effectiveSlots.slice(startIdx, endIdx + 1);
 
   const allEntries = (() => {
     const raw = selected.flatMap((s) =>
@@ -177,29 +174,47 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
     const seen = new Map<string, { flight: typeof raw[0]["flight"]; ids: string[]; isNoTransport: boolean }>();
     for (const entry of raw) {
       const key = `${entry.flight.scheduledTime.getTime()}-${entry.flight.origin}`;
-      if (seen.has(key)) {
-        seen.get(key)!.ids.push(entry.flight.id);
-      } else {
-        seen.set(key, { flight: entry.flight, ids: [entry.flight.id], isNoTransport: entry.isNoTransport });
-      }
+      if (seen.has(key)) seen.get(key)!.ids.push(entry.flight.id);
+      else seen.set(key, { flight: entry.flight, ids: [entry.flight.id], isNoTransport: entry.isNoTransport });
     }
     return Array.from(seen.values());
   })();
   const totalFlights = allEntries.length;
 
+  // "지금" 구분선: 현재 시각 기준 첫 미래 항공편 위치
+  const now = new Date();
+  const nowDividerIdx = useMemo(() => {
+    const idx = allEntries.findIndex(({ flight }) => flight.exitTime >= now || flight.landingTime >= now);
+    return idx >= 0 ? idx : allEntries.length;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [allEntries]);
+
+  const listRef = useRef<HTMLDivElement>(null);
+  const dividerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const list = listRef.current;
+    const divider = dividerRef.current;
+    if (list && divider) {
+      list.scrollTop = Math.max(0, divider.offsetTop - list.offsetTop - 8);
+    }
+  }, [selectedGroups, basis]);
+
   function toggleAirline(airline: string) {
     setSelectedAirlines((prev) => {
       const base = prev ?? new Set(allAirlines);
       const next = new Set(base);
-      if (next.has(airline)) next.delete(airline);
-      else next.add(airline);
+      if (next.has(airline)) next.delete(airline); else next.add(airline);
       return next.size === allAirlines.length ? null : next;
     });
   }
 
+  const sortedGroupIndices = Array.from(selectedSlotSet).sort((a, b) => a - b);
+  const rangeStart = sortedGroupIndices[0] ?? 0;
+  const rangeEnd = sortedGroupIndices[sortedGroupIndices.length - 1] ?? 0;
+
   return (
     <>
-    {/* 필터 행 - 카드 외부 */}
     <div className="flex items-center justify-between px-1 mb-2">
       <div className="flex items-center gap-2">
         <p className="text-base font-bold text-gray-800">
@@ -207,11 +222,8 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
         </p>
         <div className="flex rounded-lg overflow-hidden border border-gray-300 text-xs font-semibold">
           {(["exit", "landing"] as const).map((b) => (
-            <button
-              key={b}
-              onClick={() => setBasis(b)}
-              className={`px-2.5 py-1 transition-colors ${basis === b ? "bg-gray-800 text-white" : "bg-white text-gray-600"}`}
-            >
+            <button key={b} onClick={() => setBasis(b)}
+              className={`px-2.5 py-1 transition-colors ${basis === b ? "bg-gray-800 text-white" : "bg-white text-gray-600"}`}>
               {b === "exit" ? "출구" : "착륙"}
             </button>
           ))}
@@ -220,58 +232,43 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
       <button
         onClick={() => { setShowFilter(true); setFilterQuery(""); }}
         className={`text-sm px-3 py-1.5 rounded-full border font-medium transition-colors ${
-          isFiltered
-            ? "bg-gray-900 text-white border-gray-900"
-            : "bg-white text-gray-700 border-gray-300"
+          isFiltered ? "bg-gray-900 text-white border-gray-900" : "bg-white text-gray-700 border-gray-300"
         }`}
       >
-        항공사
-        {isFiltered && (
-          <span className="ml-1 opacity-70">{selectedCount}/{allAirlines.length}</span>
-        )}
+        항공사{isFiltered && <span className="ml-1 opacity-70">{selectedCount}/{allAirlines.length}</span>}
       </button>
     </div>
 
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-      {/* 시간대 선택 */}
       <div className="px-4 pt-4 pb-3 border-b border-gray-100">
         <div className="flex items-baseline gap-2 mb-3">
           <span className="text-3xl font-black text-[#9B1B30]">{terminal}</span>
           <p className="text-3xl font-bold tabular-nums text-gray-900">
-            {slotLabel(slots[startIdx], todayStr)}
+            {slotLabel(slots[rangeStart], todayStr)}
             <span className="text-gray-300 mx-2">–</span>
-            {slotLabel(slots[endIdx], todayStr)}
+            {slotLabel(slots[rangeEnd], todayStr)}
           </p>
         </div>
-
-        {/* 3시간 블록 칩 */}
         <div className="flex flex-wrap gap-2">
-          {blocks.map(({ start, end }) => {
-            const isSelected = start === startIdx && end === endIdx;
-            const containsNow = nowIdx >= start && nowIdx <= end;
+          {hourGroups.map(({ label, containsNow }, groupIdx) => {
+            const isSelected = selectedGroups.has(groupIdx);
             return (
               <button
-                key={start}
-                onClick={() => handleBlockClick(start, end)}
-                className={`px-4 py-2.5 rounded-xl text-base font-semibold transition-colors whitespace-nowrap flex items-center gap-1.5 ${
-                  isSelected
-                    ? "bg-[#C4933F] text-white"
-                    : containsNow
-                    ? "bg-amber-50 text-[#9A7020]"
-                    : "bg-gray-100 text-gray-600"
+                key={groupIdx}
+                onClick={() => toggleGroup(groupIdx)}
+                className={`px-4 py-2.5 rounded-xl text-base font-semibold transition-colors whitespace-nowrap ${
+                  isSelected ? "bg-[#C4933F] text-white"
+                  : containsNow ? "bg-amber-50 text-[#9A7020] ring-1 ring-[#C4933F]"
+                  : "bg-gray-100 text-gray-600"
                 }`}
               >
-                {containsNow && !isSelected && (
-                  <span className="text-xs font-bold px-1.5 py-0.5 rounded-full text-white leading-none" style={{ background: "#C4933F" }}>지금</span>
-                )}
-                {blockLabel(slots[start], slots[end], todayStr)}
+                {label}
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* 항공편 목록 */}
       {totalFlights === 0 ? (
         <p className="px-4 py-6 text-gray-400 text-sm text-center">이 시간대 운항편 없음</p>
       ) : (
@@ -281,84 +278,79 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
             <span className="flex-1">출발지</span>
             <span className="w-28 text-right">착륙 · 출구 도착</span>
           </div>
-          <div className="divide-y divide-gray-100 overflow-y-auto max-h-[36rem]">
+          <div ref={listRef} className="divide-y divide-gray-100 overflow-y-auto max-h-[36rem]">
             {allEntries.map(({ flight, ids, isNoTransport }, i) => {
               const primaryId = ids[0];
               const extraIds = ids.slice(1);
               const isExpanded = expandedIds.has(primaryId);
               return (
-                <div
-                  key={`${primaryId}-${i}`}
-                  className={`flex items-start px-4 py-3 gap-3 ${flight.isDelayed ? "bg-rose-50/60" : isNoTransport ? "bg-amber-50/30" : ""}`}
-                >
-                  {/* 편명 열 */}
-                  <div className="w-20 shrink-0 flex flex-col items-start gap-0.5 pt-0.5">
-                    <div className="flex items-center gap-1">
-                      <span className="text-base font-mono font-bold text-gray-900 leading-tight">{primaryId}</span>
-                      {extraIds.length > 0 && !isExpanded && (
-                        <button
-                          onClick={() => setExpandedIds((s) => new Set(s).add(primaryId))}
-                          className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 leading-none"
-                        >+{extraIds.length}</button>
-                      )}
+                <Fragment key={`${primaryId}-${i}`}>
+                  {i === nowDividerIdx && (
+                    <div
+                      ref={dividerRef}
+                      className="flex items-center gap-2 px-4 py-1.5 bg-amber-50 sticky top-0 z-10"
+                    >
+                      <span className="text-xs font-bold px-2 py-0.5 rounded-full text-white leading-none" style={{ background: "#C4933F" }}>지금</span>
+                      <span className="text-xs text-[#9A7020] font-medium">이후 도착편</span>
                     </div>
-                    {extraIds.length > 0 && isExpanded && (
-                      <div className="flex flex-col gap-0.5">
-                        {extraIds.map((id) => (
-                          <span key={id} className="text-xs font-mono text-gray-500 leading-tight">{id}</span>
-                        ))}
-                        <button
-                          onClick={() => setExpandedIds((s) => { const n = new Set(s); n.delete(primaryId); return n; })}
-                          className="text-[10px] text-gray-400 leading-tight text-left"
-                        >접기</button>
+                  )}
+                  <div className={`flex items-start px-4 py-3 gap-3 ${flight.isDelayed ? "bg-rose-50/60" : isNoTransport ? "bg-amber-50/30" : ""}`}>
+                    <div className="w-20 shrink-0 flex flex-col items-start gap-0.5 pt-0.5">
+                      <div className="flex items-center gap-1">
+                        <span className="text-base font-mono font-bold text-gray-900 leading-tight">{primaryId}</span>
+                        {extraIds.length > 0 && !isExpanded && (
+                          <button onClick={() => setExpandedIds((s) => new Set(s).add(primaryId))}
+                            className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 leading-none">
+                            +{extraIds.length}
+                          </button>
+                        )}
                       </div>
-                    )}
-                    {flight.airline && (
-                      <span className="text-xs font-medium text-gray-600 leading-tight truncate w-full">{flight.airline}</span>
-                    )}
-                  </div>
-
-                  {/* 출발지 열 */}
-                  <div className="flex-1 flex flex-col justify-center min-w-0 gap-0.5 pt-0.5">
-                    <span className="text-base font-semibold text-gray-900 truncate">{flight.origin}</span>
-                    <DurationBadge code={flight.airportCode} />
-                  </div>
-
-                  {/* 시각 열 */}
-                  <div className="shrink-0 text-right space-y-0.5">
-                    {flight.isDelayed ? (() => {
-                      const isLate = flight.landingTime > flight.scheduledTime;
-                      const sh = String(flight.scheduledTime.getHours()).padStart(2, "0");
-                      const sm = String(flight.scheduledTime.getMinutes()).padStart(2, "0");
-                      const lh = String(flight.landingTime.getHours()).padStart(2, "0");
-                      const lm = String(flight.landingTime.getMinutes()).padStart(2, "0");
-                      return (
-                        <>
-                          <p className="text-sm tabular-nums whitespace-nowrap text-gray-500">
-                            예정 {sh}:{sm}
-                          </p>
-                          <p className="text-base tabular-nums font-bold whitespace-nowrap flex items-center justify-end gap-1">
-                            <span className={`text-[10px] font-bold text-white px-1.5 py-0.5 rounded-md leading-none ${isLate ? "bg-[#9B1B30]" : "bg-blue-400"}`}>
-                              {isLate ? "지연" : "단축"}
-                            </span>
-                            <span>실착 </span>
-                            <span style={{ color: isLate ? "#9B1B30" : "#3B82F6" }}>{lh}:{lm}</span>
-                          </p>
-                        </>
-                      );
-                    })() : (
-                      <p className="text-base text-gray-900 font-medium whitespace-nowrap">
-                        <TimeCell date={flight.landingTime} todayStr={todayStr} prefix="착륙" />
-                      </p>
-                    )}
-                    <p className={`text-base font-semibold whitespace-nowrap ${isNoTransport ? "text-[#9B1B30]" : "text-gray-900"}`}>
-                      <TimeCell date={flight.exitTime} todayStr={todayStr} prefix={flight.exitGate ? `출구 ${flight.exitGate}` : "출구"} />
-                      {isNoTransport && (
-                        <span className="ml-1 text-[10px] font-bold text-white bg-[#9B1B30] px-1 rounded leading-[1.4] align-middle">심야</span>
+                      {extraIds.length > 0 && isExpanded && (
+                        <div className="flex flex-col gap-0.5">
+                          {extraIds.map((id) => <span key={id} className="text-xs font-mono text-gray-500 leading-tight">{id}</span>)}
+                          <button onClick={() => setExpandedIds((s) => { const n = new Set(s); n.delete(primaryId); return n; })}
+                            className="text-[10px] text-gray-400 leading-tight text-left">접기</button>
+                        </div>
                       )}
-                    </p>
+                      {flight.airline && <span className="text-xs font-medium text-gray-600 leading-tight truncate w-full">{flight.airline}</span>}
+                    </div>
+
+                    <div className="flex-1 flex flex-col justify-center min-w-0 gap-0.5 pt-0.5">
+                      <span className="text-base font-semibold text-gray-900 truncate">{flight.origin}</span>
+                      <DurationBadge code={flight.airportCode} />
+                    </div>
+
+                    <div className="shrink-0 text-right space-y-0.5">
+                      {flight.isDelayed ? (() => {
+                        const isLate = flight.landingTime > flight.scheduledTime;
+                        const sh = String(flight.scheduledTime.getHours()).padStart(2, "0");
+                        const sm = String(flight.scheduledTime.getMinutes()).padStart(2, "0");
+                        const lh = String(flight.landingTime.getHours()).padStart(2, "0");
+                        const lm = String(flight.landingTime.getMinutes()).padStart(2, "0");
+                        return (
+                          <>
+                            <p className="text-sm tabular-nums whitespace-nowrap text-gray-500">예정 {sh}:{sm}</p>
+                            <p className="text-base tabular-nums font-bold whitespace-nowrap flex items-center justify-end gap-1">
+                              <span className={`text-[10px] font-bold text-white px-1.5 py-0.5 rounded-md leading-none ${isLate ? "bg-[#9B1B30]" : "bg-blue-400"}`}>
+                                {isLate ? "지연" : "단축"}
+                              </span>
+                              <span>실착 </span>
+                              <span style={{ color: isLate ? "#9B1B30" : "#3B82F6" }}>{lh}:{lm}</span>
+                            </p>
+                          </>
+                        );
+                      })() : (
+                        <p className="text-base text-gray-900 font-medium whitespace-nowrap">
+                          <TimeCell date={flight.landingTime} todayStr={todayStr} prefix="착륙" />
+                        </p>
+                      )}
+                      <p className={`text-base font-semibold whitespace-nowrap ${isNoTransport ? "text-[#9B1B30]" : "text-gray-900"}`}>
+                        <TimeCell date={flight.exitTime} todayStr={todayStr} prefix={flight.exitGate ? `출구 ${flight.exitGate}` : "출구"} />
+                        {isNoTransport && <span className="ml-1 text-[10px] font-bold text-white bg-[#9B1B30] px-1 rounded leading-[1.4] align-middle">심야</span>}
+                      </p>
+                    </div>
                   </div>
-                </div>
+                </Fragment>
               );
             })}
           </div>
@@ -366,53 +358,28 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
         </>
       )}
 
-      {/* 항공사 필터 모달 */}
       {showFilter && (
-        <div
-          className="fixed inset-0 z-50 flex items-end justify-center"
-          onClick={() => { setShowFilter(false); setFilterQuery(""); }}
-        >
+        <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={() => { setShowFilter(false); setFilterQuery(""); }}>
           <div className="absolute inset-0 bg-black/30" />
-          <div
-            className="relative bg-white rounded-t-2xl w-full max-w-lg px-5 pt-5 pb-8"
-            onClick={(e) => e.stopPropagation()}
-          >
+          <div className="relative bg-white rounded-t-2xl w-full max-w-lg px-5 pt-5 pb-8" onClick={(e) => e.stopPropagation()}>
             <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
             <div className="flex items-center justify-between mb-4">
               <p className="text-sm font-semibold text-gray-900">항공사 선택</p>
               <div className="flex gap-2">
-                <button
-                  onClick={() => setSelectedAirlines(null)}
-                  className="text-xs px-3 py-1.5 rounded-full border border-gray-200 text-gray-600 font-medium"
-                >전체 선택</button>
-                <button
-                  onClick={() => setSelectedAirlines(new Set())}
-                  className="text-xs px-3 py-1.5 rounded-full border border-gray-200 text-gray-600 font-medium"
-                >전체 해제</button>
+                <button onClick={() => setSelectedAirlines(null)} className="text-xs px-3 py-1.5 rounded-full border border-gray-200 text-gray-600 font-medium">전체 선택</button>
+                <button onClick={() => setSelectedAirlines(new Set())} className="text-xs px-3 py-1.5 rounded-full border border-gray-200 text-gray-600 font-medium">전체 해제</button>
               </div>
             </div>
-            <input
-              type="text"
-              value={filterQuery}
-              onChange={(e) => setFilterQuery(e.target.value)}
+            <input type="text" value={filterQuery} onChange={(e) => setFilterQuery(e.target.value)}
               placeholder="항공사 검색"
               className="w-full mb-3 px-3 py-2 text-sm border border-gray-200 rounded-xl outline-none focus:border-gray-400 placeholder-gray-300"
-              autoFocus
-            />
+              autoFocus />
             <div className="space-y-0.5 max-h-52 overflow-y-auto">
               {allAirlines.filter((a) => a.includes(filterQuery.trim())).map((airline) => {
                 const checked = selectedAirlines === null || selectedAirlines.has(airline);
                 return (
-                  <label
-                    key={airline}
-                    className="flex items-center gap-3 px-1 py-2.5 rounded-xl cursor-pointer hover:bg-gray-50"
-                  >
-                    <input
-                      type="checkbox"
-                      checked={checked}
-                      onChange={() => toggleAirline(airline)}
-                      className="w-4 h-4 rounded accent-gray-900"
-                    />
+                  <label key={airline} className="flex items-center gap-3 px-1 py-2.5 rounded-xl cursor-pointer hover:bg-gray-50">
+                    <input type="checkbox" checked={checked} onChange={() => toggleAirline(airline)} className="w-4 h-4 rounded accent-gray-900" />
                     <span className="text-sm text-gray-800">{airline}</span>
                   </label>
                 );
