@@ -266,24 +266,25 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
                 >
                   {/* 편명 열 */}
                   <div className="w-20 shrink-0 flex flex-col items-start gap-0.5 pt-0.5">
-                    <span className="text-sm font-mono font-bold text-gray-900 leading-tight">{primaryId}</span>
-                    {extraIds.length > 0 && (
-                      isExpanded ? (
-                        <div className="flex flex-col gap-0.5">
-                          {extraIds.map((id) => (
-                            <span key={id} className="text-xs font-mono text-gray-400 leading-tight">{id}</span>
-                          ))}
-                          <button
-                            onClick={() => setExpandedIds((s) => { const n = new Set(s); n.delete(primaryId); return n; })}
-                            className="text-[10px] text-gray-300 leading-tight text-left"
-                          >접기</button>
-                        </div>
-                      ) : (
+                    <div className="flex items-center gap-1">
+                      <span className="text-sm font-mono font-bold text-gray-900 leading-tight">{primaryId}</span>
+                      {extraIds.length > 0 && !isExpanded && (
                         <button
                           onClick={() => setExpandedIds((s) => new Set(s).add(primaryId))}
                           className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-gray-100 text-gray-400 leading-none"
                         >+{extraIds.length}</button>
-                      )
+                      )}
+                    </div>
+                    {extraIds.length > 0 && isExpanded && (
+                      <div className="flex flex-col gap-0.5">
+                        {extraIds.map((id) => (
+                          <span key={id} className="text-xs font-mono text-gray-400 leading-tight">{id}</span>
+                        ))}
+                        <button
+                          onClick={() => setExpandedIds((s) => { const n = new Set(s); n.delete(primaryId); return n; })}
+                          className="text-[10px] text-gray-300 leading-tight text-left"
+                        >접기</button>
+                      </div>
                     )}
                     {flight.isDelayed && (
                       <span className="text-[10px] font-bold text-white bg-[#9B1B30] px-1.5 py-0.5 rounded-md leading-none mt-0.5">지연</span>
