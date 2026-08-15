@@ -331,12 +331,12 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
                         const lm = String(flight.landingTime.getMinutes()).padStart(2, "0");
                         return (
                           <>
-                            <p className="text-sm tabular-nums whitespace-nowrap text-gray-500">예정 {sh}:{sm}</p>
+                            <p className="text-sm tabular-nums whitespace-nowrap text-gray-500">도착예정 {sh}:{sm}</p>
                             <p className="text-base tabular-nums font-bold whitespace-nowrap flex items-center justify-end gap-1">
                               <span className={`text-xs font-bold text-white px-2 py-0.5 rounded-md leading-none ${isLate ? "bg-[#9B1B30]" : "bg-blue-400"}`}>
                                 {isLate ? "지연" : "단축"}
                               </span>
-                              <span>실착 </span>
+                              <span>도착 </span>
                               <span className="text-gray-900">{lh}:{lm}</span>
                             </p>
                           </>
