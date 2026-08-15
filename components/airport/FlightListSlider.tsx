@@ -340,8 +340,8 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
                       const lm = String(flight.landingTime.getMinutes()).padStart(2, "0");
                       return (
                         <div className="flex items-center justify-end gap-1">
-                          <p className="text-sm font-medium tabular-nums whitespace-nowrap text-gray-900">
-                            착륙 {sh}:{sm}→<span style={{ color: isLate ? "#9B1B30" : "#3B82F6" }}>{lh}:{lm}</span>
+                          <p className="text-sm tabular-nums whitespace-nowrap text-gray-900">
+                            착륙 {sh}:{sm}→<span className="font-bold" style={{ color: isLate ? "#9B1B30" : "#3B82F6" }}>{lh}:{lm}</span>
                           </p>
                           <span className={`text-[10px] font-bold text-white px-1.5 py-0.5 rounded-md leading-none ${isLate ? "bg-[#9B1B30]" : "bg-blue-400"}`}>
                             {isLate ? "지연" : "단축"}
