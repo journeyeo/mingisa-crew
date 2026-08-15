@@ -253,14 +253,17 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
               <button
                 key={start}
                 onClick={() => handleBlockClick(start, end)}
-                className={`px-4 py-2.5 rounded-xl text-base font-semibold transition-colors whitespace-nowrap ${
+                className={`px-4 py-2.5 rounded-xl text-base font-semibold transition-colors whitespace-nowrap flex items-center gap-1.5 ${
                   isSelected
                     ? "bg-[#C4933F] text-white"
                     : containsNow
-                    ? "bg-amber-50 text-[#C4933F] ring-1 ring-[#C4933F]"
+                    ? "bg-amber-50 text-[#9A7020]"
                     : "bg-gray-100 text-gray-600"
                 }`}
               >
+                {containsNow && !isSelected && (
+                  <span className="text-xs font-bold px-1.5 py-0.5 rounded-full text-white leading-none" style={{ background: "#C4933F" }}>지금</span>
+                )}
                 {blockLabel(slots[start], slots[end], todayStr)}
               </button>
             );
