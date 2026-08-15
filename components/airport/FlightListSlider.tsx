@@ -349,12 +349,14 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
                       const lh = String(flight.landingTime.getHours()).padStart(2, "0");
                       const lm = String(flight.landingTime.getMinutes()).padStart(2, "0");
                       return (
-                        <p className="text-sm font-semibold tabular-nums" style={{ color: isLate ? "#9B1B30" : "#3B82F6" }}>
-                          착륙 {sh}:{sm}→{lh}:{lm}
-                        </p>
-                        <p className="text-xs font-semibold tabular-nums" style={{ color: isLate ? "#9B1B30" : "#3B82F6" }}>
-                          {isLate ? `+${absDiff}분` : `-${absDiff}분`}
-                        </p>
+                        <>
+                          <p className="text-sm font-semibold tabular-nums" style={{ color: isLate ? "#9B1B30" : "#3B82F6" }}>
+                            착륙 {sh}:{sm}→{lh}:{lm}
+                          </p>
+                          <p className="text-xs font-semibold tabular-nums" style={{ color: isLate ? "#9B1B30" : "#3B82F6" }}>
+                            {isLate ? `+${absDiff}분` : `-${absDiff}분`}
+                          </p>
+                        </>
                       );
                     })() : (
                       <p className="text-sm text-gray-500 font-medium">
