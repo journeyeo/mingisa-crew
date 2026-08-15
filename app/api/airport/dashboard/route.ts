@@ -82,7 +82,7 @@ export async function GET(req: NextRequest) {
   const slots = buildWindowSlots(forecasts, terminal, mergedFlights, "exit", windowStartHour, windowSize, todayStr, tomorrowStr);
   const allSlots = buildWindowSlots(forecasts, terminal, allStatusFlights, "exit", windowStartHour, windowSize, todayStr, tomorrowStr);
 
-  const futureSlots = slots.filter(
+  const futureSlots = allSlots.filter(
     (s) => s.date === tomorrowStr || (s.date === todayStr && s.hour > kstHour)
   );
   const peakSlot = findPeakSlot(futureSlots);

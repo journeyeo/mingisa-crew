@@ -29,14 +29,14 @@ export function DashboardHeader({ currentForeignWaiting, currentTotalWaiting, pe
         <p className="text-4xl font-bold tabular-nums leading-none text-gray-900">
           {currentForeignWaiting.toLocaleString()}<span className="text-lg font-normal text-gray-500 ml-0.5">명</span>
         </p>
-        <p className="text-xs text-gray-400 mt-2">외국인 기준</p>
+        <p className="text-xs text-gray-400 mt-2">외국인 · 내국인 {domesticWaiting.toLocaleString()}명</p>
       </div>
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-4">
         <p className="text-sm text-gray-400 mb-2">다음 피크</p>
         <p className="text-4xl font-bold tabular-nums leading-none text-gray-900">{peakHour}</p>
         <p className="text-xs text-gray-400 mt-2">
           {isPeakTomorrow && tomorrowDateLabel ? `${tomorrowDateLabel} · ` : ""}
-          {peakFlights ? `${peakFlights}편` : ""}
+          {peakFlights ? `총 ${peakFlights}편` : ""}
         </p>
       </div>
     </div>
