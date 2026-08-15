@@ -88,6 +88,7 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
         },
       },
     },
+    layout: { padding: { top: 20 } },
     scales: {
       x: {
         stacked: true,
@@ -125,8 +126,8 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
         ctx.stroke();
         ctx.fillStyle = "#C4933F";
         ctx.font = "700 11px sans-serif";
-        ctx.textAlign = "left";
-        ctx.fillText("지금", px + 4, y.top + 13);
+        ctx.textAlign = "center";
+        ctx.fillText("지금", px, y.top - 6);
       }
       ctx.restore();
     },

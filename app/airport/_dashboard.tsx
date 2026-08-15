@@ -177,7 +177,13 @@ export function AirportDashboard({ terminal }: Props) {
               now={data.nowISO}
               tomorrowLabel={data.tomorrowLabel}
             />
-            <PassengerChart slots={data.slots.map(deserializeSlot)} tomorrowLabel={data.tomorrowLabel} />
+            <div>
+              <p className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-1.5">
+                <span className="inline-block w-1 h-4 rounded-full bg-[#C4933F]" />
+                승객 예고
+              </p>
+              <PassengerChart slots={data.slots.map(deserializeSlot)} tomorrowLabel={data.tomorrowLabel} />
+            </div>
             <div>
               <p className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-1.5">
                 <span className="inline-block w-1 h-4 rounded-full bg-[#C4933F]" />
