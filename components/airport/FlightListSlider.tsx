@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo } from "react";
 import type { HourlySlot } from "@/lib/airport/types";
 
 // IATA 코드 → 인천 기준 편도 비행시간(분) 추정
@@ -79,9 +79,13 @@ function slotLabel(slot: HourlySlot | undefined, todayStr: string): string {
   return slot.date && slot.date !== todayStr ? `익일 ${h}` : h;
 }
 
-function slotChipLabel(slot: HourlySlot, todayStr: string): string {
-  const h = `${String(slot.hour).padStart(2, "0")}시`;
-  return slot.date && slot.date !== todayStr ? `익일 ${h}` : h;
+const BLOCK_SIZE = 3;
+
+function blockLabel(startSlot: HourlySlot, endSlot: HourlySlot, todayStr: string): string {
+  const s = `${String(startSlot.hour).padStart(2, "0")}`;
+  const e = `${String(endSlot.hour).padStart(2, "0")}`;
+  const prefix = startSlot.date && startSlot.date !== todayStr ? "익일 " : "";
+  return `${prefix}${s}~${e}시`;
 }
 
 function dateOf(date: Date): string {
@@ -116,23 +120,18 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [basis, setBasis] = useState<"exit" | "landing">("exit");
 
-  const chipScrollRef = useRef<HTMLDivElement>(null);
-
-  // 현재 시간 칩이 보이도록 초기 스크롤
-  useEffect(() => {
-    const el = chipScrollRef.current;
-    if (!el) return;
-    const chip = el.children[nowIdx] as HTMLElement | undefined;
-    if (chip) {
-      const left = chip.offsetLeft - el.clientWidth / 2 + chip.clientWidth / 2;
-      el.scrollTo({ left: Math.max(0, left), behavior: "instant" });
+  // 3시간 블록 목록
+  const blocks = useMemo(() => {
+    const result: { start: number; end: number }[] = [];
+    for (let i = 0; i <= maxIdx; i += BLOCK_SIZE) {
+      result.push({ start: i, end: Math.min(i + BLOCK_SIZE - 1, maxIdx) });
     }
-  }, [nowIdx]);
+    return result;
+  }, [maxIdx]);
 
-  function handleChipClick(idx: number) {
-    const windowSize = endIdx - startIdx;
-    setStartIdx(idx);
-    setEndIdx(Math.min(idx + windowSize, maxIdx));
+  function handleBlockClick(start: number, end: number) {
+    setStartIdx(start);
+    setEndIdx(end);
   }
 
   const allAirlines = useMemo(() => {
@@ -245,27 +244,24 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
           </p>
         </div>
 
-        {/* 시간대 칩 */}
-        <div
-          ref={chipScrollRef}
-          className="flex overflow-x-auto gap-1.5 pb-1 scrollbar-none -mx-4 px-4"
-        >
-          {slots.map((slot, idx) => {
-            const isSelected = idx >= startIdx && idx <= endIdx;
-            const isNow = idx === nowIdx;
+        {/* 3시간 블록 칩 */}
+        <div className="flex flex-wrap gap-2">
+          {blocks.map(({ start, end }) => {
+            const isSelected = start === startIdx && end === endIdx;
+            const containsNow = nowIdx >= start && nowIdx <= end;
             return (
               <button
-                key={idx}
-                onClick={() => handleChipClick(idx)}
-                className={`flex-shrink-0 px-3 py-2 rounded-full text-sm font-semibold transition-colors whitespace-nowrap ${
+                key={start}
+                onClick={() => handleBlockClick(start, end)}
+                className={`px-4 py-2.5 rounded-xl text-base font-semibold transition-colors whitespace-nowrap ${
                   isSelected
                     ? "bg-[#C4933F] text-white"
-                    : isNow
+                    : containsNow
                     ? "bg-amber-50 text-[#C4933F] ring-1 ring-[#C4933F]"
                     : "bg-gray-100 text-gray-600"
                 }`}
               >
-                {slotChipLabel(slot, todayStr)}
+                {blockLabel(slots[start], slots[end], todayStr)}
               </button>
             );
           })}
