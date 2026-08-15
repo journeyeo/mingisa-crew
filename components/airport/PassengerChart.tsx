@@ -15,13 +15,11 @@ import type { HourlySlot } from "@/lib/airport/types";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, BarController, Tooltip);
 
-// 아시아나 컬러 — 대한항공 통합 오마쥬
-// 일반: 골드(진) / 골드(연)  막차 이후: 와인(진) / 와인(연)
 const COLOR = {
-  normalDark: "#C4933F",   // 아시아나 골드
-  normalLight: "#E8C47A",  // 골드 라이트
-  alertDark: "#9B1B30",    // 아시아나 와인
-  alertLight: "#D4889A",   // 와인 라이트
+  normalDark: "#C4933F",
+  normalLight: "#E8C47A",
+  alertDark: "#9B1B30",
+  alertLight: "#D4889A",
 };
 
 interface Props {
@@ -30,7 +28,6 @@ interface Props {
 }
 
 export function PassengerChart({ slots, tomorrowLabel }: Props) {
-  // 00시 슬롯(전날 23시 다음에 오는)에 날짜 레이블 추가
   const labels = slots.map((s, i) => {
     const h = `${String(s.hour).padStart(2, "0")}시`;
     if (s.hour === 0 && i > 0) return [h, tomorrowLabel];
@@ -40,6 +37,16 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
     const h = new Date().getHours();
     return slots.findIndex((s) => s.hour === h);
   }, [slots]);
+
+  // 상위 3개 시간대 인덱스 (총 승객 기준)
+  const ranked = useMemo(() =>
+    slots
+      .map((s, i) => ({ i, total: s.foreignCount + s.domesticCount }))
+      .filter((s) => s.total > 0)
+      .sort((a, b) => b.total - a.total)
+      .slice(0, 3),
+  [slots]);
+  const rankedSet = useMemo(() => new Set(ranked.map((r) => r.i)), [ranked]);
 
   const data = {
     labels,
@@ -83,7 +90,12 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
     scales: {
       x: {
         stacked: true,
-        ticks: { color: "#a1a1aa", font: { size: 12 } },
+        ticks: {
+          color: (ctx) => rankedSet.has(ctx.index) ? "#111827" : "#a1a1aa",
+          font: (ctx) => rankedSet.has(ctx.index)
+            ? { size: 12, weight: "bold" }
+            : { size: 12 },
+        },
         grid: { display: false },
         border: { display: false },
       },
@@ -114,6 +126,7 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
         ctx.stroke();
         ctx.fillStyle = "#C4933F";
         ctx.font = "700 11px sans-serif";
+        ctx.textAlign = "left";
         ctx.fillText("지금", px + 4, y.top + 13);
       }
 
