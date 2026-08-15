@@ -1,6 +1,5 @@
 import { NextRequest } from "next/server";
 
-export const revalidate = 300; // 5분 캐시
 import {
   fetchArrivalsCongestion,
   fetchFlightStatus,
@@ -98,7 +97,7 @@ export async function GET(req: NextRequest) {
   const serializeSlots = (ss: typeof slots) =>
     ss.map((s) => ({ ...s, flights: s.flights.map(serializeFlight) }));
 
-  return Response.json({
+  const body = {
     slots: serializeSlots(slots),
     allSlots: serializeSlots(allSlots),
     peakSlot: peakSlot ? { ...peakSlot, flights: peakSlot.flights.map(serializeFlight) } : null,
@@ -111,5 +110,11 @@ export async function GET(req: NextRequest) {
     tomorrowLabel,
     nowIdx,
     nowISO: now.toISOString(),
+  };
+
+  return Response.json(body, {
+    headers: {
+      "Cache-Control": "public, s-maxage=300, stale-while-revalidate=60",
+    },
   });
 }

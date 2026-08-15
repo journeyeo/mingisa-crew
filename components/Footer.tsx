@@ -1,6 +1,6 @@
 export function Footer() {
   return (
-    <footer className="border-t border-gray-100 py-6 px-4">
+    <footer className="border-t border-gray-100 pt-6 pb-24 px-4">
       <div className="max-w-lg mx-auto flex items-center justify-between">
         <div>
           <p className="text-sm font-semibold tracking-widest text-gray-700">
