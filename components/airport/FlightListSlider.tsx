@@ -304,7 +304,7 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
                   {/* 시각 열 */}
                   <div className="w-28 text-right shrink-0">
                     {flight.exitGate && (
-                      <p className="text-xs font-medium text-gray-500 mb-0.5">입국장 {flight.exitGate}</p>
+                      <p className="text-xs text-gray-400 mb-0.5">출구 {flight.exitGate}</p>
                     )}
                     <p className="text-sm text-gray-500 font-medium">
                       <TimeCell date={flight.landingTime} todayStr={todayStr} prefix="착륙" />
