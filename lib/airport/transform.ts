@@ -253,12 +253,15 @@ export function buildWeeklyDays(items: WeeklyFlightItem[], terminal: Terminal): 
     ? items.filter((f) => f.terminalid === "P01" || f.terminalid === "P02")
     : items.filter((f) => f.terminalid === "P03");
   items = filtered;
+
+  // KST 기준 오늘 (서버가 UTC여도 정확하게)
+  const nowKst = new Date(Date.now() + 9 * 3600_000);
+
   return Array.from({ length: 7 }, (_, offset) => {
-    const d = new Date();
-    d.setDate(d.getDate() + offset);
-    const y = d.getFullYear();
-    const mo = String(d.getMonth() + 1).padStart(2, "0");
-    const dy = String(d.getDate()).padStart(2, "0");
+    const kstDay = new Date(nowKst.getTime() + offset * 86_400_000);
+    const y = kstDay.getUTCFullYear();
+    const mo = String(kstDay.getUTCMonth() + 1).padStart(2, "0");
+    const dy = String(kstDay.getUTCDate()).padStart(2, "0");
     const date = `${y}${mo}${dy}`;
 
     const dayFlights = items.filter((f) => f.scheduleDateTime.startsWith(date));
@@ -282,12 +285,12 @@ export function buildWeeklyDays(items: WeeklyFlightItem[], terminal: Terminal): 
       .filter((s) => s.isNoTransport)
       .reduce((sum, s) => sum + s.flightCount, 0);
 
-    const label = offset === 0 ? "오늘" : offset === 1 ? "내일" : DOW_KO[d.getDay()];
+    const label = offset === 0 ? "오늘" : offset === 1 ? "내일" : DOW_KO[kstDay.getUTCDay()];
 
     return {
       date,
       label,
-      dayOfWeek: DOW_KO[d.getDay()],
+      dayOfWeek: DOW_KO[kstDay.getUTCDay()],
       slots,
       totalFlights: dayFlights.length,
       goldenHourFlights,

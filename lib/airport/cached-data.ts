@@ -103,8 +103,10 @@ export const getCachedFlights = unstable_cache(
       ...forecastsTomorrow.map((f) => ({ ...f, adate: tomorrowStr })),
     ];
 
-    const flightDateKey = (d: Date) =>
-      `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, "0")}${String(d.getDate()).padStart(2, "0")}`;
+    const flightDateKey = (d: Date) => {
+      const k = new Date(d.getTime() + 9 * 3600_000);
+      return `${k.getUTCFullYear()}${String(k.getUTCMonth() + 1).padStart(2, "0")}${String(k.getUTCDate()).padStart(2, "0")}`;
+    };
     const allStatusFlights = Array.from(
       new Map(
         [
