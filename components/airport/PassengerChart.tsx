@@ -171,7 +171,7 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
           <table className="w-full">
             <thead>
               <tr className="text-base text-gray-600 border-b border-gray-100">
-                <th className="text-left pb-2 font-semibold w-28">시간</th>
+                <th className="text-left pb-2 font-semibold w-36">시간</th>
                 <th className="text-right pb-2 font-semibold">외국인</th>
                 <th className="text-right pb-2 font-semibold">내국인</th>
                 <th className="text-right pb-2 font-semibold">합계</th>
@@ -194,6 +194,7 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
                         <div className="flex items-center gap-1.5 flex-nowrap">
                           {isNext && <span className="text-[10px] text-amber-500 leading-none">{tomorrowLabel}</span>}
                           <span className="text-base tabular-nums font-semibold">{String(s.hour).padStart(2, "0")}시</span>
+                          {isNow && <span className="text-xs font-bold px-2 py-0.5 rounded-full text-white leading-none" style={{ background: "#C4933F" }}>지금</span>}
                           {s.isNoTransport && <span className="text-xs font-bold text-white px-2 py-0.5 rounded-full leading-none" style={{ background: "#9B1B30" }}>심야</span>}
                         </div>
                       </div>
