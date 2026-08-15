@@ -118,11 +118,20 @@ export interface ParkingItem {
   datetm: string;      // "20260811223502.000"
 }
 
+export interface ParkingLot {
+  capacity: number;
+  occupied: number;
+  rate: number;
+  level: "여유" | "보통" | "혼잡" | "만차";
+}
+
 export interface ParkingSummary {
   terminal: Terminal;
   capacity: number;
   occupied: number;
   rate: number;            // 0~1
+  shortTerm: ParkingLot;
+  longTerm: ParkingLot;
   level: "여유" | "보통" | "혼잡" | "만차";
 }
 

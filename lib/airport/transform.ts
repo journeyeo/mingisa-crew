@@ -277,18 +277,27 @@ export function buildWeeklyDays(items: WeeklyFlightItem[]): WeeklyDay[] {
 }
 
 /** 주차 데이터 → 터미널별 요약 */
+function toLot(items: ParkingItem[]): import("@/lib/airport/types").ParkingLot {
+  const capacity = items.reduce((s, p) => s + parseInt(p.parkingarea, 10), 0);
+  const occupied = items.reduce((s, p) => s + parseInt(p.parking, 10), 0);
+  const rate = capacity > 0 ? occupied / capacity : 0;
+  const level = rate >= 0.95 ? "만차" : rate >= 0.8 ? "혼잡" : rate >= 0.5 ? "보통" : "여유";
+  return { capacity, occupied, rate, level };
+}
+
 export function summarizeParking(items: ParkingItem[], terminal: Terminal): ParkingSummary {
-  // floor: "T1 단기주차장지하1층" — T1/T2로 시작 여부로 필터
+  // floor: "T1 단기주차장지하1층" / "T1 장기주차장지하1층"
   const filtered = items.filter((p) => p.floor.startsWith(terminal));
+  const shortItems = filtered.filter((p) => p.floor.includes("단기"));
+  const longItems  = filtered.filter((p) => p.floor.includes("장기"));
 
   const capacity = filtered.reduce((s, p) => s + parseInt(p.parkingarea, 10), 0);
   const occupied = filtered.reduce((s, p) => s + parseInt(p.parking, 10), 0);
   const rate = capacity > 0 ? occupied / capacity : 0;
-
   const level: ParkingSummary["level"] =
     rate >= 0.95 ? "만차" : rate >= 0.8 ? "혼잡" : rate >= 0.5 ? "보통" : "여유";
 
-  return { terminal, capacity, occupied, rate, level };
+  return { terminal, capacity, occupied, rate, level, shortTerm: toLot(shortItems), longTerm: toLot(longItems) };
 }
 
 /** 시간 포맷 — "22:15" */
