@@ -229,15 +229,6 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
             </button>
           ))}
         </div>
-        {!isCurrentBlockSelected && (
-          <button
-            onClick={() => setSelectedGroups(new Set([currentBlockIdx]))}
-            className="text-xs font-bold px-2.5 py-1.5 rounded-lg transition-colors text-white"
-            style={{ background: "#C4933F" }}
-          >
-            지금
-          </button>
-        )}
       </div>
       <button
         onClick={() => { setShowFilter(true); setFilterQuery(""); }}
@@ -251,13 +242,24 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
 
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
       <div className="px-4 pt-4 pb-3 border-b border-gray-100">
-        <div className="flex items-baseline gap-2 mb-3">
-          <span className="text-3xl font-black text-[#9B1B30]">{terminal}</span>
-          <p className="text-3xl font-bold tabular-nums text-gray-900">
-            {headerStart}
-            <span className="text-gray-300 mx-2">–</span>
-            {headerEnd}
-          </p>
+        <div className="flex items-center justify-between mb-3">
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-black text-[#9B1B30]">{terminal}</span>
+            <p className="text-3xl font-bold tabular-nums text-gray-900">
+              {headerStart}
+              <span className="text-gray-300 mx-2">–</span>
+              {headerEnd}
+            </p>
+          </div>
+          {!isCurrentBlockSelected && (
+            <button
+              onClick={() => setSelectedGroups(new Set([currentBlockIdx]))}
+              className="text-sm font-bold px-3 py-1.5 rounded-xl text-white shrink-0"
+              style={{ background: "#C4933F" }}
+            >
+              지금으로
+            </button>
+          )}
         </div>
         <div className="grid grid-cols-4 gap-2">
           {FIXED_BLOCKS.map(({ label }, blockIdx) => {
