@@ -108,6 +108,7 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
   const [filterQuery, setFilterQuery] = useState("");
   const [selectedAirlines, setSelectedAirlines] = useState<Set<string> | null>(null);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
+  const [basis, setBasis] = useState<"exit" | "landing">("exit");
 
   const startPct = maxIdx > 0 ? (startIdx / maxIdx) * 100 : 0;
   const endPct = maxIdx > 0 ? (endIdx / maxIdx) * 100 : 100;
@@ -128,10 +129,27 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
     return result.sort((a, b) => a.localeCompare(b, "ko"));
   }, [slots]);
 
+  // 착륙/출구 기준으로 같은 항공편을 재분류
+  const effectiveSlots = useMemo(() => {
+    if (basis === "exit") return slots;
+    const allFlights = new Map<string, (typeof slots)[0]["flights"][0]>();
+    for (const slot of slots) {
+      for (const f of slot.flights) allFlights.set(f.id, f);
+    }
+    return slots.map((slot) => {
+      const flights = Array.from(allFlights.values()).filter((f) => {
+        const t = f.landingTime;
+        const fd = `${t.getFullYear()}${String(t.getMonth()+1).padStart(2,"0")}${String(t.getDate()).padStart(2,"0")}`;
+        return fd === slot.date && t.getHours() === slot.hour;
+      });
+      return { ...slot, flights, flightCount: flights.length };
+    });
+  }, [slots, basis]);
+
   const isFiltered = selectedAirlines !== null;
   const selectedCount = selectedAirlines?.size ?? allAirlines.length;
 
-  const selected = slots.slice(startIdx, endIdx + 1);
+  const selected = effectiveSlots.slice(startIdx, endIdx + 1);
 
   // 공동운항(코드쉐어) 중복 제거: scheduledTime + origin이 같으면 동일 항공기
   const allEntries = (() => {
@@ -184,9 +202,22 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
                 {slotLabel(slots[endIdx], todayStr)}
               </p>
             </div>
-            <p className="text-sm mt-0.5 text-gray-400">
-              {totalFlights > 0 ? `${totalFlights}편` : "운항편 없음"}
-            </p>
+            <div className="flex items-center gap-2 mt-0.5">
+              <p className="text-sm text-gray-400">
+                {totalFlights > 0 ? `${totalFlights}편` : "운항편 없음"}
+              </p>
+              <div className="flex rounded-lg overflow-hidden border border-gray-100 text-[11px] font-semibold">
+                {(["exit", "landing"] as const).map((b) => (
+                  <button
+                    key={b}
+                    onClick={() => setBasis(b)}
+                    className={`px-2 py-0.5 transition-colors ${basis === b ? "bg-gray-800 text-white" : "bg-white text-gray-400"}`}
+                  >
+                    {b === "exit" ? "출구" : "착륙"}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
           <button
@@ -315,14 +346,13 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
                       const absDiff = Math.abs(delayMin);
                       const sh = String(flight.scheduledTime.getHours()).padStart(2, "0");
                       const sm = String(flight.scheduledTime.getMinutes()).padStart(2, "0");
+                      const lh = String(flight.landingTime.getHours()).padStart(2, "0");
+                      const lm = String(flight.landingTime.getMinutes()).padStart(2, "0");
                       return (
-                        <>
-                          <p className="text-xs text-gray-400">예정 {sh}:{sm}</p>
-                          <p className="text-sm font-semibold" style={{ color: isLate ? "#9B1B30" : "#3B82F6" }}>
-                            <TimeCell date={flight.landingTime} todayStr={todayStr} prefix="착륙" />
-                            <span className="ml-1 text-xs">{isLate ? `+${absDiff}분` : `-${absDiff}분`}</span>
-                          </p>
-                        </>
+                        <p className="text-sm font-semibold tabular-nums" style={{ color: isLate ? "#9B1B30" : "#3B82F6" }}>
+                          {sh}:{sm}→{lh}:{lm}
+                          <span className="ml-1 text-xs font-medium">{isLate ? `+${absDiff}분` : `-${absDiff}분`}</span>
+                        </p>
                       );
                     })() : (
                       <p className="text-sm text-gray-500 font-medium">
