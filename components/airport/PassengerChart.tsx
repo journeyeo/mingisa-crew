@@ -182,16 +182,23 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
                 const isNow = slots.indexOf(s) === nowIndex;
                 const isNext = s.hour === 0 && slots.indexOf(s) > 0;
                 return (
-                  <tr key={i} className={isNow ? "font-semibold text-gray-900" : "text-gray-600"}>
-                    <td className="py-1.5 tabular-nums">
+                  <tr
+                    key={i}
+                    className={isNow
+                      ? "bg-amber-50 font-bold text-gray-900"
+                      : "text-gray-600"}
+                  >
+                    <td className="py-2 tabular-nums rounded-l-lg pl-1">
                       {isNext && <span className="text-[10px] text-amber-500 mr-1">{tomorrowLabel}</span>}
                       {String(s.hour).padStart(2, "0")}시
-                      {isNow && <span className="ml-1 text-[10px] text-[#C4933F] font-bold">지금</span>}
+                      {isNow && (
+                        <span className="ml-1.5 text-xs font-bold px-1.5 py-0.5 rounded-full text-white leading-none" style={{ background: "#C4933F" }}>지금</span>
+                      )}
                       {s.isNoTransport && <span className="ml-1 text-[10px] text-[#9B1B30] font-bold">심야</span>}
                     </td>
-                    <td className="py-1.5 text-right tabular-nums" style={{ color: COLOR.normalDark }}>{s.foreignCount.toLocaleString()}</td>
-                    <td className="py-1.5 text-right tabular-nums text-gray-500">{s.domesticCount.toLocaleString()}</td>
-                    <td className="py-1.5 text-right tabular-nums font-medium text-gray-900">{total.toLocaleString()}</td>
+                    <td className="py-2 text-right tabular-nums" style={{ color: COLOR.normalDark }}>{s.foreignCount.toLocaleString()}</td>
+                    <td className="py-2 text-right tabular-nums text-gray-500">{s.domesticCount.toLocaleString()}</td>
+                    <td className="py-2 text-right tabular-nums font-medium text-gray-900 pr-1 rounded-r-lg">{total.toLocaleString()}</td>
                   </tr>
                 );
               })}

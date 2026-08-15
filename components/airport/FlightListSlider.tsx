@@ -189,50 +189,52 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
   }
 
   return (
+    <>
+    {/* 필터 행 - 카드 외부 */}
+    <div className="flex items-center justify-between px-1 mb-2">
+      <div className="flex items-center gap-2">
+        <p className="text-base font-bold text-gray-800">
+          {totalFlights > 0 ? `${totalFlights}편` : "운항편 없음"}
+        </p>
+        <div className="flex rounded-lg overflow-hidden border border-gray-300 text-xs font-semibold">
+          {(["exit", "landing"] as const).map((b) => (
+            <button
+              key={b}
+              onClick={() => setBasis(b)}
+              className={`px-2.5 py-1 transition-colors ${basis === b ? "bg-gray-800 text-white" : "bg-white text-gray-600"}`}
+            >
+              {b === "exit" ? "출구" : "착륙"}
+            </button>
+          ))}
+        </div>
+      </div>
+      <button
+        onClick={() => { setShowFilter(true); setFilterQuery(""); }}
+        className={`text-sm px-3 py-1.5 rounded-full border font-medium transition-colors ${
+          isFiltered
+            ? "bg-gray-900 text-white border-gray-900"
+            : "bg-white text-gray-700 border-gray-300"
+        }`}
+      >
+        항공사
+        {isFiltered && (
+          <span className="ml-1 opacity-70">{selectedCount}/{allAirlines.length}</span>
+        )}
+      </button>
+    </div>
+
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
       {/* 슬라이더 영역 */}
       <div className="px-4 pt-4 pb-4 border-b border-gray-100">
-        <div className="flex items-end justify-between mb-4">
-          <div>
-            <div className="flex items-baseline gap-2">
-              <span className="text-2xl font-black text-[#9B1B30]">{terminal}</span>
-              <p className="text-2xl font-bold tabular-nums text-gray-900">
-                {slotLabel(slots[startIdx], todayStr)}
-                <span className="text-gray-300 mx-2">–</span>
-                {slotLabel(slots[endIdx], todayStr)}
-              </p>
-            </div>
-            <div className="flex items-center gap-2 mt-0.5">
-              <p className="text-sm text-gray-600">
-                {totalFlights > 0 ? `${totalFlights}편` : "운항편 없음"}
-              </p>
-              <div className="flex rounded-lg overflow-hidden border border-gray-200 text-[11px] font-semibold">
-                {(["exit", "landing"] as const).map((b) => (
-                  <button
-                    key={b}
-                    onClick={() => setBasis(b)}
-                    className={`px-2 py-0.5 transition-colors ${basis === b ? "bg-gray-800 text-white" : "bg-white text-gray-500"}`}
-                  >
-                    {b === "exit" ? "출구" : "착륙"}
-                  </button>
-                ))}
-              </div>
-            </div>
+        <div className="mb-4">
+          <div className="flex items-baseline gap-2">
+            <span className="text-3xl font-black text-[#9B1B30]">{terminal}</span>
+            <p className="text-3xl font-bold tabular-nums text-gray-900">
+              {slotLabel(slots[startIdx], todayStr)}
+              <span className="text-gray-300 mx-2">–</span>
+              {slotLabel(slots[endIdx], todayStr)}
+            </p>
           </div>
-
-          <button
-            onClick={() => { setShowFilter(true); setFilterQuery(""); }}
-            className={`text-xs px-3 py-1.5 rounded-full border font-medium transition-colors ${
-              isFiltered
-                ? "bg-gray-900 text-white border-gray-900"
-                : "bg-white text-gray-600 border-gray-200"
-            }`}
-          >
-            항공사
-            {isFiltered && (
-              <span className="ml-1 opacity-70">{selectedCount}/{allAirlines.length}</span>
-            )}
-          </button>
         </div>
 
         {/* 듀얼 썸 슬라이더 */}
@@ -280,12 +282,12 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
         <p className="px-4 py-6 text-gray-400 text-sm text-center">이 시간대 운항편 없음</p>
       ) : (
         <>
-          <div className="flex items-center px-4 pt-2 pb-1 gap-3 text-xs font-semibold text-gray-600">
+          <div className="flex items-center px-4 pt-2 pb-1 gap-3 text-sm font-semibold text-gray-600">
             <span className="w-20 shrink-0">편명</span>
             <span className="flex-1">출발지</span>
             <span className="w-28 text-right">착륙 · 출구 도착</span>
           </div>
-          <div className="divide-y divide-gray-100 overflow-y-auto max-h-[26rem]">
+          <div className="divide-y divide-gray-100 overflow-y-auto max-h-[36rem]">
             {allEntries.map(({ flight, ids, isNoTransport }, i) => {
               const primaryId = ids[0];
               const extraIds = ids.slice(1);
@@ -435,5 +437,6 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
         </div>
       )}
     </div>
+    </>
   );
 }
