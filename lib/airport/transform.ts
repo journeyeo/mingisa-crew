@@ -189,8 +189,11 @@ export function flightsFromStatus(
   dateStr: string, // YYYYMMDD
   terminal: Terminal
 ): Flight[] {
+  // 공공데이터 API가 terminal 파라미터를 무시하고 전체 반환하므로 terminalId로 직접 필터
+  const prefix = terminal === "T1" ? "P" : "S";
+  const filtered = items.filter((f) => (f.terminalId ?? "").startsWith(prefix));
   const y = dateStr.slice(0, 4), mo = dateStr.slice(4, 6), d = dateStr.slice(6, 8);
-  return items.map((f) => {
+  return filtered.map((f) => {
     const hh = (f.scheduleDateTime ?? "0000").slice(0, 2);
     const mm = (f.scheduleDateTime ?? "0000").slice(2, 4);
     const schedTime = new Date(`${y}-${mo}-${d}T${hh}:${mm}:00`);
