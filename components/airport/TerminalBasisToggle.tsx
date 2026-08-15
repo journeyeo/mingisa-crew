@@ -1,7 +1,7 @@
 "use client";
 
 import { useTransition } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import type { Terminal } from "@/lib/airport/types";
 
 interface Props {
@@ -10,30 +10,27 @@ interface Props {
 
 export function TerminalToggle({ terminal }: Props) {
   const router = useRouter();
-  const params = useSearchParams();
   const [, startTransition] = useTransition();
 
-  function update(value: string) {
-    const next = new URLSearchParams(params.toString());
-    next.set("terminal", value);
+  function update(value: Terminal) {
     startTransition(() => {
-      router.push(`?${next.toString()}`);
+      router.push(`?terminal=${value}`);
     });
   }
 
   return (
-    <div className="flex rounded-xl overflow-hidden border border-gray-200 text-sm font-semibold shadow-sm">
+    <div className="flex border-b-2 border-gray-100">
       {(["T1", "T2"] as Terminal[]).map((t) => (
         <button
           key={t}
           onClick={() => update(t)}
-          className={`px-5 py-2.5 transition-colors ${
+          className={`flex-1 py-3 text-base font-bold transition-colors border-b-2 -mb-0.5 ${
             terminal === t
-              ? "bg-[#9B1B30] text-white"
-              : "bg-white text-gray-400 hover:text-gray-700"
+              ? "border-[#9B1B30] text-[#9B1B30]"
+              : "border-transparent text-gray-400"
           }`}
         >
-          {t}
+          {t === "T1" ? "T1 제1터미널" : "T2 제2터미널"}
         </button>
       ))}
     </div>

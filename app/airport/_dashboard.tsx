@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import type { Flight, HourlySlot, Terminal, WeeklyDay } from "@/lib/airport/types";
 
 import { DashboardHeader } from "@/components/airport/DashboardHeader";
@@ -9,6 +9,7 @@ import { PassengerChart } from "@/components/airport/PassengerChart";
 import { FlightListSlider } from "@/components/airport/FlightListSlider";
 import { WeeklyForecast } from "@/components/airport/WeeklyForecast";
 import { Footer } from "@/components/Footer";
+import { FloatingScrollNav } from "@/components/FloatingScrollNav";
 
 interface Props {
   terminal: Terminal;
@@ -136,34 +137,21 @@ export function AirportDashboard({ terminal }: Props) {
   const [summary, setSummary] = useState<SummaryData | null>(null);
   const [flights, setFlights] = useState<FlightsData | null>(null);
 
-  const summaryCache = useRef<Partial<Record<Terminal, SummaryData>>>({});
-  const flightsCache = useRef<Partial<Record<Terminal, FlightsData>>>({});
-
   useEffect(() => {
     const controller = new AbortController();
     const { signal } = controller;
 
-    // 캐시 히트 시 즉시 표시
-    if (summaryCache.current[terminal]) setSummary(summaryCache.current[terminal]!);
-    else setSummary(null);
-    if (flightsCache.current[terminal]) setFlights(flightsCache.current[terminal]!);
-    else setFlights(null);
+    setSummary(null);
+    setFlights(null);
 
-    // 두 요청 동시 발사 — summary가 먼저 오면 위 섹션 바로 표시
     fetch(`/api/airport/summary?terminal=${terminal}`, { signal })
       .then((r) => r.json())
-      .then((raw: SummaryData) => {
-        summaryCache.current[terminal] = raw;
-        setSummary(raw);
-      })
+      .then((raw: SummaryData) => setSummary(raw))
       .catch((e) => { if (e.name !== "AbortError") console.error(e); });
 
     fetch(`/api/airport/flights?terminal=${terminal}`, { signal })
       .then((r) => r.json())
-      .then((raw: FlightsData) => {
-        flightsCache.current[terminal] = raw;
-        setFlights(raw);
-      })
+      .then((raw: FlightsData) => setFlights(raw))
       .catch((e) => { if (e.name !== "AbortError") console.error(e); });
 
     return () => controller.abort();
@@ -173,28 +161,28 @@ export function AirportDashboard({ terminal }: Props) {
 
   return (
     <main className="min-h-screen bg-gray-50 text-gray-900">
-      <div className="max-w-lg mx-auto px-4 py-6 pb-4 space-y-5">
-
-        <div>
-          <h1 className="text-xl font-bold text-gray-900">인천공항 입국 수요</h1>
-          <p className="text-sm text-gray-500 mt-0.5">
-            {now.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" })}
-            {" · 5분 갱신"}
-            {summary && (() => {
-              const t = new Date(summary.nowISO);
-              const hh = String(t.getHours()).padStart(2, "0");
-              const mm = String(t.getMinutes()).padStart(2, "0");
-              return <span className="text-gray-400"> · {hh}:{mm} 업데이트</span>;
-            })()}
-          </p>
-        </div>
+      <div className="sticky top-0 z-50 max-w-lg mx-auto bg-white border-b border-gray-100 px-4 pt-5 pb-0">
+        <h1 className="text-xl font-bold text-gray-900">인천공항 입국 수요</h1>
+        <p className="text-sm text-gray-500 mt-0.5 mb-3">
+          {now.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" })}
+          {" · 5분 갱신"}
+          {summary && (() => {
+            const t = new Date(summary.nowISO);
+            const hh = String(t.getHours()).padStart(2, "0");
+            const mm = String(t.getMinutes()).padStart(2, "0");
+            return <span className="text-gray-400"> · {hh}:{mm} 업데이트</span>;
+          })()}
+        </p>
+        <TerminalToggle terminal={terminal} />
+      </div>
+      <div className="max-w-lg mx-auto px-4 py-6 pb-4 space-y-8">
 
         {/* ── 빠른 섹션: 헤더 + 승객 예고 ── */}
         {!summary ? (
           <>
             <HeaderSkeleton />
             <div>
-              <p className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-1.5">
+              <p className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-1.5">
                 <span className="inline-block w-1 h-4 rounded-full bg-[#C4933F]" />
                 승객 예고
               </p>
@@ -212,7 +200,7 @@ export function AirportDashboard({ terminal }: Props) {
               tomorrowLabel={summary.tomorrowLabel}
             />
             <div>
-              <p className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-1.5">
+              <p className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-1.5">
                 <span className="inline-block w-1 h-4 rounded-full bg-[#C4933F]" />
                 승객 예고
               </p>
@@ -230,7 +218,7 @@ export function AirportDashboard({ terminal }: Props) {
         ) : (
           <>
             <div>
-              <p className="text-base font-semibold text-gray-700 mb-3 flex items-center gap-1.5">
+              <p className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-1.5">
                 <span className="inline-block w-1 h-4 rounded-full bg-[#C4933F]" />
                 시간대별 운항편
               </p>
@@ -244,9 +232,9 @@ export function AirportDashboard({ terminal }: Props) {
               />
             </div>
             <div>
-              <div className="flex items-center gap-1.5 mb-3">
+              <div className="flex items-center gap-1.5 mb-4">
                 <span className="inline-block w-1 h-4 rounded-full bg-[#C4933F]" />
-                <p className="text-base font-semibold text-gray-700">주간 예측</p>
+                <p className="text-xl font-bold text-gray-800">주간 예측</p>
                 <span className="text-xs text-gray-500">(T1/T2 통합)</span>
               </div>
               <WeeklyForecast days={flights.weeklyDays} />
@@ -257,15 +245,7 @@ export function AirportDashboard({ terminal }: Props) {
         <p className="text-xs text-gray-400 pb-2">출처: 인천국제공항공사 공공데이터포털</p>
       </div>
       <Footer />
-
-      {/* 플로팅 터미널 토글 */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-50">
-        <div className="shadow-lg rounded-xl overflow-hidden">
-          <Suspense>
-            <TerminalToggle terminal={terminal} />
-          </Suspense>
-        </div>
-      </div>
+      <FloatingScrollNav />
     </main>
   );
 }

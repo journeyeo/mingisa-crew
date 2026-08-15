@@ -1,7 +1,14 @@
 import { getCachedSummary, getCachedFlights } from "@/lib/airport/cached-data";
 import type { Terminal } from "@/lib/airport/types";
 
-export async function GET() {
+export async function GET(req: Request) {
+  const secret = process.env.CRON_SECRET;
+  if (secret) {
+    const auth = req.headers.get("authorization");
+    if (auth !== `Bearer ${secret}`) {
+      return Response.json({ error: "Unauthorized" }, { status: 401 });
+    }
+  }
   const now = new Date();
   const toKST = (d: Date) =>
     new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Seoul" }).format(d).replace(/-/g, "");

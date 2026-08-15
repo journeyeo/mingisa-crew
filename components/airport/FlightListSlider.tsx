@@ -104,7 +104,7 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
   const [filterQuery, setFilterQuery] = useState("");
   const [selectedAirlines, setSelectedAirlines] = useState<Set<string> | null>(null);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
-  const [basis, setBasis] = useState<"exit" | "landing">("exit");
+  const [basis, setBasis] = useState<"exit" | "landing">("landing");
 
   // Slot indices for each fixed block:
   // Blocks 0-1 (00~05시) → tomorrowStr slots; Blocks 2-7 (06~23시) → todayStr slots
@@ -303,7 +303,7 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
       ) : (
         <>
           <div className="flex items-center px-4 pt-2 pb-1 gap-3 text-sm font-semibold text-gray-600">
-            <span className="w-20 shrink-0">편명</span>
+            <span className="w-24 shrink-0">편명</span>
             <span className="flex-1">출발지</span>
             <span className="w-28 text-right">착륙 · 출구 도착</span>
           </div>
@@ -324,7 +324,7 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr, kstHour, termin
                     </div>
                   )}
                   <div className={`flex items-start px-4 py-3 gap-3 ${flight.isDelayed ? "bg-rose-50/60" : isNoTransport ? "bg-amber-50/30" : ""}`}>
-                    <div className="w-20 shrink-0 flex flex-col items-start gap-0.5 pt-0.5">
+                    <div className="w-24 shrink-0 flex flex-col items-start gap-0.5 pt-0.5">
                       <div className="flex items-center gap-1">
                         <span className="text-base font-mono font-bold text-gray-900 leading-tight">{primaryId}</span>
                         {extraIds.length > 0 && !isExpanded && (
