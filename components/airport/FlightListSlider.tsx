@@ -351,7 +351,9 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
                       return (
                         <p className="text-sm font-semibold tabular-nums" style={{ color: isLate ? "#9B1B30" : "#3B82F6" }}>
                           착륙 {sh}:{sm}→{lh}:{lm}
-                          <span className="ml-1 text-xs font-medium">{isLate ? `+${absDiff}분` : `-${absDiff}분`}</span>
+                        </p>
+                        <p className="text-xs font-semibold tabular-nums" style={{ color: isLate ? "#9B1B30" : "#3B82F6" }}>
+                          {isLate ? `+${absDiff}분` : `-${absDiff}분`}
                         </p>
                       );
                     })() : (
