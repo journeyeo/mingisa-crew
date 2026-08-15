@@ -318,10 +318,7 @@ export function FlightListSlider({ slots, todayStr, tomorrowStr: _tomorrowStr, n
                       );
                     })()}
                     <p className={`text-base font-semibold leading-tight ${isNoTransport ? "text-[#9B1B30]" : "text-gray-900"}`}>
-                      <TimeCell date={flight.exitTime} todayStr={todayStr} prefix="출구" />
-                      {flight.exitGate && (
-                        <span className="ml-1 text-xs font-semibold text-gray-400">{flight.exitGate}</span>
-                      )}
+                      <TimeCell date={flight.exitTime} todayStr={todayStr} prefix={flight.exitGate ? `출구 ${flight.exitGate}` : "출구"} />
                       {isNoTransport && (
                         <span className="ml-1 text-[10px] font-bold text-white bg-[#9B1B30] px-1 rounded leading-[1.4] align-middle">심야</span>
                       )}
