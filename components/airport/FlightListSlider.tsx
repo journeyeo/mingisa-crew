@@ -128,6 +128,18 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
 
   function toggleGroup(groupIdx: number) {
     setSelectedGroups(new Set([groupIdx]));
+    if (timeCardRef.current) {
+      let naturalTop = 0;
+      let el: HTMLElement | null = timeCardRef.current;
+      while (el) {
+        naturalTop += el.offsetTop;
+        el = el.offsetParent as HTMLElement | null;
+      }
+      const targetScroll = naturalTop - 50;
+      if (window.scrollY > targetScroll) {
+        window.scrollTo({ top: Math.max(0, targetScroll), behavior: "smooth" });
+      }
+    }
   }
 
   const selectedSlotSet = useMemo(() => {
@@ -184,6 +196,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
 
   const listRef = useRef<HTMLDivElement>(null);
   const dividerRef = useRef<HTMLDivElement>(null);
+  const timeCardRef = useRef<HTMLDivElement>(null);
 
   const isCurrentBlockSelected = selectedGroups.has(currentBlockIdx);
 
@@ -248,7 +261,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
       <p className="px-1 py-2 text-sm text-gray-500">* 출구 시각 = 착륙 후 약 55분 (외국인 입국 기준)</p>
     )}
 
-    <div className="sticky top-[50px] z-40 bg-white rounded-2xl border border-gray-100 shadow-sm px-4 pt-4 pb-3">
+    <div ref={timeCardRef} className="sticky top-[50px] z-40 bg-white rounded-2xl border border-gray-100 shadow-sm px-4 pt-4 pb-3">
       <div className="flex items-center justify-between mb-3">
         <p className="text-2xl font-bold tabular-nums text-gray-900">
           {headerStart}
