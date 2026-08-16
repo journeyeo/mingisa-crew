@@ -334,7 +334,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
                   <div className={`flex items-start px-4 py-3 gap-3 ${flight.isDelayed ? "bg-orange-50/60" : isNoTransport ? "bg-orange-50/30" : ""}`}>
                     <div className="w-20 shrink-0 flex flex-col items-start gap-0.5 pt-0.5">
                       <div className="flex items-center gap-1">
-                        <span className="text-base font-mono font-bold text-gray-900 leading-tight">{primaryId}</span>
+                        <span className="text-sm font-mono font-bold text-gray-900 leading-tight">{primaryId}</span>
                         {extraIds.length > 0 && !isExpanded && (
                           <button onClick={() => setExpandedIds((s) => new Set(s).add(primaryId))}
                             className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 leading-none">
@@ -354,7 +354,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
 
                     <div className="flex-1 flex items-center min-w-0 gap-1.5 pt-0.5">
                       <DurationBadge code={flight.airportCode} />
-                      <span className="text-base font-semibold text-gray-900 truncate min-w-0">{flight.origin}</span>
+                      <span className="text-sm font-semibold text-gray-900 truncate min-w-0">{flight.origin}</span>
                     </div>
 
                     <div className="shrink-0 text-right space-y-0.5">
@@ -371,7 +371,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
                               {isNoTransport && <span className="text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 px-1 rounded leading-[1.4]">심야</span>}
                               <span>착륙예정 {sh}:{sm}</span>
                             </p>
-                            <p className="text-base tabular-nums font-bold whitespace-nowrap flex items-center justify-end gap-1">
+                            <p className="text-sm tabular-nums font-bold whitespace-nowrap flex items-center justify-end gap-1">
                               <span className={`text-xs font-bold text-white px-2 py-0.5 rounded-md leading-none ${isLate ? "bg-[#E65100]" : "bg-blue-400"}`}>
                                 {isLate ? "지연" : "단축"}
                               </span>
@@ -381,13 +381,13 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
                           </>
                         );
                       })() : (
-                        <p className="text-base text-gray-900 font-medium whitespace-nowrap flex items-center justify-end gap-0.5">
+                        <p className="text-sm text-gray-900 font-medium whitespace-nowrap flex items-center justify-end gap-0.5">
                           {isNextDay && <NextDayBadge />}
                           {isNoTransport && <span className="text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 px-1 rounded leading-[1.4]">심야</span>}
                           <TimeCell date={flight.landingTime} todayStr={todayStr} prefix="착륙" hideNextDay />
                         </p>
                       )}
-                      <p className="text-base font-semibold whitespace-nowrap text-gray-900">
+                      <p className="text-sm font-semibold whitespace-nowrap text-gray-900">
                         <TimeCell date={flight.exitTime} todayStr={todayStr} prefix={flight.exitGate ? `출구 ${flight.exitGate}` : "출구"} hideNextDay />
                       </p>
                     </div>
