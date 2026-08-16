@@ -35,7 +35,7 @@ const FLIGHT_MINUTES: Record<string, number> = {
   CDG:695, FRA:715, LHR:700, AMS:715, ZRH:720, MUC:715, VIE:720,
   FCO:735, MAD:745, BCN:735, BRU:720, CPH:725, ARN:740, OSL:745,
   WAW:720, PRG:715, BUD:720,
-  LAX:635, SFO:645, SEA:605, YVR:605, JFK:810, ORD:825, YYZ:845, YYC:645,
+  LAX:635, SFO:645, SEA:605, YVR:605, JFK:810, ORD:825, YYZ:845, YYC:645, LAS:660,
   SYD:665, MEL:695, BNE:665, AKL:770,
 };
 
@@ -48,14 +48,10 @@ function estimateHours(code?: string): number | null {
 function DurationBadge({ code }: { code?: string }) {
   const h = estimateHours(code);
   if (!h) return null;
-  const long = h >= 7, mid = h >= 3;
   return (
-    <span
-      className="text-xs font-bold px-1.5 py-0.5 rounded leading-none shrink-0"
-      style={long ? { background: "#FFF3E0", color: "#E65100" }
-           : mid  ? { background: "#E8F5E9", color: "#BF360C" }
-                  : { background: "#F4F4F5", color: "#71717A" }}
-    >약 {h}시간 비행</span>
+    <span className="text-xs font-medium px-1.5 py-0.5 rounded leading-none shrink-0 bg-gray-100 text-gray-500">
+      약 {h}시간 비행
+    </span>
   );
 }
 
