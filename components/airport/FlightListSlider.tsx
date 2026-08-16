@@ -350,8 +350,10 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
                         const isNextDay = dateOf(flight.scheduledTime) !== todayStr;
                         return (
                           <>
-                            <p className="text-sm tabular-nums whitespace-nowrap text-gray-500">
-                              착륙예정 {sh}:{sm}{isNextDay && <NextDayBadge />}
+                            <p className="text-sm tabular-nums whitespace-nowrap text-gray-500 flex items-center justify-end gap-0.5">
+                              <span>착륙예정 {sh}:{sm}</span>
+                              {isNextDay && <NextDayBadge />}
+                              {isNoTransport && <span className="text-[10px] font-bold text-white bg-[#E65100] px-1 rounded leading-[1.4]">심야</span>}
                             </p>
                             <p className="text-base tabular-nums font-bold whitespace-nowrap flex items-center justify-end gap-1">
                               <span className={`text-xs font-bold text-white px-2 py-0.5 rounded-md leading-none ${isLate ? "bg-[#E65100]" : "bg-blue-400"}`}>
@@ -363,13 +365,13 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
                           </>
                         );
                       })() : (
-                        <p className="text-base text-gray-900 font-medium whitespace-nowrap">
+                        <p className="text-base text-gray-900 font-medium whitespace-nowrap flex items-center justify-end gap-0.5">
                           <TimeCell date={flight.landingTime} todayStr={todayStr} prefix="착륙" />
+                          {isNoTransport && <span className="text-[10px] font-bold text-white bg-[#E65100] px-1 rounded leading-[1.4]">심야</span>}
                         </p>
                       )}
-                      <p className={`text-base font-semibold whitespace-nowrap ${"text-gray-900"}`}>
+                      <p className="text-base font-semibold whitespace-nowrap text-gray-900">
                         <TimeCell date={flight.exitTime} todayStr={todayStr} prefix={flight.exitGate ? `출구 ${flight.exitGate}` : "출구"} hideNextDay />
-                        {isNoTransport && <span className="ml-1 text-[10px] font-bold text-white bg-[#E65100] px-1 rounded leading-[1.4] align-middle">심야</span>}
                       </p>
                     </div>
                   </div>
