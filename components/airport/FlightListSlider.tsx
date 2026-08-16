@@ -336,8 +336,8 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
                     </div>
 
                     <div className="flex-1 flex items-center min-w-0 gap-1.5 pt-0.5">
-                      <span className="text-base font-semibold text-gray-900 truncate min-w-0">{flight.origin}</span>
                       <DurationBadge code={flight.airportCode} />
+                      <span className="text-base font-semibold text-gray-900 truncate min-w-0">{flight.origin}</span>
                     </div>
 
                     <div className="shrink-0 text-right space-y-0.5">
