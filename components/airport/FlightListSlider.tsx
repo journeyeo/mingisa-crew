@@ -367,19 +367,16 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
                       })() : (
                         <>
                           {isNoTransport && (() => {
-                            const sh = String(flight.scheduledTime.getHours()).padStart(2, "0");
-                            const sm = String(flight.scheduledTime.getMinutes()).padStart(2, "0");
-                            const isNextDay = dateOf(flight.scheduledTime) !== todayStr;
+                            const isNextDay = dateOf(flight.landingTime) !== todayStr;
                             return (
-                              <p className="text-sm tabular-nums whitespace-nowrap text-gray-500 flex items-center justify-end gap-0.5">
-                                <span>착륙예정 {sh}:{sm}</span>
+                              <p className="text-sm whitespace-nowrap text-gray-500 flex items-center justify-end gap-0.5">
                                 {isNextDay && <NextDayBadge />}
                                 <span className="text-[10px] font-bold text-white bg-[#E65100] px-1 rounded leading-[1.4]">심야</span>
                               </p>
                             );
                           })()}
                           <p className="text-base text-gray-900 font-medium whitespace-nowrap">
-                            <TimeCell date={flight.landingTime} todayStr={todayStr} prefix="착륙" />
+                            <TimeCell date={flight.landingTime} todayStr={todayStr} prefix="착륙" hideNextDay={isNoTransport} />
                           </p>
                         </>
                       )}
