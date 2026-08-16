@@ -126,19 +126,27 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
     () => new Set([currentBlockIdx])
   );
 
-  function toggleGroup(groupIdx: number) {
+  function scrollToListTop() {
     if (listRef.current) listRef.current.scrollTop = 0;
-    setSelectedGroups(new Set([groupIdx]));
     if (!timeCardRef.current || !flightListCardRef.current) return;
     const timeCardRect = timeCardRef.current.getBoundingClientRect();
-    const isStuck = timeCardRect.top <= 51;
-    if (!isStuck) return;
+    if (timeCardRect.top > 51) return;
     const targetViewportTop = timeCardRect.bottom + 8;
     const currentViewportTop = flightListCardRef.current.getBoundingClientRect().top;
     const scrollDelta = currentViewportTop - targetViewportTop;
     if (Math.abs(scrollDelta) > 5) {
       window.scrollTo({ top: Math.max(0, window.scrollY + scrollDelta), behavior: "smooth" });
     }
+  }
+
+  function toggleGroup(groupIdx: number) {
+    scrollToListTop();
+    setSelectedGroups(new Set([groupIdx]));
+  }
+
+  function changeBasis(b: "exit" | "landing") {
+    scrollToListTop();
+    setBasis(b);
   }
 
   const selectedSlotSet = useMemo(() => {
@@ -242,7 +250,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
       <div className="flex items-center justify-between mb-3">
         <div className="flex rounded-lg overflow-hidden border border-gray-300 text-xs font-semibold">
           {(["exit", "landing"] as const).map((b) => (
-            <button key={b} onClick={() => setBasis(b)}
+            <button key={b} onClick={() => changeBasis(b)}
               className={`px-2.5 py-1.5 transition-colors ${basis === b ? "bg-gray-800 text-white" : "bg-white text-gray-600"}`}>
               {b === "exit" ? "출구기준" : "착륙기준"}
             </button>
