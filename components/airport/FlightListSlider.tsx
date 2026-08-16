@@ -105,6 +105,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
   const [showFilter, setShowFilter] = useState(false);
   const [filterQuery, setFilterQuery] = useState("");
   const [selectedAirlines, setSelectedAirlines] = useState<Set<string> | null>(null);
+  const [filterLongHaul, setFilterLongHaul] = useState(false);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
   const [basis, setBasis] = useState<"exit" | "landing">("landing");
 
@@ -150,6 +151,11 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
     setBasis(b);
   }
 
+  function toggleLongHaul() {
+    scrollToListTop();
+    setFilterLongHaul((prev) => !prev);
+  }
+
   const selectedSlotSet = useMemo(() => {
     const s = new Set<number>();
     for (const blockIdx of selectedGroups) {
@@ -180,6 +186,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
     const raw = selected.flatMap((s) =>
       s.flights
         .filter((f) => selectedAirlines === null || selectedAirlines.has(f.airline))
+        .filter((f) => !filterLongHaul || (estimateHours(f.airportCode) ?? 0) >= 7)
         .map((f) => ({ flight: f, isNoTransport: s.isNoTransport }))
     );
     const seen = new Map<string, { flight: typeof raw[0]["flight"]; ids: string[]; isNoTransport: boolean }>();
@@ -237,14 +244,24 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
       <p className="text-base font-bold text-gray-800 tabular-nums">
         {totalFlights > 0 ? `${totalFlights}편` : "—"}
       </p>
-      <button
-        onClick={() => { setShowFilter(true); setFilterQuery(""); }}
-        className={`text-sm px-3 py-1.5 rounded-full border font-medium transition-colors ${
-          isFiltered ? "bg-gray-900 text-white border-gray-900" : "bg-white text-gray-700 border-gray-300"
-        }`}
-      >
-        항공사{isFiltered && <span className="ml-1 opacity-70">{selectedCount}/{allAirlines.length}</span>}
-      </button>
+      <div className="flex items-center gap-2">
+        <button
+          onClick={toggleLongHaul}
+          className={`text-sm px-3 py-1.5 rounded-full border font-medium transition-colors ${
+            filterLongHaul ? "bg-gray-900 text-white border-gray-900" : "bg-white text-gray-700 border-gray-300"
+          }`}
+        >
+          장거리
+        </button>
+        <button
+          onClick={() => { setShowFilter(true); setFilterQuery(""); }}
+          className={`text-sm px-3 py-1.5 rounded-full border font-medium transition-colors ${
+            isFiltered ? "bg-gray-900 text-white border-gray-900" : "bg-white text-gray-700 border-gray-300"
+          }`}
+        >
+          항공사{isFiltered && <span className="ml-1 opacity-70">{selectedCount}/{allAirlines.length}</span>}
+        </button>
+      </div>
     </div>
 
     <div ref={timeCardRef} className="sticky top-[50px] z-40 bg-white rounded-2xl border border-gray-100 shadow-sm px-4 pt-4 pb-3">
