@@ -19,12 +19,12 @@ const MAJOR_KEYWORDS = [
 const isMajorAirline = (name: string) => MAJOR_KEYWORDS.some((k) => name.includes(k));
 
 const FLIGHT_MINUTES: Record<string, number> = {
-  NRT:130, HND:130, KIX:135, FUK:115, CTS:145, OKA:175, NGO:130, SDJ:155, KOJ:160, OIT:140,
+  NRT:130, HND:130, KIX:135, FUK:115, CTS:145, OKA:175, NGO:130, SDJ:155, KOJ:160, OIT:140, AOJ:100, ISG:150,
   PEK:200, PKX:200, PVG:185, SHA:185, TAO:110, DLC:90, SHE:90, CGO:130, WUH:140, CSX:155,
-  HGH:160, NKG:150, TNA:115, TYN:145, HET:185, HRB:150, SJW:130,
+  HGH:160, NKG:150, TNA:115, TYN:145, HET:185, HRB:150, SJW:130, FOC:150, YNJ:90,
   HKG:215, MFM:215, TPE:175, KHH:200,
   CAN:210, SZX:210, XMN:190, CTU:250, TFU:250, CKG:260, XIY:225, KMG:270, URC:330, DYG:150,
-  ULN:195, VVO:195, KHV:185, YKS:245,
+  ULN:195, UBN:195, VVO:195, KHV:185, YKS:245,
   MNL:250, CEB:240, CRK:220, HAN:260, DAD:280, SGN:305, PQC:330, BKK:360, DMK:360, HKT:360, CNX:375, REP:355, PNH:330, VTE:325, CXR:320,
   KUL:360, BKI:300, SIN:375, CGK:390, DPS:390, RGN:365, MDL:350,
   DAC:330, DEL:475, BOM:500, KTM:420, CMB:515, CCU:360, MAA:550, HYD:540, BLR:560,
@@ -33,9 +33,9 @@ const FLIGHT_MINUTES: Record<string, number> = {
   DXB:545, DOH:570, AUH:585, BAH:590, KWI:585, MCT:575, RUH:590,
   AMM:615, CAI:625, TLV:625, IST:665, SAW:665,
   CDG:695, FRA:715, LHR:700, AMS:715, ZRH:720, MUC:715, VIE:720,
-  FCO:735, MAD:745, BCN:735, BRU:720, CPH:725, ARN:740, OSL:745,
+  FCO:735, MXP:720, MAD:745, BCN:735, BRU:720, CPH:725, ARN:740, OSL:745,
   WAW:720, PRG:715, BUD:720,
-  LAX:635, SFO:645, SEA:605, YVR:605, JFK:810, ORD:825, YYZ:845, YYC:645, LAS:660, ATL:830,
+  LAX:635, SFO:645, SEA:605, YVR:605, JFK:810, BOS:840, ORD:825, DTW:780, DFW:790, IAD:840, YYZ:845, YYC:645, LAS:660, ATL:830,
   SYD:665, MEL:695, BNE:665, AKL:770,
 };
 
@@ -332,7 +332,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
                             className="text-[10px] text-gray-400 leading-tight text-left">접기</button>
                         </div>
                       )}
-                      {flight.airline && <span className="text-sm font-medium text-gray-600 leading-tight truncate w-full">{flight.airline.replace("항공", "").trim()}</span>}
+                      {flight.airline && <span className="text-sm font-medium text-gray-600 leading-tight truncate w-full">{flight.airline.replace(/(?<!대한)항공/, "").trim()}</span>}
                     </div>
 
                     <div className="flex-1 flex flex-col items-start justify-center min-w-0 gap-0.5 pt-0.5">
