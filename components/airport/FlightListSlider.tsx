@@ -337,7 +337,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
                       {(isNextDay || isNoTransport) && (
                         <div className="flex items-center gap-0.5 flex-wrap">
                           {isNextDay && <NextDayBadge />}
-                          {isNoTransport && <span className="text-[10px] font-bold text-white bg-[#E65100] px-1 rounded leading-[1.4]">심야</span>}
+                          {isNoTransport && <span className="text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 px-1 rounded leading-[1.4]">심야</span>}
                         </div>
                       )}
                     </div>
