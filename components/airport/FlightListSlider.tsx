@@ -334,12 +334,6 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
                         </div>
                       )}
                       {flight.airline && <span className="text-sm font-medium text-gray-600 leading-tight truncate w-full">{flight.airline.replace("항공", "").trim()}</span>}
-                      {(isNextDay || isNoTransport) && (
-                        <div className="flex items-center gap-0.5 flex-wrap">
-                          {isNextDay && <NextDayBadge />}
-                          {isNoTransport && <span className="text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 px-1 rounded leading-[1.4]">심야</span>}
-                        </div>
-                      )}
                     </div>
 
                     <div className="flex-1 flex flex-col items-start justify-center min-w-0 gap-0.5 pt-0.5">
@@ -356,8 +350,10 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
                         const lm = String(flight.landingTime.getMinutes()).padStart(2, "0");
                         return (
                           <>
-                            <p className="text-sm tabular-nums whitespace-nowrap text-gray-500">
-                              착륙예정 {sh}:{sm}
+                            <p className="text-sm tabular-nums whitespace-nowrap text-gray-500 flex items-center justify-end gap-0.5">
+                              {isNextDay && <NextDayBadge />}
+                              {isNoTransport && <span className="text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 px-1 rounded leading-[1.4]">심야</span>}
+                              <span>착륙예정 {sh}:{sm}</span>
                             </p>
                             <p className="text-base tabular-nums font-bold whitespace-nowrap flex items-center justify-end gap-1">
                               <span className={`text-xs font-bold text-white px-2 py-0.5 rounded-md leading-none ${isLate ? "bg-[#E65100]" : "bg-blue-400"}`}>
@@ -369,7 +365,9 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
                           </>
                         );
                       })() : (
-                        <p className="text-base text-gray-900 font-medium whitespace-nowrap">
+                        <p className="text-base text-gray-900 font-medium whitespace-nowrap flex items-center justify-end gap-0.5">
+                          {isNextDay && <NextDayBadge />}
+                          {isNoTransport && <span className="text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 px-1 rounded leading-[1.4]">심야</span>}
                           <TimeCell date={flight.landingTime} todayStr={todayStr} prefix="착륙" hideNextDay />
                         </p>
                       )}
