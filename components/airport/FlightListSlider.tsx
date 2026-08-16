@@ -48,7 +48,7 @@ function estimateHours(code?: string): number | null {
 function DurationBadge({ code }: { code?: string }) {
   const h = estimateHours(code);
   if (!h) return null;
-  const cls = h >= 7 ? "bg-orange-50 text-orange-500"
+  const cls = h >= 7 ? "bg-rose-50 text-rose-500"
             : h >= 3 ? "bg-amber-50 text-amber-600"
                      : "bg-sky-50 text-sky-500";
   return (
