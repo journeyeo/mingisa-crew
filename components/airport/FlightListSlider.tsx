@@ -48,12 +48,12 @@ function estimateHours(code?: string): number | null {
 function DurationBadge({ code }: { code?: string }) {
   const h = estimateHours(code);
   if (!h) return null;
-  const cls = h >= 7 ? "bg-rose-50 text-rose-500"
-            : h >= 3 ? "bg-amber-50 text-amber-600"
-                     : "bg-sky-50 text-sky-500";
+  const [label, cls] = h >= 7 ? ["장거리", "bg-rose-50 text-rose-500"]
+                     : h >= 3 ? ["중거리", "bg-amber-50 text-amber-600"]
+                              : ["단거리", "bg-sky-50 text-sky-500"];
   return (
     <span className={`text-xs font-medium px-1.5 py-0.5 rounded leading-none ${cls}`}>
-      ~{h}h
+      {label}
     </span>
   );
 }
