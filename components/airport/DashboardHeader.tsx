@@ -26,24 +26,30 @@ export function DashboardHeader({ currentForeignWaiting, currentTotalWaiting, pe
     <div className="grid grid-cols-2 gap-3">
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-4">
         <p className="text-sm text-gray-500 mb-2">입국장 대기</p>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="space-y-1.5">
           <div>
             <p className="text-xs font-semibold text-gray-400 mb-0.5">외국인</p>
-            <p className="text-2xl font-bold tabular-nums leading-tight text-gray-900">
-              {currentForeignWaiting.toLocaleString()}<span className="text-sm font-normal text-gray-500 ml-0.5">명</span>
-            </p>
+            <div className="flex items-baseline gap-0.5">
+              <span className="text-3xl font-bold tabular-nums leading-none text-gray-900">
+                {currentForeignWaiting.toLocaleString()}
+              </span>
+              <span className="text-sm font-normal text-gray-500">명</span>
+            </div>
           </div>
           <div>
             <p className="text-xs font-semibold text-gray-400 mb-0.5">내국인</p>
-            <p className="text-2xl font-bold tabular-nums leading-tight text-gray-700">
-              {domesticWaiting.toLocaleString()}<span className="text-sm font-normal text-gray-500 ml-0.5">명</span>
-            </p>
+            <div className="flex items-baseline gap-0.5">
+              <span className="text-xl font-bold tabular-nums leading-none text-gray-700">
+                {domesticWaiting.toLocaleString()}
+              </span>
+              <span className="text-sm font-normal text-gray-500">명</span>
+            </div>
           </div>
         </div>
       </div>
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-4">
         <p className="text-sm text-gray-500 mb-2">다음 피크</p>
-        <p className="text-4xl font-bold tabular-nums leading-none text-gray-900">{peakHour}</p>
+        <p className="text-3xl font-bold tabular-nums leading-none text-gray-900">{peakHour}</p>
         <p className="text-xs text-gray-500 mt-2">
           {isPeakTomorrow && tomorrowDateLabel ? tomorrowDateLabel : ""}
         </p>
