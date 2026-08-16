@@ -52,8 +52,8 @@ function DurationBadge({ code }: { code?: string }) {
             : h >= 3 ? "bg-amber-50 text-amber-600"
                      : "bg-sky-50 text-sky-500";
   return (
-    <span className={`text-xs font-medium px-1.5 py-0.5 rounded leading-none shrink-0 ${cls}`}>
-      약 {h}시간 비행
+    <span className={`text-xs font-medium px-1.5 py-0.5 rounded leading-none ${cls}`}>
+      ~{h}h
     </span>
   );
 }
