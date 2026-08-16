@@ -162,9 +162,9 @@ export function AirportDashboard({ terminal }: Props) {
 
   return (
     <main className="min-h-screen bg-gray-50 text-gray-900">
-      <div className="sticky top-0 z-50 max-w-lg mx-auto bg-white border-b border-gray-100 px-4 pt-5 pb-0">
+      <div className="max-w-lg mx-auto bg-white px-4 pt-5 pb-2">
         <h1 className="text-xl font-bold text-gray-900">인천공항 입국 수요</h1>
-        <p className="text-sm text-gray-500 mt-0.5 mb-3">
+        <p className="text-sm text-gray-500 mt-0.5">
           {now.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" })}
           {" · 5분 갱신"}
           {summary && (() => {
@@ -174,6 +174,8 @@ export function AirportDashboard({ terminal }: Props) {
             return <span className="text-gray-400"> · {hh}:{mm} 업데이트</span>;
           })()}
         </p>
+      </div>
+      <div className="sticky top-0 z-50 max-w-lg mx-auto bg-white border-b border-gray-100 px-4">
         <TerminalToggle terminal={terminal} />
       </div>
       <div className="max-w-lg mx-auto px-4 py-6 pb-4 space-y-8">

@@ -248,57 +248,55 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
       <p className="px-1 py-2 text-sm text-gray-500">* 출구 시각 = 착륙 후 약 55분 (외국인 입국 기준)</p>
     )}
 
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-      <div className="px-4 pt-4 pb-3 border-b border-gray-100">
-        <div className="flex items-center justify-between mb-3">
-          <div className="flex items-baseline gap-2">
-            <span className="text-3xl font-black text-[#E65100]">{terminal}</span>
-            <p className="text-3xl font-bold tabular-nums text-gray-900">
-              {headerStart}
-              <span className="text-gray-300 mx-2">–</span>
-              {headerEnd}
-            </p>
-          </div>
-          {!isCurrentBlockSelected && (
-            <button
-              onClick={() => setSelectedGroups(new Set([currentBlockIdx]))}
-              className="text-sm font-bold px-3 py-1.5 rounded-xl text-white shrink-0"
-              style={{ background: "#E65100" }}
-            >
-              지금으로
-            </button>
-          )}
-        </div>
-        <div className="grid grid-cols-4 gap-2">
-          {FIXED_BLOCKS.map(({ label }, blockIdx) => {
-            const isSelected = selectedGroups.has(blockIdx);
-            return (
-              <button
-                key={blockIdx}
-                onClick={() => toggleGroup(blockIdx)}
-                className={`py-2 rounded-xl text-sm font-semibold text-center transition-colors ${
-                  isSelected ? "bg-[#1B5E36] text-white"
-                  : "bg-gray-100 text-gray-600"
-                }`}
-              >
-                {label}
-              </button>
-            );
-          })}
-        </div>
+    <div className="sticky top-[50px] z-40 bg-white rounded-2xl border border-gray-100 shadow-sm px-4 pt-4 pb-3">
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-2xl font-bold tabular-nums text-gray-900">
+          {headerStart}
+          <span className="text-gray-300 mx-2">–</span>
+          {headerEnd}
+        </p>
+        {!isCurrentBlockSelected && (
+          <button
+            onClick={() => setSelectedGroups(new Set([currentBlockIdx]))}
+            className="text-sm font-bold px-3 py-1.5 rounded-xl text-white shrink-0"
+            style={{ background: "#E65100" }}
+          >
+            지금으로
+          </button>
+        )}
       </div>
+      <div className="grid grid-cols-4 gap-2">
+        {FIXED_BLOCKS.map(({ label }, blockIdx) => {
+          const isSelected = selectedGroups.has(blockIdx);
+          return (
+            <button
+              key={blockIdx}
+              onClick={() => toggleGroup(blockIdx)}
+              className={`py-2 rounded-xl text-sm font-semibold text-center transition-colors ${
+                isSelected ? "bg-[#1B5E36] text-white"
+                : "bg-gray-100 text-gray-600"
+              }`}
+            >
+              {label}
+            </button>
+          );
+        })}
+      </div>
+    </div>
 
-      {totalFlights === 0 ? (
+    {totalFlights === 0 ? (
+      <div className="mt-2 bg-white rounded-2xl border border-gray-100 shadow-sm">
         <p className="px-4 py-6 text-gray-400 text-sm text-center">이 시간대 운항편 없음</p>
-      ) : (
-        <>
-          <div className="flex items-center px-4 pt-2 pb-1 gap-3 text-sm font-semibold text-gray-600">
-            <span className="w-24 shrink-0">편명</span>
-            <span className="flex-1">출발지</span>
-            <span className="w-28 text-right">착륙 · 출구 도착</span>
-          </div>
-          <div ref={listRef} className="divide-y divide-gray-100 overflow-y-auto max-h-[36rem]">
-            {allEntries.map(({ flight, ids, isNoTransport }, i) => {
+      </div>
+    ) : (
+      <div className="mt-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+        <div className="flex items-center px-4 pt-2 pb-1 gap-3 text-sm font-semibold text-gray-600">
+          <span className="w-24 shrink-0">편명</span>
+          <span className="flex-1">출발지</span>
+          <span className="w-28 text-right">착륙 · 출구 도착</span>
+        </div>
+        <div ref={listRef} className="divide-y divide-gray-100 overflow-y-auto max-h-[36rem]">
+          {allEntries.map(({ flight, ids, isNoTransport }, i) => {
               const primaryId = ids[0];
               const extraIds = ids.slice(1);
               const isExpanded = expandedIds.has(primaryId);
@@ -374,7 +372,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
               );
             })}
           </div>
-        </>
+        </div>
       )}
 
       {showFilter && (
@@ -382,12 +380,10 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
           <div className="absolute inset-0 bg-black/30" />
           <div className="relative bg-white rounded-t-2xl w-full max-w-lg px-5 pt-5 pb-8" onClick={(e) => e.stopPropagation()}>
             <div className="w-10 h-1 bg-gray-200 rounded-full mx-auto mb-4" />
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-semibold text-gray-900">항공사 선택</p>
-              <button onClick={() => setSelectedAirlines(null)} className="text-xs px-3 py-1.5 rounded-full border border-gray-200 text-gray-600 font-medium">전체 선택</button>
-            </div>
+            <p className="text-sm font-semibold text-gray-900 mb-3">항공사 선택</p>
             <div className="flex gap-2 mb-3">
               {[
+                { label: "전체 선택", fn: () => setSelectedAirlines(null) },
                 { label: "대형항공사", fn: () => setSelectedAirlines(new Set(allAirlines.filter(isMajorAirline))) },
                 { label: "전체 해제", fn: () => setSelectedAirlines(new Set()) },
               ].map(({ label, fn }) => (
@@ -415,7 +411,6 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
           </div>
         </div>
       )}
-    </div>
     </>
   );
 }
