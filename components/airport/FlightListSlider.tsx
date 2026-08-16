@@ -365,10 +365,23 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
                           </>
                         );
                       })() : (
-                        <p className="text-base text-gray-900 font-medium whitespace-nowrap flex items-center justify-end gap-0.5">
-                          <TimeCell date={flight.landingTime} todayStr={todayStr} prefix="착륙" />
-                          {isNoTransport && <span className="text-[10px] font-bold text-white bg-[#E65100] px-1 rounded leading-[1.4]">심야</span>}
-                        </p>
+                        <>
+                          {isNoTransport && (() => {
+                            const sh = String(flight.scheduledTime.getHours()).padStart(2, "0");
+                            const sm = String(flight.scheduledTime.getMinutes()).padStart(2, "0");
+                            const isNextDay = dateOf(flight.scheduledTime) !== todayStr;
+                            return (
+                              <p className="text-sm tabular-nums whitespace-nowrap text-gray-500 flex items-center justify-end gap-0.5">
+                                <span>착륙예정 {sh}:{sm}</span>
+                                {isNextDay && <NextDayBadge />}
+                                <span className="text-[10px] font-bold text-white bg-[#E65100] px-1 rounded leading-[1.4]">심야</span>
+                              </p>
+                            );
+                          })()}
+                          <p className="text-base text-gray-900 font-medium whitespace-nowrap">
+                            <TimeCell date={flight.landingTime} todayStr={todayStr} prefix="착륙" />
+                          </p>
+                        </>
                       )}
                       <p className="text-base font-semibold whitespace-nowrap text-gray-900">
                         <TimeCell date={flight.exitTime} todayStr={todayStr} prefix={flight.exitGate ? `출구 ${flight.exitGate}` : "출구"} hideNextDay />
