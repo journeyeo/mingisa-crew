@@ -127,6 +127,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
   );
 
   function toggleGroup(groupIdx: number) {
+    if (listRef.current) listRef.current.scrollTop = 0;
     setSelectedGroups(new Set([groupIdx]));
     if (timeCardRef.current) {
       let naturalTop = 0;
