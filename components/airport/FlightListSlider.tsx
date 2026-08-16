@@ -335,8 +335,8 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
                       {flight.airline && <span className="text-sm font-medium text-gray-600 leading-tight truncate w-full">{flight.airline.replace(/(?<!대한)항공/, "").trim()}</span>}
                     </div>
 
-                    <div className="flex-1 flex flex-col items-start justify-center min-w-0 gap-0.5 pt-0.5">
-                      <span className="text-base font-semibold text-gray-900 truncate w-full">{flight.origin}</span>
+                    <div className="flex-1 flex items-center min-w-0 gap-1.5 pt-0.5">
+                      <span className="text-base font-semibold text-gray-900 truncate min-w-0">{flight.origin}</span>
                       <DurationBadge code={flight.airportCode} />
                     </div>
 
