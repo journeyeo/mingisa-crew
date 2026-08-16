@@ -23,9 +23,9 @@ const FLIGHT_MINUTES: Record<string, number> = {
   PEK:200, PKX:200, PVG:185, SHA:185, TAO:110, DLC:90, SHE:90, CGO:130, WUH:140, CSX:155,
   HGH:160, NKG:150, TNA:115, TYN:145, HET:185, HRB:150, SJW:130,
   HKG:215, MFM:215, TPE:175, KHH:200,
-  CAN:210, SZX:210, XMN:190, CTU:250, CKG:260, XIY:225, KMG:270, URC:330, DYG:150,
+  CAN:210, SZX:210, XMN:190, CTU:250, TFU:250, CKG:260, XIY:225, KMG:270, URC:330, DYG:150,
   ULN:195, VVO:195, KHV:185, YKS:245,
-  MNL:250, HAN:260, SGN:305, BKK:360, DMK:360, CNX:375, REP:355, VTE:325,
+  MNL:250, HAN:260, SGN:305, BKK:360, DMK:360, CNX:375, REP:355, VTE:325, CXR:320,
   KUL:360, SIN:375, CGK:390, DPS:390, RGN:365, MDL:350,
   DAC:330, DEL:475, BOM:500, KTM:420, CMB:515, CCU:360, MAA:550, HYD:540, BLR:560,
   ALA:430, TAS:445, FRU:440, GYD:525,
@@ -48,8 +48,11 @@ function estimateHours(code?: string): number | null {
 function DurationBadge({ code }: { code?: string }) {
   const h = estimateHours(code);
   if (!h) return null;
+  const cls = h >= 7 ? "bg-orange-50 text-orange-500"
+            : h >= 3 ? "bg-amber-50 text-amber-600"
+                     : "bg-sky-50 text-sky-500";
   return (
-    <span className="text-xs font-medium px-1.5 py-0.5 rounded leading-none shrink-0 bg-orange-50 text-orange-500">
+    <span className={`text-xs font-medium px-1.5 py-0.5 rounded leading-none shrink-0 ${cls}`}>
       약 {h}시간 비행
     </span>
   );
