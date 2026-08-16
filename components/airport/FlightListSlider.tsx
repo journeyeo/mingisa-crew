@@ -244,35 +244,35 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
       <p className="text-base font-bold text-gray-800 tabular-nums">
         {totalFlights > 0 ? `${totalFlights}편` : "—"}
       </p>
-      <div className="flex items-center gap-2">
-        <button
-          onClick={toggleLongHaul}
-          className={`text-sm px-3 py-1.5 rounded-full border font-medium transition-colors ${
-            filterLongHaul ? "bg-gray-900 text-white border-gray-900" : "bg-white text-gray-700 border-gray-300"
-          }`}
-        >
-          장거리
-        </button>
-        <button
-          onClick={() => { setShowFilter(true); setFilterQuery(""); }}
-          className={`text-sm px-3 py-1.5 rounded-full border font-medium transition-colors ${
-            isFiltered ? "bg-gray-900 text-white border-gray-900" : "bg-white text-gray-700 border-gray-300"
-          }`}
-        >
-          항공사{isFiltered && <span className="ml-1 opacity-70">{selectedCount}/{allAirlines.length}</span>}
-        </button>
-      </div>
+      <button
+        onClick={() => { setShowFilter(true); setFilterQuery(""); }}
+        className={`text-sm px-3 py-1.5 rounded-full border font-medium transition-colors ${
+          isFiltered ? "bg-gray-900 text-white border-gray-900" : "bg-white text-gray-700 border-gray-300"
+        }`}
+      >
+        항공사{isFiltered && <span className="ml-1 opacity-70">{selectedCount}/{allAirlines.length}</span>}
+      </button>
     </div>
 
     <div ref={timeCardRef} className="sticky top-[50px] z-40 bg-white rounded-2xl border border-gray-100 shadow-sm px-4 pt-4 pb-3">
       <div className="flex items-center justify-between mb-3">
-        <div className="flex rounded-lg overflow-hidden border border-gray-300 text-xs font-semibold">
-          {(["exit", "landing"] as const).map((b) => (
-            <button key={b} onClick={() => changeBasis(b)}
-              className={`px-2.5 py-1.5 transition-colors ${basis === b ? "bg-gray-800 text-white" : "bg-white text-gray-600"}`}>
-              {b === "exit" ? "출구기준" : "착륙기준"}
-            </button>
-          ))}
+        <div className="flex items-center gap-2">
+          <div className="flex rounded-lg overflow-hidden border border-gray-300 text-xs font-semibold">
+            {(["exit", "landing"] as const).map((b) => (
+              <button key={b} onClick={() => changeBasis(b)}
+                className={`px-2.5 py-1.5 transition-colors ${basis === b ? "bg-gray-800 text-white" : "bg-white text-gray-600"}`}>
+                {b === "exit" ? "출구기준" : "착륙기준"}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={toggleLongHaul}
+            className={`text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-colors ${
+              filterLongHaul ? "bg-gray-800 text-white border-gray-800" : "bg-white text-gray-600 border-gray-300"
+            }`}
+          >
+            장거리
+          </button>
         </div>
         {!isCurrentBlockSelected && (
           <button
