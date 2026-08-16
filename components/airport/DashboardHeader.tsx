@@ -23,10 +23,10 @@ export function DashboardHeader({ currentForeignWaiting, currentTotalWaiting, pe
   const domesticWaiting = currentTotalWaiting - currentForeignWaiting;
 
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="grid grid-cols-[3fr_2fr] gap-3">
       <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-4">
         <p className="text-sm text-gray-500 mb-2">입국장 대기</p>
-        <div className="space-y-1.5">
+        <div className="grid grid-cols-2 gap-2">
           <div>
             <p className="text-xs font-semibold text-gray-400 mb-0.5">외국인</p>
             <div className="flex items-baseline gap-0.5">
