@@ -222,32 +222,12 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
   // 00~05시 블록은 kstHour >= 6일 때만 익일 (자정~새벽엔 오늘로 표시)
   const isNextDay = (blockIdx: number) => blockIdx < 2 && kstHour >= 6;
 
-  // Header range: sort selected blocks in window order (06시 first, 00시 익일 last)
-  const selectedBlocksSorted = Array.from(selectedGroups).sort((a, b) => {
-    const w = (i: number) => i < 2 ? i + 8 : i;
-    return w(a) - w(b);
-  });
-  const firstBIdx = selectedBlocksSorted[0] ?? currentBlockIdx;
-  const lastBIdx = selectedBlocksSorted[selectedBlocksSorted.length - 1] ?? currentBlockIdx;
-  const headerStart = `${isNextDay(firstBIdx) ? "익일 " : ""}${String(FIXED_BLOCKS[firstBIdx].startH).padStart(2, "0")}:00`;
-  const headerEnd = `${isNextDay(lastBIdx) ? "익일 " : ""}${String(FIXED_BLOCKS[lastBIdx].endH).padStart(2, "0")}:00`;
-
   return (
     <>
     <div className="flex items-center justify-between px-1 mb-2">
-      <div className="flex items-center gap-2">
-        <p className="text-base font-bold text-gray-800 tabular-nums min-w-[3.5rem]">
-          {totalFlights > 0 ? `${totalFlights}편` : "—"}
-        </p>
-        <div className="flex rounded-lg overflow-hidden border border-gray-300 text-xs font-semibold">
-          {(["exit", "landing"] as const).map((b) => (
-            <button key={b} onClick={() => setBasis(b)}
-              className={`px-2.5 py-1.5 transition-colors ${basis === b ? "bg-gray-800 text-white" : "bg-white text-gray-600"}`}>
-              {b === "exit" ? "출구기준" : "착륙기준"}
-            </button>
-          ))}
-        </div>
-      </div>
+      <p className="text-base font-bold text-gray-800 tabular-nums">
+        {totalFlights > 0 ? `${totalFlights}편` : "—"}
+      </p>
       <button
         onClick={() => { setShowFilter(true); setFilterQuery(""); }}
         className={`text-sm px-3 py-1.5 rounded-full border font-medium transition-colors ${
@@ -257,17 +237,17 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
         항공사{isFiltered && <span className="ml-1 opacity-70">{selectedCount}/{allAirlines.length}</span>}
       </button>
     </div>
-    {basis === "exit" && (
-      <p className="px-1 py-2 text-sm text-gray-500">* 출구 시각 = 착륙 후 약 55분 (외국인 입국 기준)</p>
-    )}
 
     <div ref={timeCardRef} className="sticky top-[50px] z-40 bg-white rounded-2xl border border-gray-100 shadow-sm px-4 pt-4 pb-3">
       <div className="flex items-center justify-between mb-3">
-        <p className="text-2xl font-bold tabular-nums text-gray-900">
-          {headerStart}
-          <span className="text-gray-300 mx-2">–</span>
-          {headerEnd}
-        </p>
+        <div className="flex rounded-lg overflow-hidden border border-gray-300 text-xs font-semibold">
+          {(["exit", "landing"] as const).map((b) => (
+            <button key={b} onClick={() => setBasis(b)}
+              className={`px-2.5 py-1.5 transition-colors ${basis === b ? "bg-gray-800 text-white" : "bg-white text-gray-600"}`}>
+              {b === "exit" ? "출구기준" : "착륙기준"}
+            </button>
+          ))}
+        </div>
         {!isCurrentBlockSelected && (
           <button
             onClick={() => setSelectedGroups(new Set([currentBlockIdx]))}
