@@ -20,6 +20,11 @@ export const metadata: Metadata = {
     description: "인천공항 시간대별 입국 수요 · 기사용",
     images: [{ url: "/og-image.png" }],
   },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: "민기사크루",
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
