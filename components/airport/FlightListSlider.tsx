@@ -49,7 +49,7 @@ function DurationBadge({ code }: { code?: string }) {
   const h = estimateHours(code);
   if (!h) return null;
   return (
-    <span className="text-xs font-medium px-1.5 py-0.5 rounded leading-none shrink-0 bg-gray-100 text-gray-500">
+    <span className="text-xs font-medium px-1.5 py-0.5 rounded leading-none shrink-0 bg-orange-50 text-orange-500">
       약 {h}시간 비행
     </span>
   );
