@@ -340,8 +340,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
 
                     <div className="shrink-0 text-right space-y-0.5">
                       {flight.isDelayed ? (() => {
-                        const diffMin = Math.round((flight.landingTime.getTime() - flight.scheduledTime.getTime()) / 60000);
-                        const isLate = diffMin > 0;
+                        const isLate = flight.landingTime.getTime() > flight.scheduledTime.getTime();
                         const sh = String(flight.scheduledTime.getHours()).padStart(2, "0");
                         const sm = String(flight.scheduledTime.getMinutes()).padStart(2, "0");
                         const lh = String(flight.landingTime.getHours()).padStart(2, "0");
@@ -351,7 +350,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
                             <p className="text-sm tabular-nums whitespace-nowrap text-gray-500">착륙예정 {sh}:{sm}</p>
                             <p className="text-base tabular-nums font-bold whitespace-nowrap flex items-center justify-end gap-1">
                               <span className={`text-xs font-bold text-white px-2 py-0.5 rounded-md leading-none ${isLate ? "bg-[#E65100]" : "bg-blue-400"}`}>
-                                {isLate ? `+${diffMin}분` : `${diffMin}분`}
+                                {isLate ? "지연" : "단축"}
                               </span>
                               <span>착륙 </span>
                               <span className="text-gray-900">{lh}:{lm}</span>
