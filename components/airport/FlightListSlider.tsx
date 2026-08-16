@@ -129,17 +129,15 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
   function toggleGroup(groupIdx: number) {
     if (listRef.current) listRef.current.scrollTop = 0;
     setSelectedGroups(new Set([groupIdx]));
-    if (timeCardRef.current) {
-      let naturalTop = 0;
-      let el: HTMLElement | null = timeCardRef.current;
-      while (el) {
-        naturalTop += el.offsetTop;
-        el = el.offsetParent as HTMLElement | null;
-      }
-      const targetScroll = naturalTop - 50;
-      if (window.scrollY > targetScroll) {
-        window.scrollTo({ top: Math.max(0, targetScroll), behavior: "smooth" });
-      }
+    if (!timeCardRef.current || !flightListCardRef.current) return;
+    const timeCardRect = timeCardRef.current.getBoundingClientRect();
+    const isStuck = timeCardRect.top <= 51;
+    if (!isStuck) return;
+    const targetViewportTop = timeCardRect.bottom + 8;
+    const currentViewportTop = flightListCardRef.current.getBoundingClientRect().top;
+    const scrollDelta = currentViewportTop - targetViewportTop;
+    if (Math.abs(scrollDelta) > 5) {
+      window.scrollTo({ top: Math.max(0, window.scrollY + scrollDelta), behavior: "smooth" });
     }
   }
 
@@ -198,6 +196,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
   const listRef = useRef<HTMLDivElement>(null);
   const dividerRef = useRef<HTMLDivElement>(null);
   const timeCardRef = useRef<HTMLDivElement>(null);
+  const flightListCardRef = useRef<HTMLDivElement>(null);
 
   const isCurrentBlockSelected = selectedGroups.has(currentBlockIdx);
 
@@ -299,11 +298,11 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
     </div>
 
     {totalFlights === 0 ? (
-      <div className="mt-2 bg-white rounded-2xl border border-gray-100 shadow-sm">
+      <div ref={flightListCardRef} className="mt-2 bg-white rounded-2xl border border-gray-100 shadow-sm">
         <p className="px-4 py-6 text-gray-400 text-sm text-center">이 시간대 운항편 없음</p>
       </div>
     ) : (
-      <div className="mt-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+      <div ref={flightListCardRef} className="mt-2 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div className="flex items-center px-4 pt-2 pb-1 gap-3 text-sm font-semibold text-gray-600">
           <span className="w-24 shrink-0">편명</span>
           <span className="flex-1">출발지</span>
