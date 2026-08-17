@@ -166,9 +166,9 @@ export function AirportDashboard({ terminal }: Props) {
           {now.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" })}
           {" · 5분 갱신"}
           {summary && (() => {
-            const t = new Date(summary.nowISO);
-            const hh = String(t.getHours()).padStart(2, "0");
-            const mm = String(t.getMinutes()).padStart(2, "0");
+            const kst = new Date(new Date(summary.nowISO).getTime() + 9 * 3600_000);
+            const hh = String(kst.getUTCHours()).padStart(2, "0");
+            const mm = String(kst.getUTCMinutes()).padStart(2, "0");
             return <span className="text-gray-400"> · {hh}:{mm} 업데이트</span>;
           })()}
         </p>
