@@ -136,8 +136,8 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
   const tableSlots = slots;
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 pt-4 pb-3">
-      <div className="flex items-center justify-between mb-4">
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 pt-4 pb-3 h-full flex flex-col">
+      <div className="flex items-center justify-between mb-4 flex-shrink-0">
         <div className="flex items-center gap-4 text-sm text-gray-500">
           <span className="flex items-center gap-1.5">
             <span className="w-3 h-3 rounded-sm inline-block" style={{ background: COLOR.normalDark }} />외국인
@@ -163,11 +163,11 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
       </div>
 
       {view === "chart" ? (
-        <div className="h-52">
+        <div className="flex-1 min-h-0">
           <Bar data={data} options={options} plugins={[linePlugin]} />
         </div>
       ) : (
-        <div className="overflow-y-auto max-h-64">
+        <div className="flex-1 min-h-0 overflow-y-auto">
           <table className="w-full">
             <thead>
               <tr className="text-base text-gray-600 border-b border-gray-100">

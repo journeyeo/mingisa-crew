@@ -35,7 +35,7 @@ export function WeeklyForecast({ days }: Props) {
 
   // 표 뷰
   const tableView = (
-    <div className="px-4 pt-3 pb-3">
+    <div className="px-4 pt-3 pb-3 flex-1 min-h-0 overflow-y-auto">
       <table className="w-full">
         <thead>
           <tr className="text-sm font-semibold text-gray-500 border-b border-gray-100">
@@ -194,8 +194,8 @@ export function WeeklyForecast({ days }: Props) {
   };
 
   const chartView = (
-    <>
-      <div className="flex overflow-x-auto border-b border-gray-100 scrollbar-none">
+    <div className="flex-1 min-h-0 flex flex-col">
+      <div className="flex overflow-x-auto border-b border-gray-100 scrollbar-none flex-shrink-0">
         {days.map((d, idx) => (
           <button
             key={d.date}
@@ -216,8 +216,8 @@ export function WeeklyForecast({ days }: Props) {
           </button>
         ))}
       </div>
-      <div className="px-4 pt-4 pb-3">
-        <div className="flex items-center justify-between mb-3">
+      <div className="px-4 pt-4 pb-3 flex-1 min-h-0 flex flex-col">
+        <div className="flex items-center justify-between mb-3 flex-shrink-0">
           <p className="text-base font-semibold text-gray-700">
             {day.label} · 전체 {day.totalFlights}편
           </p>
@@ -227,16 +227,16 @@ export function WeeklyForecast({ days }: Props) {
             </span>
           )}
         </div>
-        <div className="h-40">
+        <div className="flex-1 min-h-0">
           <Bar data={chartData} options={options} plugins={[markersPlugin]} />
         </div>
       </div>
-    </>
+    </div>
   );
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
-      <div className="flex items-center justify-end px-4 pt-3">
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden h-full flex flex-col">
+      <div className="flex items-center justify-end px-4 pt-3 flex-shrink-0">
         <div className="flex rounded-lg overflow-hidden border border-gray-100 text-[11px] font-semibold">
           {(["table", "chart"] as const).map((v) => (
             <button

@@ -80,11 +80,11 @@ function HeaderSkeleton() {
 
 function PassengerSkeleton() {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 pt-4 pb-3">
-      <div className="flex gap-5 mb-4">
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 pt-4 pb-3 h-full flex flex-col">
+      <div className="flex gap-5 mb-4 flex-shrink-0">
         {[0, 1, 2].map((i) => <Sk key={i} className="h-3 w-14" />)}
       </div>
-      <div className="h-52 flex items-end gap-1">
+      <div className="flex-1 min-h-0 flex items-end gap-1">
         {[35, 55, 70, 45, 80, 60, 30, 50, 65, 40, 25, 45].map((h, i) => (
           <div key={i} className="skeleton flex-1 rounded-sm" style={{ height: `${h}%`, animationDelay: `${i * 60}ms` }} />
         ))}
@@ -95,7 +95,7 @@ function PassengerSkeleton() {
 
 function WeeklySkeleton() {
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm divide-y divide-gray-50">
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm h-full overflow-y-auto divide-y divide-gray-50">
       {[0, 1, 2, 3, 4, 5, 6].map((i) => (
         <div key={i} className="flex items-center px-4 py-3 gap-3">
           <Sk className="h-4 w-6" />
@@ -209,16 +209,14 @@ export function AirportDashboard({ terminal }: Props) {
             </button>
           </div>
 
-          {activeTab === "passenger" && (
-            !summary
-              ? <PassengerSkeleton />
-              : <PassengerChart slots={summary.slots.map(deserializeSlot)} tomorrowLabel={summary.tomorrowLabel} />
-          )}
-          {activeTab === "weekly" && (
-            !flights
-              ? <WeeklySkeleton />
-              : <WeeklyForecast days={flights.weeklyDays} />
-          )}
+          <div className="relative h-80">
+            <div className={`absolute inset-0 ${activeTab === "passenger" ? "" : "invisible pointer-events-none"}`}>
+              {!summary ? <PassengerSkeleton /> : <PassengerChart slots={summary.slots.map(deserializeSlot)} tomorrowLabel={summary.tomorrowLabel} />}
+            </div>
+            <div className={`absolute inset-0 ${activeTab === "weekly" ? "" : "invisible pointer-events-none"}`}>
+              {!flights ? <WeeklySkeleton /> : <WeeklyForecast days={flights.weeklyDays} />}
+            </div>
+          </div>
         </div>
 
         {/* ── 느린 섹션: 운항편 ── */}
