@@ -12,8 +12,6 @@ import {
   findPeakSlot,
   flightsFromStatus,
 } from "./transform";
-import { FLIGHT_MINUTES } from "./flight-minutes";
-import { estimateMissing } from "./estimate-minutes";
 import type { Flight, Terminal } from "./types";
 
 // ─── Serialization helpers ────────────────────────────────────────────────────
@@ -121,14 +119,9 @@ export const getCachedFlights = unstable_cache(
     const allSlots = buildWindowSlots(forecasts, terminal, allStatusFlights, "exit", 0, 30, todayStr, tomorrowStr);
     const allSlotsLanding = buildWindowSlots(forecasts, terminal, allStatusFlights, "landing", 0, 30, todayStr, tomorrowStr);
 
-    // 정적 테이블에 없는 공항 코드를 좌표 기반으로 추정 (비동기 영향 없음 — 순수 계산)
-    const allCodes = [...new Set(allStatusFlights.map((f) => f.airportCode).filter(Boolean))] as string[];
-    const extraMinutes = estimateMissing(allCodes, FLIGHT_MINUTES);
-
     return {
       allSlots: serializeSlots(allSlots),
       allSlotsLanding: serializeSlots(allSlotsLanding),
-      extraMinutes,
       todayStr,
       tomorrowStr,
       kstHour,

@@ -19,15 +19,14 @@ const MAJOR_KEYWORDS = [
 ];
 const isMajorAirline = (name: string) => MAJOR_KEYWORDS.some((k) => name.includes(k));
 
-function estimateHours(code: string | undefined, extra: Record<string, number>): number | null {
+function estimateHours(code?: string): number | null {
   if (!code) return null;
-  const upper = code.toUpperCase();
-  const min = FLIGHT_MINUTES[upper] ?? extra[upper];
+  const min = FLIGHT_MINUTES[code.toUpperCase()];
   return min ? Math.round(min / 60) : null;
 }
 
-function DurationBadge({ code, extra }: { code?: string; extra: Record<string, number> }) {
-  const h = estimateHours(code, extra);
+function DurationBadge({ code }: { code?: string }) {
+  const h = estimateHours(code);
   if (!h) return null;
   const [label, cls] = h >= 7 ? ["장", "bg-orange-50 text-orange-700"]
                      : h >= 3 ? ["중", "bg-gray-100 text-gray-500"]
@@ -54,7 +53,6 @@ const FIXED_BLOCKS = [
 interface Props {
   slots: HourlySlot[];
   slotsLanding: HourlySlot[];
-  extraMinutes: Record<string, number>;
   todayStr: string;
   tomorrowStr: string;
   kstHour: number;
@@ -83,7 +81,7 @@ function TimeCell({ date, todayStr, prefix, hideNextDay }: { date: Date; todaySt
   );
 }
 
-export function FlightListSlider({ slots, slotsLanding, extraMinutes, todayStr, tomorrowStr, kstHour, terminal }: Props) {
+export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, kstHour, terminal }: Props) {
   const [showFilter, setShowFilter] = useState(false);
   const [filterQuery, setFilterQuery] = useState("");
   const [selectedAirlines, setSelectedAirlines] = useState<Set<string> | null>(null);
@@ -168,7 +166,7 @@ export function FlightListSlider({ slots, slotsLanding, extraMinutes, todayStr, 
     const raw = selected.flatMap((s) =>
       s.flights
         .filter((f) => selectedAirlines === null || selectedAirlines.has(f.airline))
-        .filter((f) => !filterLongHaul || (estimateHours(f.airportCode, extraMinutes) ?? 0) >= 7)
+        .filter((f) => !filterLongHaul || (estimateHours(f.airportCode) ?? 0) >= 7)
         .map((f) => ({ flight: f, isNoTransport: s.isNoTransport }))
     );
     const seen = new Map<string, { flight: typeof raw[0]["flight"]; ids: string[]; isNoTransport: boolean }>();
@@ -335,7 +333,7 @@ export function FlightListSlider({ slots, slotsLanding, extraMinutes, todayStr, 
                     </div>
 
                     <div className="flex-1 flex items-center min-w-0 gap-1.5 pt-0.5">
-                      <DurationBadge code={flight.airportCode} extra={extraMinutes} />
+                      <DurationBadge code={flight.airportCode} />
                       <span className="text-base font-semibold text-gray-900 truncate min-w-0">{flight.origin}</span>
                     </div>
 

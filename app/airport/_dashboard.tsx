@@ -39,7 +39,6 @@ interface SummaryData {
 interface FlightsData {
   allSlots: SerializedSlot[];
   allSlotsLanding: SerializedSlot[];
-  extraMinutes: Record<string, number>;
   todayStr: string;
   tomorrowStr: string;
   kstHour: number;
@@ -208,7 +207,6 @@ export function AirportDashboard({ terminal }: Props) {
               terminal={terminal}
               slots={flights.allSlots.map(deserializeSlot)}
               slotsLanding={flights.allSlotsLanding.map(deserializeSlot)}
-              extraMinutes={flights.extraMinutes}
               todayStr={flights.todayStr}
               tomorrowStr={flights.tomorrowStr}
               kstHour={flights.kstHour}
