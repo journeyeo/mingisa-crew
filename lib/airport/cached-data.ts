@@ -122,6 +122,7 @@ export const getCachedFlights = unstable_cache(
     return {
       allSlots: serializeSlots(allSlots),
       allSlotsLanding: serializeSlots(allSlotsLanding),
+      weeklyDays: buildWeeklyDays(weeklyItems, terminal),
       todayStr,
       tomorrowStr,
       kstHour,

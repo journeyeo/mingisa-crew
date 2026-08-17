@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { Flight, HourlySlot, Terminal } from "@/lib/airport/types";
+import type { Flight, HourlySlot, Terminal, WeeklyDay } from "@/lib/airport/types";
 
 import { DashboardHeader } from "@/components/airport/DashboardHeader";
 import { TerminalToggle } from "@/components/airport/TerminalBasisToggle";
 import { PassengerChart } from "@/components/airport/PassengerChart";
 import { FlightListSlider } from "@/components/airport/FlightListSlider";
+import { WeeklyForecast } from "@/components/airport/WeeklyForecast";
 import { Footer } from "@/components/Footer";
 import { FloatingScrollNav } from "@/components/FloatingScrollNav";
 
@@ -39,6 +40,7 @@ interface SummaryData {
 interface FlightsData {
   allSlots: SerializedSlot[];
   allSlotsLanding: SerializedSlot[];
+  weeklyDays: WeeklyDay[];
   todayStr: string;
   tomorrowStr: string;
   kstHour: number;
@@ -91,6 +93,20 @@ function PassengerSkeleton() {
   );
 }
 
+function WeeklySkeleton() {
+  return (
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm divide-y divide-gray-50">
+      {[0, 1, 2, 3, 4, 5, 6].map((i) => (
+        <div key={i} className="flex items-center px-4 py-3 gap-3">
+          <Sk className="h-4 w-6" />
+          <Sk className="flex-1 h-3" />
+          <Sk className="h-4 w-10" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function FlightsSkeleton() {
   return (
     <div>
@@ -118,6 +134,7 @@ function FlightsSkeleton() {
 export function AirportDashboard({ terminal }: Props) {
   const [summary, setSummary] = useState<SummaryData | null>(null);
   const [flights, setFlights] = useState<FlightsData | null>(null);
+  const [activeTab, setActiveTab] = useState<"passenger" | "weekly">("passenger");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -161,37 +178,48 @@ export function AirportDashboard({ terminal }: Props) {
       </div>
       <div className="max-w-lg mx-auto px-4 py-6 pb-4 space-y-8">
 
-        {/* ── 빠른 섹션: 헤더 + 승객 예고 ── */}
-        {!summary ? (
-          <>
-            <HeaderSkeleton />
-            <div>
-              <p className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-1.5">
-                <span className="inline-block w-1 h-4 rounded-full bg-[#1B5E36]" />
-                승객 예고
-              </p>
-              <PassengerSkeleton />
-            </div>
-          </>
-        ) : (
-          <>
-            <DashboardHeader
-              terminal={terminal}
-              currentForeignWaiting={summary.currentForeignWaiting}
-              currentTotalWaiting={summary.currentTotalWaiting}
-              peakSlot={summary.peakSlot ? deserializeSlot(summary.peakSlot) : null}
-              now={summary.nowISO}
-              tomorrowLabel={summary.tomorrowLabel}
-            />
-            <div>
-              <p className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-1.5">
-                <span className="inline-block w-1 h-4 rounded-full bg-[#1B5E36]" />
-                승객 예고
-              </p>
-              <PassengerChart slots={summary.slots.map(deserializeSlot)} tomorrowLabel={summary.tomorrowLabel} />
-            </div>
-          </>
+        {/* ── 헤더 ── */}
+        {!summary ? <HeaderSkeleton /> : (
+          <DashboardHeader
+            terminal={terminal}
+            currentForeignWaiting={summary.currentForeignWaiting}
+            currentTotalWaiting={summary.currentTotalWaiting}
+            peakSlot={summary.peakSlot ? deserializeSlot(summary.peakSlot) : null}
+            now={summary.nowISO}
+            tomorrowLabel={summary.tomorrowLabel}
+          />
         )}
+
+        {/* ── 탭: 승객 예고 | 주간 예측 ── */}
+        <div>
+          <div className="flex items-center gap-1.5 mb-4">
+            <span className="inline-block w-1 h-4 rounded-full bg-[#1B5E36]" />
+            <button
+              onClick={() => setActiveTab("passenger")}
+              className={`text-xl font-bold transition-colors ${activeTab === "passenger" ? "text-gray-800" : "text-gray-300 hover:text-gray-400"}`}
+            >
+              승객 예고
+            </button>
+            <span className="text-gray-200 font-bold">·</span>
+            <button
+              onClick={() => setActiveTab("weekly")}
+              className={`text-xl font-bold transition-colors ${activeTab === "weekly" ? "text-gray-800" : "text-gray-300 hover:text-gray-400"}`}
+            >
+              주간 예측
+            </button>
+          </div>
+
+          {activeTab === "passenger" && (
+            !summary
+              ? <PassengerSkeleton />
+              : <PassengerChart slots={summary.slots.map(deserializeSlot)} tomorrowLabel={summary.tomorrowLabel} />
+          )}
+          {activeTab === "weekly" && (
+            !flights
+              ? <WeeklySkeleton />
+              : <WeeklyForecast days={flights.weeklyDays} />
+          )}
+        </div>
 
         {/* ── 느린 섹션: 운항편 ── */}
         {!flights ? (
