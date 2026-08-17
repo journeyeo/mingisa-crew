@@ -99,20 +99,6 @@ export default function Loading() {
           </div>
         </div>
 
-        {/* 주간 예측 */}
-        <div>
-          <Skeleton className="h-4 w-20 mb-3" />
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm divide-y divide-gray-50">
-            {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-              <div key={i} className="flex items-center px-4 py-3 gap-3">
-                <Skeleton className="h-4 w-6" />
-                <Skeleton className="flex-1 h-3" />
-                <Skeleton className="h-4 w-10" />
-              </div>
-            ))}
-          </div>
-        </div>
-
         {/* 주차 */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 py-4 space-y-2">
           <Skeleton className="h-3 w-16" />

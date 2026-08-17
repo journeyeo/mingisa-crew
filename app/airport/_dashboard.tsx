@@ -1,13 +1,12 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import type { Flight, HourlySlot, Terminal, WeeklyDay } from "@/lib/airport/types";
+import type { Flight, HourlySlot, Terminal } from "@/lib/airport/types";
 
 import { DashboardHeader } from "@/components/airport/DashboardHeader";
 import { TerminalToggle } from "@/components/airport/TerminalBasisToggle";
 import { PassengerChart } from "@/components/airport/PassengerChart";
 import { FlightListSlider } from "@/components/airport/FlightListSlider";
-import { WeeklyForecast } from "@/components/airport/WeeklyForecast";
 import { Footer } from "@/components/Footer";
 import { FloatingScrollNav } from "@/components/FloatingScrollNav";
 
@@ -40,7 +39,6 @@ interface SummaryData {
 interface FlightsData {
   allSlots: SerializedSlot[];
   allSlotsLanding: SerializedSlot[];
-  weeklyDays: WeeklyDay[];
   todayStr: string;
   tomorrowStr: string;
   kstHour: number;
@@ -108,23 +106,6 @@ function FlightsSkeleton() {
             <Sk className="w-20 h-5" />
             <Sk className="flex-1 h-4" />
             <Sk className="w-24 h-4" />
-          </div>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function WeeklySkeleton() {
-  return (
-    <div>
-      <Sk className="h-4 w-20 mb-3" />
-      <div className="bg-white rounded-2xl border border-gray-100 shadow-sm divide-y divide-gray-50">
-        {[0, 1, 2, 3, 4, 5, 6].map((i) => (
-          <div key={i} className="flex items-center px-4 py-3 gap-3">
-            <Sk className="h-4 w-6" />
-            <Sk className="flex-1 h-3" />
-            <Sk className="h-4 w-10" />
           </div>
         ))}
       </div>
@@ -212,38 +193,25 @@ export function AirportDashboard({ terminal }: Props) {
           </>
         )}
 
-        {/* ── 느린 섹션: 운항편 + 주간 예측 ── */}
+        {/* ── 느린 섹션: 운항편 ── */}
         {!flights ? (
-          <>
-            <FlightsSkeleton />
-            <WeeklySkeleton />
-          </>
+          <FlightsSkeleton />
         ) : (
-          <>
-            <div>
-              <p className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-1.5">
-                <span className="inline-block w-1 h-4 rounded-full bg-[#1B5E36]" />
-                시간대별 운항편
-              </p>
-              <FlightListSlider
-                key={terminal}
-                terminal={terminal}
-                slots={flights.allSlots.map(deserializeSlot)}
-                slotsLanding={flights.allSlotsLanding.map(deserializeSlot)}
-                todayStr={flights.todayStr}
-                tomorrowStr={flights.tomorrowStr}
-                kstHour={flights.kstHour}
-              />
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5 mb-4">
-                <span className="inline-block w-1 h-4 rounded-full bg-[#1B5E36]" />
-                <p className="text-xl font-bold text-gray-800">주간 예측</p>
-                <span className="text-xs text-gray-500">(T1/T2 통합)</span>
-              </div>
-              <WeeklyForecast days={flights.weeklyDays} />
-            </div>
-          </>
+          <div>
+            <p className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-1.5">
+              <span className="inline-block w-1 h-4 rounded-full bg-[#1B5E36]" />
+              시간대별 운항편
+            </p>
+            <FlightListSlider
+              key={terminal}
+              terminal={terminal}
+              slots={flights.allSlots.map(deserializeSlot)}
+              slotsLanding={flights.allSlotsLanding.map(deserializeSlot)}
+              todayStr={flights.todayStr}
+              tomorrowStr={flights.tomorrowStr}
+              kstHour={flights.kstHour}
+            />
+          </div>
         )}
 
         <p className="text-xs text-gray-400 pb-2">출처: 인천국제공항공사 공공데이터포털</p>
