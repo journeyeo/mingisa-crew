@@ -2,6 +2,7 @@
 
 import { Fragment, useState, useMemo, useRef, useEffect } from "react";
 import type { HourlySlot } from "@/lib/airport/types";
+import { FLIGHT_MINUTES } from "@/lib/airport/flight-minutes";
 
 // 대형항공사 키워드 (포함 여부로 판단)
 const MAJOR_KEYWORDS = [
@@ -18,35 +19,15 @@ const MAJOR_KEYWORDS = [
 ];
 const isMajorAirline = (name: string) => MAJOR_KEYWORDS.some((k) => name.includes(k));
 
-const FLIGHT_MINUTES: Record<string, number> = {
-  NRT:130, HND:130, KIX:135, FUK:115, CTS:145, OKA:175, NGO:130, SDJ:155, KOJ:160, OIT:140, AOJ:100, ISG:150, YGJ:90, TAK:90, KKJ:90, UKB:90, KMI:100, KMJ:90, KIJ:95, KMQ:95, HIJ:120, MYJ:115,
-  PEK:200, PKX:200, TSN:130, PVG:185, SHA:185, TAO:110, DLC:90, SHE:90, CGO:130, WUH:140, CSX:155, HFE:120,
-  HGH:160, NKG:150, TNA:115, TYN:145, HET:185, HRB:150, SJW:130, FOC:150, YNJ:90, CGQ:120, WEH:90, YNT:95, WNZ:150,
-  HKG:215, MFM:215, TPE:175, KHH:200, RMQ:155,
-  CAN:210, SZX:210, XMN:190, CTU:250, TFU:250, CKG:260, XIY:225, KMG:270, URC:330, DYG:150,
-  ULN:195, UBN:195, VVO:195, KHV:185, YKS:245,
-  MNL:250, CEB:240, CRK:220, TAG:220, HAN:260, DAD:280, SGN:305, PQC:330, BKK:360, DMK:360, HKT:360, CNX:375, REP:355, PNH:330, VTE:325, CXR:320,
-  KUL:360, BKI:300, SIN:375, CGK:390, DPS:390, RGN:365, MDL:350,
-  DAC:330, DEL:475, BOM:500, KTM:420, CMB:515, CCU:360, MAA:550, HYD:540, BLR:560,
-  ALA:430, TAS:445, FRU:440, GYD:525,
-  SVO:580, DME:580, LED:615,
-  DXB:545, DOH:570, AUH:585, BAH:590, KWI:585, MCT:575, RUH:590,
-  AMM:615, CAI:625, TLV:625, IST:665, SAW:665,
-  CDG:695, FRA:715, LHR:700, AMS:715, ZRH:720, MUC:715, VIE:720,
-  FCO:735, MXP:720, MAD:745, BCN:735, BRU:720, CPH:725, ARN:740, OSL:745,
-  WAW:720, PRG:715, BUD:720,
-  LAX:635, SFO:645, SEA:605, YVR:605, JFK:810, BOS:840, ORD:825, DTW:780, DFW:790, MSP:720, IAD:840, YYZ:845, YYC:645, LAS:660, ATL:830, MTY:900,
-  GUM:240, HNL:520, SYD:665, MEL:695, BNE:665, AKL:770,
-};
-
-function estimateHours(code?: string): number | null {
+function estimateHours(code: string | undefined, extra: Record<string, number>): number | null {
   if (!code) return null;
-  const min = FLIGHT_MINUTES[code.toUpperCase()];
+  const upper = code.toUpperCase();
+  const min = FLIGHT_MINUTES[upper] ?? extra[upper];
   return min ? Math.round(min / 60) : null;
 }
 
-function DurationBadge({ code }: { code?: string }) {
-  const h = estimateHours(code);
+function DurationBadge({ code, extra }: { code?: string; extra: Record<string, number> }) {
+  const h = estimateHours(code, extra);
   if (!h) return null;
   const [label, cls] = h >= 7 ? ["장", "bg-orange-50 text-orange-700"]
                      : h >= 3 ? ["중", "bg-gray-100 text-gray-500"]
@@ -73,6 +54,7 @@ const FIXED_BLOCKS = [
 interface Props {
   slots: HourlySlot[];
   slotsLanding: HourlySlot[];
+  extraMinutes: Record<string, number>;
   todayStr: string;
   tomorrowStr: string;
   kstHour: number;
@@ -101,7 +83,7 @@ function TimeCell({ date, todayStr, prefix, hideNextDay }: { date: Date; todaySt
   );
 }
 
-export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, kstHour, terminal }: Props) {
+export function FlightListSlider({ slots, slotsLanding, extraMinutes, todayStr, tomorrowStr, kstHour, terminal }: Props) {
   const [showFilter, setShowFilter] = useState(false);
   const [filterQuery, setFilterQuery] = useState("");
   const [selectedAirlines, setSelectedAirlines] = useState<Set<string> | null>(null);
@@ -186,7 +168,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
     const raw = selected.flatMap((s) =>
       s.flights
         .filter((f) => selectedAirlines === null || selectedAirlines.has(f.airline))
-        .filter((f) => !filterLongHaul || (estimateHours(f.airportCode) ?? 0) >= 7)
+        .filter((f) => !filterLongHaul || (estimateHours(f.airportCode, extraMinutes) ?? 0) >= 7)
         .map((f) => ({ flight: f, isNoTransport: s.isNoTransport }))
     );
     const seen = new Map<string, { flight: typeof raw[0]["flight"]; ids: string[]; isNoTransport: boolean }>();
@@ -353,7 +335,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
                     </div>
 
                     <div className="flex-1 flex items-center min-w-0 gap-1.5 pt-0.5">
-                      <DurationBadge code={flight.airportCode} />
+                      <DurationBadge code={flight.airportCode} extra={extraMinutes} />
                       <span className="text-base font-semibold text-gray-900 truncate min-w-0">{flight.origin}</span>
                     </div>
 
