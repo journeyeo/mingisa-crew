@@ -192,9 +192,11 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
                     <td className="py-2 rounded-l-lg pl-1">
                       <div className="flex flex-col gap-0.5">
                         <div className="flex items-center gap-1.5 flex-nowrap">
-                          {isNext && <span className="text-[10px] text-amber-500 leading-none">{tomorrowLabel}</span>}
                           <span className="text-base tabular-nums font-semibold">{String(s.hour).padStart(2, "0")}시</span>
-                          {s.isNoTransport && <span className="text-xs font-bold text-white px-2 py-0.5 rounded-full leading-none" style={{ background: "#E65100" }}>심야</span>}
+                          {s.isNoTransport && (
+                            <span className="text-xs font-bold text-white px-2 py-0.5 rounded-full leading-none" style={{ background: "#E65100" }}>심야</span>
+                          )}
+                          {isNext && <span className="text-[10px] text-amber-500 leading-none">{tomorrowLabel}</span>}
                           {isNow && <span className="text-xs font-bold px-2 py-0.5 rounded-full text-white leading-none" style={{ background: "#1B5E36" }}>지금</span>}
                         </div>
                       </div>

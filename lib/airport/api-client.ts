@@ -46,10 +46,9 @@ export async function fetchArrivalsCongestion(
   const fallback = terminal === "T1" ? MOCK_ARRIVALS_T1 : MOCK_ARRIVALS_T2;
   if (useMock()) return fallback;
 
-  const t = terminal === "T1" ? "1" : "2";
   const url =
     `${BASE_URL}/StatusOfArrivals/getArrivalsCongestion` +
-    `?serviceKey=${SERVICE_KEY}&type=json&numOfRows=100&terminal=${t}`;
+    `?serviceKey=${SERVICE_KEY}&type=json&numOfRows=100&terno=${terminal}`;
   return govFetch<ArrivalCongestionItem>(url).catch(() => fallback);
 }
 

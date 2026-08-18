@@ -19,15 +19,17 @@ const MAJOR_KEYWORDS = [
 ];
 const isMajorAirline = (name: string) => MAJOR_KEYWORDS.some((k) => name.includes(k));
 
-function estimateHours(code?: string): number | null {
-  if (!code) return null;
-  const min = FLIGHT_MINUTES[code.toUpperCase()];
-  return min ? Math.round(min / 60) : null;
-}
+const DOMESTIC_CODES = new Set(["GMP", "PUS", "TAE", "CJU", "USN", "KPO", "RSU", "HIN", "WJU", "YNY", "CJJ", "KWJ", "MWX"]);
 
 function DurationBadge({ code }: { code?: string }) {
-  const h = estimateHours(code);
-  if (!h) return null;
+  if (!code) return null;
+  const upper = code.toUpperCase();
+  if (DOMESTIC_CODES.has(upper)) {
+    return <span className="text-xs font-medium px-1.5 py-0.5 rounded leading-none bg-blue-50 text-blue-500">국</span>;
+  }
+  const min = FLIGHT_MINUTES[upper];
+  if (!min) return null;
+  const h = Math.round(min / 60);
   const [label, cls] = h >= 7 ? ["장", "bg-orange-50 text-orange-700"]
                      : h >= 3 ? ["중", "bg-gray-100 text-gray-500"]
                               : ["단", "bg-gray-100 text-gray-400"];
@@ -166,7 +168,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
     const raw = selected.flatMap((s) =>
       s.flights
         .filter((f) => selectedAirlines === null || selectedAirlines.has(f.airline))
-        .filter((f) => !filterLongHaul || (estimateHours(f.airportCode) ?? 0) >= 7)
+        .filter((f) => !filterLongHaul || Math.round((FLIGHT_MINUTES[f.airportCode?.toUpperCase() ?? ""] ?? 0) / 60) >= 7)
         .map((f) => ({ flight: f, isNoTransport: s.isNoTransport }))
     );
     const seen = new Map<string, { flight: typeof raw[0]["flight"]; ids: string[]; isNoTransport: boolean }>();
