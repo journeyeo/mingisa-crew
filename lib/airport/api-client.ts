@@ -24,7 +24,7 @@ function useMock() {
 }
 
 async function govFetch<T>(url: string): Promise<T[]> {
-  const res = await fetch(url, { next: { revalidate: 300 } });
+  const res = await fetch(url, { next: { revalidate: 600 } });
   if (!res.ok) {
     const body = await res.text();
     throw new Error(`gov API error: ${res.status} — ${body.slice(0, 200)}`);
