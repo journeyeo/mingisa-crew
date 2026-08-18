@@ -1,8 +1,6 @@
 import { unstable_cache } from "next/cache";
 
-const isDev = process.env.NODE_ENV === "development";
 function withCache<T>(fn: () => Promise<T>, key: string[], opts: { revalidate: number }): Promise<T> {
-  if (isDev) return fn();
   return unstable_cache(fn, key, opts)();
 }
 
@@ -74,11 +72,23 @@ export function getCachedSummary(terminal: Terminal, todayStr: string, tomorrowS
         (sum, a) => sum + ((parseFloat(a.foreigner ?? "0") + parseFloat(a.korean ?? "0")) || 0), 0
       );
 
+      const arrivalCongestion = terminalArrivals.map((a) => ({
+        flightid: a.flightid,
+        entrygate: a.entrygate,
+        airport: a.airport,
+        gatenumber: a.gatenumber,
+        korean: parseFloat(a.korean ?? "0") || 0,
+        foreigner: parseFloat(a.foreigner ?? "0") || 0,
+        scheduletime: a.scheduletime,
+        estimatedtime: a.estimatedtime,
+      }));
+
       return {
         slots: serializeSlots(slots),
         peakSlot: peakSlot ? { ...peakSlot, flights: peakSlot.flights.map(serializeFlight) } : null,
         currentForeignWaiting,
         currentTotalWaiting,
+        arrivalCongestion,
         todayStr,
         tomorrowStr,
         tomorrowLabel,

@@ -25,11 +25,23 @@ type SerializedFlight = Omit<Flight, "scheduledTime" | "landingTime" | "exitTime
 
 type SerializedSlot = Omit<HourlySlot, "flights"> & { flights: SerializedFlight[] };
 
+interface ArrivalCongestionEntry {
+  flightid: string;
+  entrygate: string;
+  airport: string;
+  gatenumber: string;
+  korean: number;
+  foreigner: number;
+  scheduletime: string;
+  estimatedtime: string;
+}
+
 interface SummaryData {
   slots: SerializedSlot[];
   peakSlot: SerializedSlot | null;
   currentForeignWaiting: number;
   currentTotalWaiting: number;
+  arrivalCongestion: ArrivalCongestionEntry[];
   todayStr: string;
   tomorrowStr: string;
   tomorrowLabel: string;
@@ -184,6 +196,7 @@ export function AirportDashboard({ terminal }: Props) {
             terminal={terminal}
             currentForeignWaiting={summary.currentForeignWaiting}
             currentTotalWaiting={summary.currentTotalWaiting}
+            arrivalCongestion={summary.arrivalCongestion}
             peakSlot={summary.peakSlot ? deserializeSlot(summary.peakSlot) : null}
             now={summary.nowISO}
             tomorrowLabel={summary.tomorrowLabel}
@@ -219,15 +232,15 @@ export function AirportDashboard({ terminal }: Props) {
           </div>
         </div>
 
-        {/* ── 느린 섹션: 운항편 ── */}
+        {/* ── 느린 섹션: 시간대별 운항편 ── */}
         {!flights ? (
           <FlightsSkeleton />
         ) : (
           <div>
-            <p className="text-xl font-bold text-gray-800 mb-4 flex items-center gap-1.5">
+            <div className="flex items-center gap-1.5 mb-4">
               <span className="inline-block w-1 h-4 rounded-full bg-[#1B5E36]" />
-              시간대별 운항편
-            </p>
+              <h2 className="text-xl font-bold text-gray-800">시간대별 운항편</h2>
+            </div>
             <FlightListSlider
               key={terminal}
               terminal={terminal}
@@ -236,6 +249,7 @@ export function AirportDashboard({ terminal }: Props) {
               todayStr={flights.todayStr}
               tomorrowStr={flights.tomorrowStr}
               kstHour={flights.kstHour}
+              congestion={summary?.arrivalCongestion}
             />
           </div>
         )}

@@ -52,6 +52,13 @@ const FIXED_BLOCKS = [
   { startH: 21, endH: 23, label: "21~23시" },
 ] as const;
 
+interface CongestionEntry {
+  flightid: string;
+  entrygate: string;
+  korean: number;
+  foreigner: number;
+}
+
 interface Props {
   slots: HourlySlot[];
   slotsLanding: HourlySlot[];
@@ -59,6 +66,7 @@ interface Props {
   tomorrowStr: string;
   kstHour: number;
   terminal: string;
+  congestion?: CongestionEntry[];
 }
 
 function dateOf(date: Date): string {
@@ -83,7 +91,7 @@ function TimeCell({ date, todayStr, prefix, hideNextDay }: { date: Date; todaySt
   );
 }
 
-export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, kstHour, terminal }: Props) {
+export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, kstHour, terminal, congestion }: Props) {
   const [showFilter, setShowFilter] = useState(false);
   const [filterQuery, setFilterQuery] = useState("");
   const [selectedAirlines, setSelectedAirlines] = useState<Set<string> | null>(null);
@@ -190,6 +198,11 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
     return idx >= 0 ? idx : allEntries.length;
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [allEntries, basis]);
+
+  const congestionMap = useMemo(() => {
+    if (!congestion?.length) return new Map<string, CongestionEntry>();
+    return new Map(congestion.map((c) => [c.flightid.toUpperCase(), c]));
+  }, [congestion]);
 
   const listRef = useRef<HTMLDivElement>(null);
   const dividerRef = useRef<HTMLDivElement>(null);
@@ -302,6 +315,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
               const extraIds = ids.slice(1);
               const isExpanded = expandedIds.has(primaryId);
               const isNextDay = dateOf(flight.landingTime) !== todayStr;
+              const cong = ids.map((id) => congestionMap.get(id.toUpperCase())).find(Boolean);
               return (
                 <Fragment key={`${primaryId}-${i}`}>
                   {i === nowDividerIdx && isCurrentBlockSelected && (
@@ -372,6 +386,11 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
                       <p className="text-base font-semibold whitespace-nowrap text-gray-900">
                         <TimeCell date={flight.exitTime} todayStr={todayStr} prefix={flight.exitGate ? `출구 ${flight.exitGate}` : "출구"} hideNextDay />
                       </p>
+                      {cong && basis === "exit" && (
+                        <p className="text-xs tabular-nums font-semibold whitespace-nowrap text-[#1B5E36]">
+                          외국인 대기 {cong.foreigner.toLocaleString()}명
+                        </p>
+                      )}
                     </div>
                   </div>
                 </Fragment>
