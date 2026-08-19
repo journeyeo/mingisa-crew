@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   openGraph: {
     title: "민기사 크루",
     description: "인천공항 시간대별 입국 수요 · 기사용",
-    images: [{ url: "/og-image.png" }],
+    images: [{ url: "/og-image-crew.png" }],
   },
   appleWebApp: {
     capable: true,

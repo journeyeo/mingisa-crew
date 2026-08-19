@@ -97,7 +97,7 @@ export function getCachedSummary(terminal: Terminal, todayStr: string, tomorrowS
       };
     },
     ["airport-summary", terminal, todayStr, tomorrowStr],
-    { revalidate: 600 }
+    { revalidate: 300 }
   );
 }
 
@@ -150,6 +150,6 @@ export function getCachedFlights(terminal: Terminal, todayStr: string, tomorrowS
       };
     },
     ["airport-flights-v3", terminal, todayStr, tomorrowStr],
-    { revalidate: 600 }
+    { revalidate: 300 }
   );
 }
