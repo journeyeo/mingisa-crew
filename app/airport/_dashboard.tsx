@@ -170,25 +170,34 @@ export function AirportDashboard({ terminal }: Props) {
 
   const now = new Date();
 
+  function scrollToTop() {
+    (document.scrollingElement ?? document.documentElement).scrollTo({ top: 0, behavior: "smooth" });
+  }
+
   return (
     <main className="min-h-screen bg-gray-50 text-gray-900">
-      <div className="max-w-lg mx-auto bg-white px-4 pb-2" style={{ paddingTop: "calc(env(safe-area-inset-top) + 28px)" }}>
-        <div className="flex items-center gap-2">
-          <img src="/app-icon-crew-512.png" alt="민기사 크루" className="w-7 h-7 rounded-lg object-contain" />
-          <h1 className="text-xl font-bold text-gray-900">인천공항 입국 수요</h1>
+      <div
+        className="sticky top-0 z-50 max-w-lg mx-auto bg-white border-b border-gray-100 px-4"
+        style={{ paddingTop: "env(safe-area-inset-top)" }}
+      >
+        <div className="pt-4 pb-2">
+          <div className="flex items-center gap-2">
+            <button onClick={scrollToTop} className="flex-shrink-0">
+              <img src="/app-icon-crew-512.png" alt="민기사 크루" className="w-7 h-7 rounded-lg object-contain" />
+            </button>
+            <h1 className="text-xl font-bold text-gray-900">인천공항 입국 수요</h1>
+          </div>
+          <p className="text-sm text-gray-500 mt-2">
+            {now.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" })}
+            {" · 5분 갱신"}
+            {summary && (() => {
+              const kst = new Date(new Date(summary.nowISO).getTime() + 9 * 3600_000);
+              const hh = String(kst.getUTCHours()).padStart(2, "0");
+              const mm = String(kst.getUTCMinutes()).padStart(2, "0");
+              return <span className="text-gray-400"> · {hh}:{mm} 업데이트</span>;
+            })()}
+          </p>
         </div>
-        <p className="text-sm text-gray-500 mt-2">
-          {now.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" })}
-          {" · 5분 갱신"}
-          {summary && (() => {
-            const kst = new Date(new Date(summary.nowISO).getTime() + 9 * 3600_000);
-            const hh = String(kst.getUTCHours()).padStart(2, "0");
-            const mm = String(kst.getUTCMinutes()).padStart(2, "0");
-            return <span className="text-gray-400"> · {hh}:{mm} 업데이트</span>;
-          })()}
-        </p>
-      </div>
-      <div className="sticky top-0 z-50 max-w-lg mx-auto bg-white border-b border-gray-100 px-4">
         <TerminalToggle terminal={terminal} />
       </div>
       <div className="max-w-lg mx-auto px-4 py-6 pb-4 space-y-8">
