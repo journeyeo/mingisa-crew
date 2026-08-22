@@ -274,19 +274,20 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
         >
           항공사{isFiltered && <span className="ml-1 opacity-70">{selectedCount}/{allAirlines.length}</span>}
         </button>
-        <div className="flex-1" />
-        {!isCurrentBlockSelected && (
-          <button
-            onClick={() => setSelectedGroups(new Set([currentBlockIdx]))}
-            className="text-sm font-bold px-3 py-1.5 rounded-xl text-white shrink-0"
-            style={{ background: "#E65100" }}
-          >
-            지금으로
-          </button>
-        )}
-        <p className="text-base font-bold text-gray-800 tabular-nums shrink-0">
-          {totalFlights > 0 ? `${totalFlights}편` : "—"}
-        </p>
+        <div className="flex items-center gap-1.5 ml-auto shrink-0">
+          {!isCurrentBlockSelected && (
+            <button
+              onClick={() => setSelectedGroups(new Set([currentBlockIdx]))}
+              className="text-sm font-bold px-2.5 py-1.5 rounded-xl text-white"
+              style={{ background: "#E65100" }}
+            >
+              지금으로
+            </button>
+          )}
+          <p className="text-base font-bold text-gray-800 tabular-nums">
+            {totalFlights > 0 ? `${totalFlights}편` : "—"}
+          </p>
+        </div>
       </div>
       <div className="grid grid-cols-4 gap-2">
         {FIXED_BLOCKS.map(({ label }, blockIdx) => {
