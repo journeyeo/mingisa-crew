@@ -257,15 +257,11 @@ export function AirportDashboard({ terminal }: Props) {
 
       {/* ── 운항편 탭 ── */}
       {bottomTab === "flights" && (
-        <div className="max-w-lg mx-auto px-4 py-6 space-y-8" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 80px)" }}>
+        <div className="max-w-lg mx-auto px-4 py-6 space-y-8" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 120px)" }}>
           {!flights ? (
             <FlightsSkeleton />
           ) : (
             <div>
-              <div className="flex items-center gap-1.5 mb-4">
-                <span className="inline-block w-1 h-4 rounded-full bg-[#1B5E36]" />
-                <h2 className="text-xl font-bold text-gray-800">시간대별 운항편</h2>
-              </div>
               <FlightListSlider
                 key={terminal}
                 terminal={terminal}

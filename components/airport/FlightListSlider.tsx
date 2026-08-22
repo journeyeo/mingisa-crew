@@ -211,15 +211,17 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
 
   const isCurrentBlockSelected = selectedGroups.has(currentBlockIdx);
 
+
+
   useEffect(() => {
-    const list = listRef.current;
-    if (!list) return;
-    if (isCurrentBlockSelected && dividerRef.current) {
-      list.scrollTop = Math.max(0, dividerRef.current.offsetTop - list.offsetTop - 8);
-    } else {
-      list.scrollTop = 0;
-    }
-  }, [selectedGroups, isCurrentBlockSelected, basis]);
+    const el = timeCardRef.current;
+    if (!el) return;
+    const update = () => document.documentElement.style.setProperty("--time-card-height", `${el.offsetHeight}px`);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   function toggleAirline(airline: string) {
     setSelectedAirlines((prev) => {
@@ -235,21 +237,21 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
 
   return (
     <>
-    <div className="flex items-center justify-between px-1 mb-2">
-      <p className="text-base font-bold text-gray-800 tabular-nums">
-        {totalFlights > 0 ? `${totalFlights}편` : "—"}
-      </p>
-      <button
-        onClick={() => { setShowFilter(true); setFilterQuery(""); }}
-        className={`text-sm px-3 py-1.5 rounded-full border font-medium transition-colors ${
-          isFiltered ? "bg-gray-900 text-white border-gray-900" : "bg-white text-gray-700 border-gray-300"
-        }`}
-      >
-        항공사{isFiltered && <span className="ml-1 opacity-70">{selectedCount}/{allAirlines.length}</span>}
-      </button>
-    </div>
-
-    <div ref={timeCardRef} className="sticky z-40 bg-white rounded-2xl border border-gray-100 shadow-sm px-4 pt-4 pb-3" style={{ top: "var(--sticky-header-height, 50px)" }}>
+    <div ref={timeCardRef} className="fixed left-0 right-0 z-40 bg-gray-50 px-4 pt-6" style={{ top: "var(--sticky-header-height, 50px)" }}>
+    <div className="max-w-lg mx-auto bg-white rounded-2xl border border-gray-100 shadow-sm px-4 pt-3 pb-3">
+      <div className="flex items-center justify-between mb-3">
+        <p className="text-base font-bold text-gray-800 tabular-nums">
+          {totalFlights > 0 ? `${totalFlights}편` : "—"}
+        </p>
+        <button
+          onClick={() => { setShowFilter(true); setFilterQuery(""); }}
+          className={`text-sm px-3 py-1.5 rounded-full border font-medium transition-colors ${
+            isFiltered ? "bg-gray-900 text-white border-gray-900" : "bg-white text-gray-700 border-gray-300"
+          }`}
+        >
+          항공사{isFiltered && <span className="ml-1 opacity-70">{selectedCount}/{allAirlines.length}</span>}
+        </button>
+      </div>
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <div className="flex rounded-lg overflow-hidden border border-gray-300 text-xs font-semibold">
@@ -297,6 +299,9 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
         })}
       </div>
     </div>
+    </div>
+
+    <div style={{ height: "var(--time-card-height, 180px)" }} />
 
     {totalFlights === 0 ? (
       <div ref={flightListCardRef} className="mt-2 bg-white rounded-2xl border border-gray-100 shadow-sm">
@@ -309,7 +314,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
           <span className="flex-1">출발지</span>
           <span className="w-28 text-right">착륙 · 출구 도착</span>
         </div>
-        <div ref={listRef} className="divide-y divide-gray-100 overflow-y-auto max-h-[36rem]">
+        <div ref={listRef} className="divide-y divide-gray-100">
           {allEntries.map(({ flight, ids, isNoTransport }, i) => {
               const primaryId = ids[0];
               const extraIds = ids.slice(1);
