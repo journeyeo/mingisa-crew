@@ -211,10 +211,23 @@ export function AirportDashboard({ terminal }: Props) {
           </p>
         </div>
         <TerminalToggle terminal={terminal} />
+        <div className="flex border-b-2 border-gray-100">
+          {(["status", "flights"] as const).map((key) => (
+            <button
+              key={key}
+              onClick={() => setBottomTab(key)}
+              className={`flex-1 py-2.5 text-sm font-bold transition-colors border-b-2 -mb-0.5 ${
+                bottomTab === key ? "text-[#1B5E36] border-[#1B5E36]" : "text-gray-300 border-transparent"
+              }`}
+            >
+              {key === "status" ? "입국 현황" : "운항편"}
+            </button>
+          ))}
+        </div>
       </div>
       {/* ── 현황 탭 ── */}
       {bottomTab === "status" && (
-        <div className="max-w-lg mx-auto px-4 py-6 pb-24 space-y-8">
+        <div className="max-w-lg mx-auto px-4 py-6 pb-8 space-y-8">
           {!summary ? <HeaderSkeleton /> : (
             <DashboardHeader
               terminal={terminal}
@@ -257,7 +270,7 @@ export function AirportDashboard({ terminal }: Props) {
 
       {/* ── 운항편 탭 ── */}
       {bottomTab === "flights" && (
-        <div className="max-w-lg mx-auto px-4 py-6 pb-24 space-y-8">
+        <div className="max-w-lg mx-auto px-4 py-6 pb-8 space-y-8">
           {!flights ? (
             <FlightsSkeleton />
           ) : (
@@ -281,40 +294,7 @@ export function AirportDashboard({ terminal }: Props) {
         </div>
       )}
 
-      {/* ── 하단 네비게이션 ── */}
-      <div
-        className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100"
-        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
-      >
-        <div className="max-w-lg mx-auto flex">
-          {([
-            { key: "status", label: "현황", icon: (
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-                <circle cx="9" cy="7" r="4" />
-                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-              </svg>
-            )},
-            { key: "flights", label: "운항편", icon: (
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21 4 19 4s-2 1-3.5 2.5L8 8 .8 6.2l-.4-.4-.4.4.4.4L3 11l-2 1v2l2-1 .2.8.8.2-1 2h2l1-2 .2.8.8.2v2l2-1 .4.4.4-.4-.4-.4" />
-              </svg>
-            )},
-          ] as const).map(({ key, label, icon }) => (
-            <button
-              key={key}
-              onClick={() => setBottomTab(key)}
-              className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors ${
-                bottomTab === key ? "text-[#1B5E36]" : "text-gray-400"
-              }`}
-            >
-              {icon}
-              <span className="text-xs font-medium">{label}</span>
-            </button>
-          ))}
-        </div>
-      </div>
+      <Footer />
     </main>
   );
 }
