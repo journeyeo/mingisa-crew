@@ -56,7 +56,7 @@ export function TaxiStatusCard({ data }: Props) {
         </div>
       </div>
 
-      <div className="h-[17.5rem] overflow-hidden">
+      <div className="h-[19rem] overflow-hidden">
         {view === "table" ? (
           <table className="w-full">
             <thead>
@@ -97,7 +97,7 @@ export function TaxiStatusCard({ data }: Props) {
               const labelInBar = pct > 35;
               return (
                 <div key={item.label} className="flex items-center gap-3">
-                  <span className="text-xs font-semibold text-gray-600 w-16 flex-shrink-0 text-right">{item.label}</span>
+                  <span className="text-xs font-semibold text-gray-600 w-[4.5rem] flex-shrink-0 text-right">{item.label}</span>
                   <div className="flex-1 h-8 bg-gray-100 rounded-lg overflow-hidden relative">
                     <div
                       className="h-full rounded-lg"
