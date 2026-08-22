@@ -247,7 +247,8 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
   return (
     <>
     <div ref={timeCardRef} className="fixed left-0 right-0 z-40 bg-gray-50 px-4 pt-4" style={{ top: "var(--sticky-header-height, 50px)" }}>
-    <div className="max-w-lg mx-auto bg-white rounded-2xl border border-gray-100 shadow-sm px-4 pt-3 pb-3">
+    <div className="max-w-lg mx-auto space-y-3">
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 pt-3 pb-3">
       <div className="flex items-center gap-2 mb-3">
         <div className="flex rounded-lg overflow-hidden border border-gray-300 text-xs font-semibold shrink-0">
           {(["exit", "landing"] as const).map((b) => (
@@ -305,24 +306,22 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
         })}
       </div>
     </div>
+    <div className="bg-white rounded-t-2xl border border-gray-100 flex items-center px-4 pt-2 pb-1 gap-3 text-sm font-semibold text-gray-600">
+      <span className="w-20 shrink-0">편명</span>
+      <span className="flex-1">출발지</span>
+      <span className="w-28 text-right">착륙 · 출구 도착</span>
+    </div>
+    </div>
     </div>
 
     <div style={{ height: "var(--time-card-height, 180px)" }} />
 
     {totalFlights === 0 ? (
-      <div ref={flightListCardRef} className="mt-3 bg-white rounded-2xl border border-gray-100 shadow-sm">
+      <div ref={flightListCardRef} className="bg-white rounded-b-2xl border-x border-b border-gray-100 shadow-sm">
         <p className="px-4 py-6 text-gray-400 text-sm text-center">이 시간대 운항편 없음</p>
       </div>
     ) : (
-      <div ref={flightListCardRef} className="mt-3 bg-white rounded-2xl border border-gray-100 shadow-sm">
-        <div
-          className="sticky z-20 bg-white rounded-t-2xl flex items-center px-4 pt-2 pb-1 gap-3 text-sm font-semibold text-gray-600 border-b border-gray-100"
-          style={{ top: `calc(var(--sticky-header-height, 50px) + var(--time-card-height, 180px) + 12px)` }}
-        >
-          <span className="w-20 shrink-0">편명</span>
-          <span className="flex-1">출발지</span>
-          <span className="w-28 text-right">착륙 · 출구 도착</span>
-        </div>
+      <div ref={flightListCardRef} className="bg-white rounded-b-2xl border-x border-b border-gray-100 shadow-sm overflow-hidden">
         <div ref={listRef} className="divide-y divide-gray-100">
           {allEntries.map(({ flight, ids, isNoTransport }, i) => {
               const primaryId = ids[0];
