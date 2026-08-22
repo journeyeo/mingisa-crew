@@ -147,7 +147,8 @@ function FlightsSkeleton() {
 export function AirportDashboard({ terminal }: Props) {
   const [summary, setSummary] = useState<SummaryData | null>(null);
   const [flights, setFlights] = useState<FlightsData | null>(null);
-  const [taxi, setTaxi] = useState<TaxiStatus | null>(null);
+  const [taxiT1, setTaxiT1] = useState<TaxiStatus | null>(null);
+  const [taxiT2, setTaxiT2] = useState<TaxiStatus | null>(null);
   const [activeTab, setActiveTab] = useState<"passenger" | "weekly">("passenger");
   const [bottomTab, setBottomTab] = useState<"status" | "flights">("status");
   const headerRef = useRef<HTMLDivElement>(null);
@@ -168,7 +169,8 @@ export function AirportDashboard({ terminal }: Props) {
 
     setSummary(null);
     setFlights(null);
-    setTaxi(null);
+    setTaxiT1(null);
+    setTaxiT2(null);
 
     fetch(`/api/airport/summary?terminal=${terminal}`, { signal })
       .then((r) => r.json())
@@ -180,9 +182,14 @@ export function AirportDashboard({ terminal }: Props) {
       .then((raw: FlightsData) => setFlights(raw))
       .catch((e) => { if (e.name !== "AbortError") console.error(e); });
 
-    fetch(`/api/airport/taxi?terminal=${terminal}`, { signal })
+    fetch(`/api/airport/taxi?terminal=T1`, { signal })
       .then((r) => r.json())
-      .then((raw: TaxiStatus) => setTaxi(raw))
+      .then((raw: TaxiStatus) => setTaxiT1(raw))
+      .catch((e) => { if (e.name !== "AbortError") console.error(e); });
+
+    fetch(`/api/airport/taxi?terminal=T2`, { signal })
+      .then((r) => r.json())
+      .then((raw: TaxiStatus) => setTaxiT2(raw))
       .catch((e) => { if (e.name !== "AbortError") console.error(e); });
 
     return () => controller.abort();
@@ -261,13 +268,13 @@ export function AirportDashboard({ terminal }: Props) {
               </div>
             </div>
           </div>
-          {taxi && (
+          {(taxiT1 || taxiT2) && (
             <div>
               <div className="flex items-center gap-1.5 mb-4">
                 <span className="inline-block w-1 h-4 rounded-full bg-[#1B5E36]" />
                 <h2 className="text-xl font-bold text-gray-800">택시 승강장 현황</h2>
               </div>
-              <TaxiStatusCard data={taxi} />
+              <TaxiStatusCard t1={taxiT1} t2={taxiT2} />
             </div>
           )}
         </div>

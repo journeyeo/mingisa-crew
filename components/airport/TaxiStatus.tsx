@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import type { TaxiStatus } from "@/app/api/airport/taxi/route";
 
 function parseMin(t: string): number {
@@ -10,118 +9,81 @@ function parseMin(t: string): number {
 
 function fmtMin(t: string): string {
   const m = parseMin(t);
-  if (m === 0) return "없음";
+  if (m === 0) return "";
   return m >= 60 ? `${Math.floor(m / 60)}시간 ${m % 60}분` : `${m}분`;
 }
 
-interface Props {
-  data: TaxiStatus;
+interface StandCellProps {
+  count: number;
+  standtime: string;
 }
 
-export function TaxiStatusCard({ data }: Props) {
-  const [view, setView] = useState<"table" | "chart">("table");
+function StandCell({ count, standtime }: StandCellProps) {
+  const waitMin = parseMin(standtime);
+  const hasWait = waitMin > 0;
+  return (
+    <td className="py-3 text-center">
+      {hasWait ? (
+        <div className="flex flex-col items-center gap-0.5">
+          <span className="inline-block text-xs font-bold px-2 py-0.5 rounded-full bg-[#1B5E36] text-white leading-snug">
+            {fmtMin(standtime)} 대기
+          </span>
+          <span className="text-[11px] text-gray-400 tabular-nums">{count}대</span>
+        </div>
+      ) : (
+        <div className="flex flex-col items-center gap-0.5">
+          <span className="text-sm font-semibold text-gray-300">—</span>
+          <span className="text-[11px] text-gray-400 tabular-nums">{count}대</span>
+        </div>
+      )}
+    </td>
+  );
+}
 
-  const items = [
-    { label: "서울택시",   count: data.seoultaxicnt,     standtime: data.seoulstandtime },
-    { label: "인천택시",   count: data.incheontaxicnt,   standtime: data.incheonstandtime },
-    { label: "경기택시",   count: data.gyenggitaxicnt,   standtime: data.gyenggistandtime },
-    { label: "우등택시",   count: data.besttaxicnt,      standtime: data.beststandtime },
-    { label: "밴택시",     count: data.vantaxicnt,       standtime: data.vanstandtime },
-    { label: "인터내셔널", count: data.intercitytaxicnt, standtime: data.intercitystandtime },
-  ];
+interface Props {
+  t1: TaxiStatus | null;
+  t2: TaxiStatus | null;
+}
 
-  const maxCount = Math.max(...items.map((i) => i.count), 1);
+export function TaxiStatusCard({ t1, t2 }: Props) {
+  const rows = [
+    { label: "서울택시",   key: ["seoultaxicnt",     "seoulstandtime"]     },
+    { label: "인천택시",   key: ["incheontaxicnt",   "incheonstandtime"]   },
+    { label: "경기택시",   key: ["gyenggitaxicnt",   "gyenggistandtime"]   },
+    { label: "우등택시",   key: ["besttaxicnt",      "beststandtime"]      },
+    { label: "밴택시",     key: ["vantaxicnt",       "vanstandtime"]       },
+    { label: "인터내셔널", key: ["intercitytaxicnt", "intercitystandtime"] },
+  ] as const;
 
   return (
-    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 pt-4 pb-3 flex flex-col">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-4 text-sm text-gray-500">
-          <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm inline-block bg-[#1B5E36]" />승객 대기
-          </span>
-          <span className="flex items-center gap-1.5">
-            <span className="w-3 h-3 rounded-sm inline-block bg-gray-200" />대기 없음
-          </span>
-        </div>
-        <div className="flex rounded-lg overflow-hidden border border-gray-100 text-[11px] font-semibold">
-          {(["table", "chart"] as const).map((v) => (
-            <button
-              key={v}
-              onClick={() => setView(v)}
-              className={`px-2.5 py-1 transition-colors ${view === v ? "bg-gray-800 text-white" : "bg-white text-gray-400"}`}
-            >
-              {v === "chart" ? "그래프" : "표"}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div className="h-[19rem] overflow-hidden">
-        {view === "table" ? (
-          <table className="w-full">
-            <thead>
-              <tr className="text-sm text-gray-500 border-b border-gray-100">
-                <th className="text-left pb-2 font-semibold">종류</th>
-                <th className="text-right pb-2 font-semibold">대기 대수</th>
-                <th className="text-right pb-2 font-semibold">승객 대기</th>
+    <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 pt-4 pb-2">
+      <table className="w-full">
+        <thead>
+          <tr className="border-b border-gray-100">
+            <th className="text-left pb-2 text-sm font-semibold text-gray-400 w-[4.5rem]" />
+            <th className="pb-2 text-center text-sm font-bold text-gray-700">T1</th>
+            <th className="pb-2 text-center text-sm font-bold text-gray-700">T2</th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-gray-50">
+          {rows.map(({ label, key }) => {
+            const [cntKey, timeKey] = key;
+            return (
+              <tr key={label}>
+                <td className="py-3 text-xs font-semibold text-gray-500 pr-2">{label}</td>
+                <StandCell
+                  count={t1 ? t1[cntKey] : 0}
+                  standtime={t1 ? t1[timeKey] : "0000"}
+                />
+                <StandCell
+                  count={t2 ? t2[cntKey] : 0}
+                  standtime={t2 ? t2[timeKey] : "0000"}
+                />
               </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-50">
-              {items.map((item) => {
-                const hasWait = parseMin(item.standtime) > 0;
-                return (
-                  <tr key={item.label}>
-                    <td className="py-2 pl-1 text-sm font-semibold text-gray-600">{item.label}</td>
-                    <td className="py-2 text-right tabular-nums text-lg font-bold" style={{ color: "#1B5E36" }}>
-                      {item.count}<span className="text-xs text-gray-400 font-normal ml-0.5">대</span>
-                    </td>
-                    <td className="py-2 text-right pr-1">
-                      {hasWait ? (
-                        <span className="inline-block text-xs font-bold px-2 py-0.5 rounded-full bg-[#1B5E36] text-white">
-                          {fmtMin(item.standtime)}
-                        </span>
-                      ) : (
-                        <span className="text-gray-400 text-sm">없음</span>
-                      )}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        ) : (
-          <div className="h-full flex flex-col justify-between py-1">
-            {items.map((item) => {
-              const hasWait = parseMin(item.standtime) > 0;
-              const pct = Math.round((item.count / maxCount) * 100);
-              const labelInBar = pct > 35;
-              return (
-                <div key={item.label} className="flex items-center gap-3">
-                  <span className="text-xs font-semibold text-gray-600 w-[4.5rem] flex-shrink-0 text-right">{item.label}</span>
-                  <div className="flex-1 h-8 bg-gray-100 rounded-lg overflow-hidden relative">
-                    <div
-                      className="h-full rounded-lg"
-                      style={{ width: `${Math.max(pct, 4)}%`, background: hasWait ? "#1B5E36" : "#9ca3af" }}
-                    />
-                    <span
-                      className="absolute top-0 h-full flex items-center text-xs font-bold tabular-nums"
-                      style={{
-                        left: labelInBar ? "8px" : `calc(${Math.max(pct, 4)}% + 6px)`,
-                        color: labelInBar ? "white" : "#374151",
-                      }}
-                    >
-                      {item.count}대
-                    </span>
-                  </div>
-                  <span className="text-xs font-bold w-14 text-right flex-shrink-0" style={{ color: hasWait ? "#1B5E36" : "#9ca3af" }}>
-                    {hasWait ? fmtMin(item.standtime) : "—"}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
+            );
+          })}
+        </tbody>
+      </table>
     </div>
   );
 }
