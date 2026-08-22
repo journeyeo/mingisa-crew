@@ -274,20 +274,9 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
         >
           항공사{isFiltered && <span className="ml-1 opacity-70">{selectedCount}/{allAirlines.length}</span>}
         </button>
-        <div className="flex items-center gap-1.5 ml-auto shrink-0">
-          {!isCurrentBlockSelected && (
-            <button
-              onClick={() => setSelectedGroups(new Set([currentBlockIdx]))}
-              className="text-sm font-bold px-2.5 py-1.5 rounded-xl text-white"
-              style={{ background: "#E65100" }}
-            >
-              지금으로
-            </button>
-          )}
-          <p className="text-base font-bold text-gray-800 tabular-nums">
-            {totalFlights > 0 ? `${totalFlights}편` : "—"}
-          </p>
-        </div>
+        <p className="text-base font-bold text-gray-800 tabular-nums ml-auto shrink-0">
+          {totalFlights > 0 ? `${totalFlights}편` : "—"}
+        </p>
       </div>
       <div className="grid grid-cols-4 gap-2">
         {FIXED_BLOCKS.map(({ label }, blockIdx) => {
@@ -296,9 +285,10 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
             <button
               key={blockIdx}
               onClick={() => toggleGroup(blockIdx)}
-              className={`py-2 rounded-xl text-sm font-semibold text-center transition-colors ${
-                isSelected ? "bg-[#1B5E36] text-white"
-                : "bg-gray-100 text-gray-600"
+              className={`py-2 rounded-xl text-sm font-semibold text-center transition-colors border-2 ${
+                isSelected ? "bg-[#1B5E36] text-white border-transparent"
+                : blockIdx === currentBlockIdx ? "bg-gray-100 text-gray-600 border-dashed border-[#1B5E36]"
+                : "bg-gray-100 text-gray-600 border-transparent"
               }`}
             >
               {label}
