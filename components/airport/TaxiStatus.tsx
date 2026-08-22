@@ -2,15 +2,32 @@
 
 import type { TaxiStatus } from "@/app/api/airport/taxi/route";
 
+function parseMin(t: string): number {
+  if (!t || t === "0000") return 0;
+  return parseInt(t.slice(0, 2), 10) * 60 + parseInt(t.slice(2, 4), 10);
+}
+
+function fmtMin(min: number): string {
+  return min >= 60 ? `${Math.floor(min / 60)}시간 ${min % 60}분` : `${min}분`;
+}
+
 interface StandCellProps {
   count: number;
   standtime: string;
 }
 
-function StandCell({ count }: StandCellProps) {
+function StandCell({ count, standtime }: StandCellProps) {
+  const waitMin = parseMin(standtime);
   return (
-    <td className="py-3.5 text-center">
-      <span className="text-base font-bold text-gray-800 tabular-nums">{count}<span className="text-sm font-normal text-gray-400 ml-0.5">대</span></span>
+    <td className="py-4 text-center">
+      <div className="flex flex-col items-center gap-1">
+        <span className="text-xl font-bold text-gray-900 tabular-nums">
+          {count}<span className="text-sm font-normal text-gray-400 ml-0.5">대</span>
+        </span>
+        <span className="text-sm text-gray-500 tabular-nums">
+          {waitMin > 0 ? fmtMin(waitMin) : "—"}
+        </span>
+      </div>
     </td>
   );
 }
@@ -35,9 +52,15 @@ export function TaxiStatusCard({ t1, t2 }: Props) {
       <table className="w-full">
         <thead>
           <tr className="border-b border-gray-100">
-            <th className="text-left pb-2 text-sm font-semibold text-gray-400 w-[4.5rem]" />
-            <th className="pb-2 text-center text-base font-bold text-gray-800">T1</th>
-            <th className="pb-2 text-center text-base font-bold text-gray-800">T2</th>
+            <th className="text-left pb-3 text-sm font-semibold text-gray-400 w-[4.5rem]" />
+            <th className="pb-3 text-center">
+              <div className="text-lg font-bold text-gray-800">T1</div>
+              <div className="text-xs text-gray-400 font-normal">대수 / 대기</div>
+            </th>
+            <th className="pb-3 text-center">
+              <div className="text-lg font-bold text-gray-800">T2</div>
+              <div className="text-xs text-gray-400 font-normal">대수 / 대기</div>
+            </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-50">
@@ -45,7 +68,7 @@ export function TaxiStatusCard({ t1, t2 }: Props) {
             const [cntKey, timeKey] = key;
             return (
               <tr key={label}>
-                <td className="py-3.5 text-sm font-semibold text-gray-600 pr-2">{label}</td>
+                <td className="py-4 text-sm font-semibold text-gray-600 pr-2 align-middle">{label}</td>
                 <StandCell
                   count={t1 ? t1[cntKey] : 0}
                   standtime={t1 ? t1[timeKey] : "0000"}
