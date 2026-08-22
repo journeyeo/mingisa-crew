@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { Flight, HourlySlot, Terminal, WeeklyDay } from "@/lib/airport/types";
 
 import { DashboardHeader } from "@/components/airport/DashboardHeader";
@@ -147,6 +147,17 @@ export function AirportDashboard({ terminal }: Props) {
   const [flights, setFlights] = useState<FlightsData | null>(null);
   const [activeTab, setActiveTab] = useState<"passenger" | "weekly">("passenger");
   const [bottomTab, setBottomTab] = useState<"status" | "flights">("status");
+  const headerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = headerRef.current;
+    if (!el) return;
+    const update = () => document.documentElement.style.setProperty("--sticky-header-height", `${el.offsetHeight}px`);
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -177,6 +188,7 @@ export function AirportDashboard({ terminal }: Props) {
   return (
     <main className="min-h-screen bg-gray-50 text-gray-900">
       <div
+        ref={headerRef}
         className="sticky top-0 z-50 max-w-lg mx-auto bg-white border-b border-gray-100 px-4"
         style={{ paddingTop: "env(safe-area-inset-top)" }}
       >

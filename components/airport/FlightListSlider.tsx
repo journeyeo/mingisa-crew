@@ -249,7 +249,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
       </button>
     </div>
 
-    <div ref={timeCardRef} className="sticky top-[50px] z-40 bg-white rounded-2xl border border-gray-100 shadow-sm px-4 pt-4 pb-3">
+    <div ref={timeCardRef} className="sticky z-40 bg-white rounded-2xl border border-gray-100 shadow-sm px-4 pt-4 pb-3" style={{ top: "var(--sticky-header-height, 50px)" }}>
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <div className="flex rounded-lg overflow-hidden border border-gray-300 text-xs font-semibold">
