@@ -272,7 +272,7 @@ export function AirportDashboard({ terminal }: Props) {
             <div>
               <div className="flex items-center gap-1.5 mb-4">
                 <span className="inline-block w-1 h-4 rounded-full bg-[#1B5E36]" />
-                <h2 className="text-xl font-bold text-gray-800">택시 승강장 현황</h2>
+                <h2 className="text-xl font-bold text-gray-800">택시 승강장</h2>
               </div>
               <TaxiStatusCard t1={taxiT1} t2={taxiT2} />
             </div>
