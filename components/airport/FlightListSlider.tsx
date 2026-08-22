@@ -420,8 +420,8 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
             <div className="flex gap-2 mb-3">
               {[
                 { label: "전체 선택", fn: () => setSelectedAirlines(null) },
-                { label: "대형항공사", fn: () => setSelectedAirlines(new Set(allAirlines.filter(isMajorAirline))) },
                 { label: "전체 해제", fn: () => setSelectedAirlines(new Set()) },
+                { label: "대형항공사", fn: () => setSelectedAirlines(new Set(allAirlines.filter(isMajorAirline))) },
               ].map(({ label, fn }) => (
                 <button key={label} onClick={fn}
                   className="text-sm font-semibold px-3 py-1.5 rounded-xl border border-gray-200 text-gray-700 bg-gray-50">
