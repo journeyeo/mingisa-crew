@@ -287,7 +287,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
           {totalFlights > 0 ? `${totalFlights}편` : "—"}
         </p>
       </div>
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid grid-cols-4 gap-2 mb-2">
         {FIXED_BLOCKS.map(({ label }, blockIdx) => {
           const isSelected = selectedGroups.has(blockIdx);
           return (
@@ -304,6 +304,11 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
           );
         })}
       </div>
+      <div className="flex items-center gap-3 pt-2 border-t border-gray-100 text-xs font-semibold text-gray-400">
+        <span className="w-20 shrink-0">편명</span>
+        <span className="flex-1">출발지</span>
+        <span className="w-28 text-right">착륙 · 출구 도착</span>
+      </div>
     </div>
     </div>
 
@@ -314,16 +319,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
         <p className="px-4 py-6 text-gray-400 text-sm text-center">이 시간대 운항편 없음</p>
       </div>
     ) : (
-      <>
-        <div
-          className="sticky z-20 mt-3 bg-white rounded-t-2xl border border-gray-100 flex items-center px-4 pt-2 pb-1 gap-3 text-sm font-semibold text-gray-600"
-          style={{ top: "calc(var(--sticky-header-height, 50px) + var(--time-card-height, 180px) + 12px)" }}
-        >
-          <span className="w-20 shrink-0">편명</span>
-          <span className="flex-1">출발지</span>
-          <span className="w-28 text-right">착륙 · 출구 도착</span>
-        </div>
-        <div ref={flightListCardRef} className="bg-white rounded-b-2xl border-x border-b border-gray-100 shadow-sm overflow-hidden">
+      <div ref={flightListCardRef} className="mt-3 bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
         <div ref={listRef} className="divide-y divide-gray-100">
           {allEntries.map(({ flight, ids, isNoTransport }, i) => {
               const primaryId = ids[0];
@@ -413,7 +409,6 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
             })}
           </div>
         </div>
-      </>
       )}
 
       {showFilter && (
