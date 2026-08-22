@@ -9,7 +9,6 @@ import { PassengerChart } from "@/components/airport/PassengerChart";
 import { FlightListSlider } from "@/components/airport/FlightListSlider";
 import { WeeklyForecast } from "@/components/airport/WeeklyForecast";
 import { Footer } from "@/components/Footer";
-import { FloatingScrollNav } from "@/components/FloatingScrollNav";
 
 interface Props {
   terminal: Terminal;
@@ -147,6 +146,7 @@ export function AirportDashboard({ terminal }: Props) {
   const [summary, setSummary] = useState<SummaryData | null>(null);
   const [flights, setFlights] = useState<FlightsData | null>(null);
   const [activeTab, setActiveTab] = useState<"passenger" | "weekly">("passenger");
+  const [bottomTab, setBottomTab] = useState<"status" | "flights">("status");
 
   useEffect(() => {
     const controller = new AbortController();
@@ -200,76 +200,109 @@ export function AirportDashboard({ terminal }: Props) {
         </div>
         <TerminalToggle terminal={terminal} />
       </div>
-      <div className="max-w-lg mx-auto px-4 py-6 pb-4 space-y-8">
-
-        {/* ── 헤더 ── */}
-        {!summary ? <HeaderSkeleton /> : (
-          <DashboardHeader
-            terminal={terminal}
-            currentForeignWaiting={summary.currentForeignWaiting}
-            currentTotalWaiting={summary.currentTotalWaiting}
-            arrivalCongestion={summary.arrivalCongestion}
-            peakSlot={summary.peakSlot ? deserializeSlot(summary.peakSlot) : null}
-            now={summary.nowISO}
-            tomorrowLabel={summary.tomorrowLabel}
-          />
-        )}
-
-        {/* ── 탭: 승객 예고 | 주간 예측 ── */}
-        <div>
-          <div className="flex items-center gap-1.5 mb-4">
-            <span className="inline-block w-1 h-4 rounded-full bg-[#1B5E36]" />
-            <button
-              onClick={() => setActiveTab("passenger")}
-              className={`text-xl font-bold transition-colors ${activeTab === "passenger" ? "text-gray-800" : "text-gray-300 hover:text-gray-400"}`}
-            >
-              승객 예고
-            </button>
-            <span className="text-gray-200 font-bold">·</span>
-            <button
-              onClick={() => setActiveTab("weekly")}
-              className={`text-xl font-bold transition-colors ${activeTab === "weekly" ? "text-gray-800" : "text-gray-300 hover:text-gray-400"}`}
-            >
-              주간 예측
-            </button>
-          </div>
-
-          <div className="relative h-80">
-            <div className={`absolute inset-0 ${activeTab === "passenger" ? "" : "invisible pointer-events-none"}`}>
-              {!summary ? <PassengerSkeleton /> : <PassengerChart slots={summary.slots.map(deserializeSlot)} tomorrowLabel={summary.tomorrowLabel} />}
-            </div>
-            <div className={`absolute inset-0 ${activeTab === "weekly" ? "" : "invisible pointer-events-none"}`}>
-              {!flights ? <WeeklySkeleton /> : <WeeklyForecast days={flights.weeklyDays} />}
-            </div>
-          </div>
-        </div>
-
-        {/* ── 느린 섹션: 시간대별 운항편 ── */}
-        {!flights ? (
-          <FlightsSkeleton />
-        ) : (
+      {/* ── 현황 탭 ── */}
+      {bottomTab === "status" && (
+        <div className="max-w-lg mx-auto px-4 py-6 pb-24 space-y-8">
+          {!summary ? <HeaderSkeleton /> : (
+            <DashboardHeader
+              terminal={terminal}
+              currentForeignWaiting={summary.currentForeignWaiting}
+              currentTotalWaiting={summary.currentTotalWaiting}
+              arrivalCongestion={summary.arrivalCongestion}
+              peakSlot={summary.peakSlot ? deserializeSlot(summary.peakSlot) : null}
+              now={summary.nowISO}
+              tomorrowLabel={summary.tomorrowLabel}
+            />
+          )}
           <div>
             <div className="flex items-center gap-1.5 mb-4">
               <span className="inline-block w-1 h-4 rounded-full bg-[#1B5E36]" />
-              <h2 className="text-xl font-bold text-gray-800">시간대별 운항편</h2>
+              <button
+                onClick={() => setActiveTab("passenger")}
+                className={`text-xl font-bold transition-colors ${activeTab === "passenger" ? "text-gray-800" : "text-gray-300 hover:text-gray-400"}`}
+              >
+                승객 예고
+              </button>
+              <span className="text-gray-200 font-bold">·</span>
+              <button
+                onClick={() => setActiveTab("weekly")}
+                className={`text-xl font-bold transition-colors ${activeTab === "weekly" ? "text-gray-800" : "text-gray-300 hover:text-gray-400"}`}
+              >
+                주간 예측
+              </button>
             </div>
-            <FlightListSlider
-              key={terminal}
-              terminal={terminal}
-              slots={flights.allSlots.map(deserializeSlot)}
-              slotsLanding={flights.allSlotsLanding.map(deserializeSlot)}
-              todayStr={flights.todayStr}
-              tomorrowStr={flights.tomorrowStr}
-              kstHour={flights.kstHour}
-              congestion={summary?.arrivalCongestion}
-            />
+            <div className="relative h-80">
+              <div className={`absolute inset-0 ${activeTab === "passenger" ? "" : "invisible pointer-events-none"}`}>
+                {!summary ? <PassengerSkeleton /> : <PassengerChart slots={summary.slots.map(deserializeSlot)} tomorrowLabel={summary.tomorrowLabel} />}
+              </div>
+              <div className={`absolute inset-0 ${activeTab === "weekly" ? "" : "invisible pointer-events-none"}`}>
+                {!flights ? <WeeklySkeleton /> : <WeeklyForecast days={flights.weeklyDays} />}
+              </div>
+            </div>
           </div>
-        )}
+        </div>
+      )}
 
-        <p className="text-xs text-gray-400 pb-2">출처: 인천국제공항공사 공공데이터포털</p>
+      {/* ── 운항편 탭 ── */}
+      {bottomTab === "flights" && (
+        <div className="max-w-lg mx-auto px-4 py-6 pb-24 space-y-8">
+          {!flights ? (
+            <FlightsSkeleton />
+          ) : (
+            <div>
+              <div className="flex items-center gap-1.5 mb-4">
+                <span className="inline-block w-1 h-4 rounded-full bg-[#1B5E36]" />
+                <h2 className="text-xl font-bold text-gray-800">시간대별 운항편</h2>
+              </div>
+              <FlightListSlider
+                key={terminal}
+                terminal={terminal}
+                slots={flights.allSlots.map(deserializeSlot)}
+                slotsLanding={flights.allSlotsLanding.map(deserializeSlot)}
+                todayStr={flights.todayStr}
+                tomorrowStr={flights.tomorrowStr}
+                kstHour={flights.kstHour}
+                congestion={summary?.arrivalCongestion}
+              />
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── 하단 네비게이션 ── */}
+      <div
+        className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-100"
+        style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      >
+        <div className="max-w-lg mx-auto flex">
+          {([
+            { key: "status", label: "현황", icon: (
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+              </svg>
+            )},
+            { key: "flights", label: "운항편", icon: (
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21 4 19 4s-2 1-3.5 2.5L8 8 .8 6.2l-.4-.4-.4.4.4.4L3 11l-2 1v2l2-1 .2.8.8.2-1 2h2l1-2 .2.8.8.2v2l2-1 .4.4.4-.4-.4-.4" />
+              </svg>
+            )},
+          ] as const).map(({ key, label, icon }) => (
+            <button
+              key={key}
+              onClick={() => setBottomTab(key)}
+              className={`flex-1 flex flex-col items-center gap-1 py-3 transition-colors ${
+                bottomTab === key ? "text-[#1B5E36]" : "text-gray-400"
+              }`}
+            >
+              {icon}
+              <span className="text-xs font-medium">{label}</span>
+            </button>
+          ))}
+        </div>
       </div>
-      <Footer />
-      <FloatingScrollNav />
     </main>
   );
 }
