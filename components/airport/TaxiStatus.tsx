@@ -22,18 +22,18 @@ function StandCell({ count, standtime }: StandCellProps) {
   const waitMin = parseMin(standtime);
   const hasWait = waitMin > 0;
   return (
-    <td className="py-3 text-center">
+    <td className="py-3.5 text-center">
       {hasWait ? (
-        <div className="flex flex-col items-center gap-0.5">
-          <span className="inline-block text-xs font-bold px-2 py-0.5 rounded-full bg-[#1B5E36] text-white leading-snug">
+        <div className="flex flex-col items-center gap-1">
+          <span className="inline-block text-sm font-bold px-3 py-1 rounded-full bg-[#1B5E36] text-white">
             {fmtMin(standtime)} 대기
           </span>
-          <span className="text-[11px] text-gray-400 tabular-nums">{count}대</span>
+          <span className="text-xs text-gray-400 tabular-nums">{count}대</span>
         </div>
       ) : (
-        <div className="flex flex-col items-center gap-0.5">
-          <span className="text-sm font-semibold text-gray-300">—</span>
-          <span className="text-[11px] text-gray-400 tabular-nums">{count}대</span>
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-base font-semibold text-gray-300">—</span>
+          <span className="text-xs text-gray-400 tabular-nums">{count}대</span>
         </div>
       )}
     </td>
@@ -61,8 +61,8 @@ export function TaxiStatusCard({ t1, t2 }: Props) {
         <thead>
           <tr className="border-b border-gray-100">
             <th className="text-left pb-2 text-sm font-semibold text-gray-400 w-[4.5rem]" />
-            <th className="pb-2 text-center text-sm font-bold text-gray-700">T1</th>
-            <th className="pb-2 text-center text-sm font-bold text-gray-700">T2</th>
+            <th className="pb-2 text-center text-base font-bold text-gray-800">T1</th>
+            <th className="pb-2 text-center text-base font-bold text-gray-800">T2</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-gray-50">
@@ -70,7 +70,7 @@ export function TaxiStatusCard({ t1, t2 }: Props) {
             const [cntKey, timeKey] = key;
             return (
               <tr key={label}>
-                <td className="py-3 text-xs font-semibold text-gray-500 pr-2">{label}</td>
+                <td className="py-3.5 text-sm font-semibold text-gray-600 pr-2">{label}</td>
                 <StandCell
                   count={t1 ? t1[cntKey] : 0}
                   standtime={t1 ? t1[timeKey] : "0000"}
