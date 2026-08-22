@@ -2,40 +2,15 @@
 
 import type { TaxiStatus } from "@/app/api/airport/taxi/route";
 
-function parseMin(t: string): number {
-  if (!t || t === "0000") return 0;
-  return parseInt(t.slice(0, 2), 10) * 60 + parseInt(t.slice(2, 4), 10);
-}
-
-function fmtMin(t: string): string {
-  const m = parseMin(t);
-  if (m === 0) return "";
-  return m >= 60 ? `${Math.floor(m / 60)}시간 ${m % 60}분` : `${m}분`;
-}
-
 interface StandCellProps {
   count: number;
   standtime: string;
 }
 
-function StandCell({ count, standtime }: StandCellProps) {
-  const waitMin = parseMin(standtime);
-  const hasWait = waitMin > 0;
+function StandCell({ count }: StandCellProps) {
   return (
     <td className="py-3.5 text-center">
-      {hasWait ? (
-        <div className="flex flex-col items-center gap-1">
-          <span className="inline-block text-sm font-bold px-3 py-1 rounded-full bg-[#1B5E36] text-white">
-            {fmtMin(standtime)} 대기
-          </span>
-          <span className="text-xs text-gray-400 tabular-nums">{count}대</span>
-        </div>
-      ) : (
-        <div className="flex flex-col items-center gap-1">
-          <span className="text-base font-semibold text-gray-300">—</span>
-          <span className="text-xs text-gray-400 tabular-nums">{count}대</span>
-        </div>
-      )}
+      <span className="text-base font-bold text-gray-800 tabular-nums">{count}<span className="text-sm font-normal text-gray-400 ml-0.5">대</span></span>
     </td>
   );
 }
