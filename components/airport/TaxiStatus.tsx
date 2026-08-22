@@ -56,70 +56,72 @@ export function TaxiStatusCard({ data }: Props) {
         </div>
       </div>
 
-      {view === "table" ? (
-        <table className="w-full">
-          <thead>
-            <tr className="text-sm text-gray-500 border-b border-gray-100">
-              <th className="text-left pb-2 font-semibold">종류</th>
-              <th className="text-right pb-2 font-semibold">대기 대수</th>
-              <th className="text-right pb-2 font-semibold">승객 대기</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-50">
+      <div className="h-[17.5rem] overflow-hidden">
+        {view === "table" ? (
+          <table className="w-full">
+            <thead>
+              <tr className="text-sm text-gray-500 border-b border-gray-100">
+                <th className="text-left pb-2 font-semibold">종류</th>
+                <th className="text-right pb-2 font-semibold">대기 대수</th>
+                <th className="text-right pb-2 font-semibold">승객 대기</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-gray-50">
+              {items.map((item) => {
+                const hasWait = parseMin(item.standtime) > 0;
+                return (
+                  <tr key={item.label}>
+                    <td className="py-2 pl-1 text-sm font-semibold text-gray-600">{item.label}</td>
+                    <td className="py-2 text-right tabular-nums text-lg font-bold" style={{ color: "#1B5E36" }}>
+                      {item.count}<span className="text-xs text-gray-400 font-normal ml-0.5">대</span>
+                    </td>
+                    <td className="py-2 text-right pr-1">
+                      {hasWait ? (
+                        <span className="inline-block text-xs font-bold px-2 py-0.5 rounded-full bg-[#1B5E36] text-white">
+                          {fmtMin(item.standtime)}
+                        </span>
+                      ) : (
+                        <span className="text-gray-400 text-sm">없음</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        ) : (
+          <div className="h-full flex flex-col justify-between py-1">
             {items.map((item) => {
               const hasWait = parseMin(item.standtime) > 0;
+              const pct = Math.round((item.count / maxCount) * 100);
+              const labelInBar = pct > 35;
               return (
-                <tr key={item.label}>
-                  <td className="py-2.5 pl-1 text-sm font-semibold text-gray-600">{item.label}</td>
-                  <td className="py-2.5 text-right tabular-nums text-lg font-bold" style={{ color: "#1B5E36" }}>
-                    {item.count}<span className="text-xs text-gray-400 font-normal ml-0.5">대</span>
-                  </td>
-                  <td className="py-2.5 text-right pr-1">
-                    {hasWait ? (
-                      <span className="inline-block text-xs font-bold px-2 py-0.5 rounded-full bg-[#1B5E36] text-white">
-                        {fmtMin(item.standtime)}
-                      </span>
-                    ) : (
-                      <span className="text-gray-300 text-sm">없음</span>
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      ) : (
-        <div className="space-y-3 py-1">
-          {items.map((item) => {
-            const hasWait = parseMin(item.standtime) > 0;
-            const pct = Math.round((item.count / maxCount) * 100);
-            const labelInBar = pct > 35;
-            return (
-              <div key={item.label} className="flex items-center gap-3">
-                <span className="text-xs font-semibold text-gray-500 w-16 flex-shrink-0 text-right">{item.label}</span>
-                <div className="flex-1 h-8 bg-gray-50 rounded-lg overflow-hidden relative">
-                  <div
-                    className="h-full rounded-lg"
-                    style={{ width: `${Math.max(pct, 4)}%`, background: hasWait ? "#1B5E36" : "#d1d5db" }}
-                  />
-                  <span
-                    className="absolute top-0 h-full flex items-center text-xs font-bold tabular-nums"
-                    style={{
-                      left: labelInBar ? "8px" : `calc(${Math.max(pct, 4)}% + 6px)`,
-                      color: labelInBar ? "white" : hasWait ? "#1B5E36" : "#9ca3af",
-                    }}
-                  >
-                    {item.count}대
+                <div key={item.label} className="flex items-center gap-3">
+                  <span className="text-xs font-semibold text-gray-600 w-16 flex-shrink-0 text-right">{item.label}</span>
+                  <div className="flex-1 h-8 bg-gray-100 rounded-lg overflow-hidden relative">
+                    <div
+                      className="h-full rounded-lg"
+                      style={{ width: `${Math.max(pct, 4)}%`, background: hasWait ? "#1B5E36" : "#9ca3af" }}
+                    />
+                    <span
+                      className="absolute top-0 h-full flex items-center text-xs font-bold tabular-nums"
+                      style={{
+                        left: labelInBar ? "8px" : `calc(${Math.max(pct, 4)}% + 6px)`,
+                        color: labelInBar ? "white" : "#374151",
+                      }}
+                    >
+                      {item.count}대
+                    </span>
+                  </div>
+                  <span className="text-xs font-bold w-14 text-right flex-shrink-0" style={{ color: hasWait ? "#1B5E36" : "#9ca3af" }}>
+                    {hasWait ? fmtMin(item.standtime) : "—"}
                   </span>
                 </div>
-                <span className="text-xs font-bold w-14 text-right flex-shrink-0" style={{ color: hasWait ? "#1B5E36" : "#d1d5db" }}>
-                  {hasWait ? fmtMin(item.standtime) : "—"}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      )}
+              );
+            })}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
