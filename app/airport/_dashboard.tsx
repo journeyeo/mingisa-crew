@@ -230,7 +230,7 @@ export function AirportDashboard({ terminal }: Props) {
       </div>
       {/* ── 현황 탭 ── */}
       {bottomTab === "status" && (
-        <div className="max-w-lg mx-auto px-4 py-6 space-y-8" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 80px)" }}>
+        <div className="max-w-lg mx-auto px-4 pt-4 pb-6 space-y-8" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 80px)" }}>
           {!summary ? <HeaderSkeleton /> : (
             <DashboardHeader
               terminal={terminal}
