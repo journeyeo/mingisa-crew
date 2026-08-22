@@ -310,7 +310,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
     <div style={{ height: "var(--time-card-height, 180px)" }} />
 
     {totalFlights === 0 ? (
-      <div ref={flightListCardRef} className="mt-2 bg-white rounded-2xl border border-gray-100 shadow-sm">
+      <div ref={flightListCardRef} className="mt-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
         <p className="px-4 py-6 text-gray-400 text-sm text-center">이 시간대 운항편 없음</p>
       </div>
     ) : (
