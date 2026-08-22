@@ -7,12 +7,16 @@ export function FloatingScrollNav() {
   const scrollInterval = useRef<ReturnType<typeof setInterval> | null>(null);
   const isLongPress = useRef(false);
 
+  function scroll(top: number, smooth?: boolean) {
+    (document.scrollingElement ?? document.documentElement).scrollBy({ top, behavior: smooth ? "smooth" : "auto" });
+  }
+
   function startPress(dir: "up" | "down") {
     isLongPress.current = false;
     pressTimer.current = setTimeout(() => {
       isLongPress.current = true;
       scrollInterval.current = setInterval(() => {
-        window.scrollBy({ top: dir === "up" ? -80 : 80 });
+        scroll(dir === "up" ? -80 : 80);
       }, 120);
     }, 300);
   }
@@ -21,12 +25,12 @@ export function FloatingScrollNav() {
     if (pressTimer.current) clearTimeout(pressTimer.current);
     if (scrollInterval.current) { clearInterval(scrollInterval.current); scrollInterval.current = null; }
     if (!isLongPress.current) {
-      window.scrollBy({ top: dir === "up" ? -window.innerHeight * 0.8 : window.innerHeight * 0.8, behavior: "smooth" });
+      scroll(dir === "up" ? -window.innerHeight * 0.8 : window.innerHeight * 0.8, true);
     }
   }
 
   return (
-    <div className="fixed bottom-6 right-4 z-50 flex flex-col rounded-2xl overflow-hidden border border-gray-200/60 shadow-lg bg-white/20 backdrop-blur-sm divide-y divide-gray-100/30">
+    <div className="fixed right-4 z-50 flex flex-col rounded-2xl overflow-hidden border border-gray-200/60 shadow-lg bg-white/20 backdrop-blur-sm divide-y divide-gray-100/30" style={{ bottom: "calc(env(safe-area-inset-bottom) + 24px)" }}>
       {(["up", "down"] as const).map((dir) => (
         <button
           key={dir}

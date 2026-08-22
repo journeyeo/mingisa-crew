@@ -172,9 +172,12 @@ export function AirportDashboard({ terminal }: Props) {
 
   return (
     <main className="min-h-screen bg-gray-50 text-gray-900">
-      <div className="max-w-lg mx-auto bg-white px-4 pt-5 pb-2">
-        <h1 className="text-xl font-bold text-gray-900">인천공항 입국 수요</h1>
-        <p className="text-sm text-gray-500 mt-0.5">
+      <div className="max-w-lg mx-auto bg-white px-4 pb-2" style={{ paddingTop: "calc(env(safe-area-inset-top) + 28px)" }}>
+        <div className="flex items-center gap-2">
+          <img src="/app-icon-crew-512.png" alt="민기사 크루" className="w-7 h-7 rounded-lg object-contain" />
+          <h1 className="text-xl font-bold text-gray-900">인천공항 입국 수요</h1>
+        </div>
+        <p className="text-sm text-gray-500 mt-2">
           {now.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" })}
           {" · 5분 갱신"}
           {summary && (() => {
