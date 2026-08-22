@@ -248,38 +248,32 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
     <>
     <div ref={timeCardRef} className="fixed left-0 right-0 z-40 bg-gray-50 px-4 pt-6" style={{ top: "var(--sticky-header-height, 50px)" }}>
     <div className="max-w-lg mx-auto bg-white rounded-2xl border border-gray-100 shadow-sm px-4 pt-3 pb-3">
-      <div className="flex items-center justify-between mb-3">
-        <p className="text-base font-bold text-gray-800 tabular-nums">
-          {totalFlights > 0 ? `${totalFlights}편` : "—"}
-        </p>
+      <div className="flex items-center gap-2 mb-3">
+        <div className="flex rounded-lg overflow-hidden border border-gray-300 text-xs font-semibold shrink-0">
+          {(["exit", "landing"] as const).map((b) => (
+            <button key={b} onClick={() => changeBasis(b)}
+              className={`px-2.5 py-1.5 transition-colors ${basis === b ? "bg-gray-800 text-white" : "bg-white text-gray-600"}`}>
+              {b === "exit" ? "출구기준" : "착륙기준"}
+            </button>
+          ))}
+        </div>
+        <button
+          onClick={toggleLongHaul}
+          className={`text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-colors shrink-0 ${
+            filterLongHaul ? "bg-gray-800 text-white border-gray-800" : "bg-white text-gray-600 border-gray-300"
+          }`}
+        >
+          장거리
+        </button>
         <button
           onClick={() => { setShowFilter(true); setFilterQuery(""); }}
-          className={`text-sm px-3 py-1.5 rounded-full border font-medium transition-colors ${
-            isFiltered ? "bg-gray-900 text-white border-gray-900" : "bg-white text-gray-700 border-gray-300"
+          className={`text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-colors shrink-0 ${
+            isFiltered ? "bg-gray-900 text-white border-gray-900" : "bg-white text-gray-600 border-gray-300"
           }`}
         >
           항공사{isFiltered && <span className="ml-1 opacity-70">{selectedCount}/{allAirlines.length}</span>}
         </button>
-      </div>
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <div className="flex rounded-lg overflow-hidden border border-gray-300 text-xs font-semibold">
-            {(["exit", "landing"] as const).map((b) => (
-              <button key={b} onClick={() => changeBasis(b)}
-                className={`px-2.5 py-1.5 transition-colors ${basis === b ? "bg-gray-800 text-white" : "bg-white text-gray-600"}`}>
-                {b === "exit" ? "출구기준" : "착륙기준"}
-              </button>
-            ))}
-          </div>
-          <button
-            onClick={toggleLongHaul}
-            className={`text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-colors ${
-              filterLongHaul ? "bg-gray-800 text-white border-gray-800" : "bg-white text-gray-600 border-gray-300"
-            }`}
-          >
-            장거리
-          </button>
-        </div>
+        <div className="flex-1" />
         {!isCurrentBlockSelected && (
           <button
             onClick={() => setSelectedGroups(new Set([currentBlockIdx]))}
@@ -289,6 +283,9 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
             지금으로
           </button>
         )}
+        <p className="text-base font-bold text-gray-800 tabular-nums shrink-0">
+          {totalFlights > 0 ? `${totalFlights}편` : "—"}
+        </p>
       </div>
       <div className="grid grid-cols-4 gap-2">
         {FIXED_BLOCKS.map(({ label }, blockIdx) => {
