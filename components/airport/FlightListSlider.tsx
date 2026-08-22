@@ -97,7 +97,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
   const [selectedAirlines, setSelectedAirlines] = useState<Set<string> | null>(null);
   const [filterLongHaul, setFilterLongHaul] = useState(false);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
-  const [basis, setBasis] = useState<"exit" | "landing">("landing");
+  const [basis, setBasis] = useState<"exit" | "landing">("exit");
 
   // Slot indices for each fixed block:
   // Blocks 0-1 (00~05시) → tomorrowStr slots; Blocks 2-7 (06~23시) → todayStr slots
@@ -210,8 +210,17 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
   const flightListCardRef = useRef<HTMLDivElement>(null);
 
   const isCurrentBlockSelected = selectedGroups.has(currentBlockIdx);
+  const isFirstRender = useRef(true);
 
-
+  useEffect(() => {
+    if (isFirstRender.current) { isFirstRender.current = false; return; }
+    const el = flightListCardRef.current;
+    if (!el) return;
+    const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--sticky-header-height") || "0");
+    const cardH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--time-card-height") || "0");
+    const top = el.getBoundingClientRect().top + window.scrollY - headerH - cardH - 8;
+    window.scrollTo({ top, behavior: "smooth" });
+  }, [selectedGroups]);
 
   useEffect(() => {
     const el = timeCardRef.current;
