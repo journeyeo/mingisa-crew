@@ -20,14 +20,12 @@ function StandCell({ count, standtime }: StandCellProps) {
   const waitMin = parseMin(standtime);
   return (
     <td className="py-3 text-center">
-      <div className="flex flex-col items-center gap-0.5">
-        <span className="text-base font-bold text-gray-800 tabular-nums">
-          {count}<span className="text-xs font-normal text-gray-400 ml-0.5">대</span>
-        </span>
+      <span className="text-base font-bold text-gray-800 tabular-nums">
+        {count}<span className="text-xs font-normal text-gray-400 ml-0.5">대</span>
         {waitMin > 0 && (
-          <span className="text-xs text-gray-500 tabular-nums">{fmtMin(waitMin)}</span>
+          <span className="text-xs font-normal text-gray-500 ml-1.5">{fmtMin(waitMin)}</span>
         )}
-      </div>
+      </span>
     </td>
   );
 }
