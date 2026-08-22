@@ -257,7 +257,7 @@ export function AirportDashboard({ terminal }: Props) {
 
       {/* ── 운항편 탭 ── */}
       {bottomTab === "flights" && (
-        <div className="max-w-lg mx-auto px-4 py-6 space-y-8" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 120px)" }}>
+        <div className="max-w-lg mx-auto px-4 py-6 space-y-8" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 88px)" }}>
           {!flights ? (
             <FlightsSkeleton />
           ) : (
