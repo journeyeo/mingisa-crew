@@ -40,8 +40,8 @@ export function TaxiStatusCard({ t1, t2 }: Props) {
     { label: "서울택시",   key: ["seoultaxicnt",     "seoulstandtime"]     },
     { label: "인천택시",   key: ["incheontaxicnt",   "incheonstandtime"]   },
     { label: "경기택시",   key: ["gyenggitaxicnt",   "gyenggistandtime"]   },
-    { label: "우등택시",   key: ["besttaxicnt",      "beststandtime"]      },
-    { label: "밴택시",     key: ["vantaxicnt",       "vanstandtime"]       },
+    { label: "모범택시",   key: ["besttaxicnt",      "beststandtime"]      },
+    { label: "대형택시",   key: ["vantaxicnt",       "vanstandtime"]       },
     { label: "인터내셔널", key: ["intercitytaxicnt", "intercitystandtime"] },
   ] as const;
 

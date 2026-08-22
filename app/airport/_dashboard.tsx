@@ -150,7 +150,7 @@ export function AirportDashboard({ terminal }: Props) {
   const [taxiT1, setTaxiT1] = useState<TaxiStatus | null>(null);
   const [taxiT2, setTaxiT2] = useState<TaxiStatus | null>(null);
   const [activeTab, setActiveTab] = useState<"passenger" | "weekly">("passenger");
-  const [bottomTab, setBottomTab] = useState<"status" | "flights">("status");
+  const [bottomTab, setBottomTab] = useState<"status" | "flights">("flights");
   const headerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -308,7 +308,7 @@ export function AirportDashboard({ terminal }: Props) {
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
         <div className="max-w-lg mx-auto flex">
-          {(["status", "flights"] as const).map((key) => (
+          {(["flights", "status"] as const).map((key) => (
             <button
               key={key}
               onClick={() => setBottomTab(key)}
