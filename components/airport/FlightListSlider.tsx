@@ -214,12 +214,18 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
 
   useEffect(() => {
     if (isFirstRender.current) { isFirstRender.current = false; return; }
-    const el = flightListCardRef.current;
-    if (!el) return;
     const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--sticky-header-height") || "0");
     const cardH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--time-card-height") || "0");
-    const top = el.getBoundingClientRect().top + window.scrollY - headerH - cardH - 8;
-    window.scrollTo({ top, behavior: "smooth" });
+    const dividerEl = dividerRef.current;
+    if (selectedGroups.has(currentBlockIdx) && dividerEl) {
+      const top = dividerEl.getBoundingClientRect().top + window.scrollY - headerH - cardH - 8;
+      window.scrollTo({ top, behavior: "smooth" });
+    } else {
+      const el = flightListCardRef.current;
+      if (!el) return;
+      const top = el.getBoundingClientRect().top + window.scrollY - headerH - cardH - 8;
+      window.scrollTo({ top, behavior: "smooth" });
+    }
   }, [selectedGroups]);
 
   useEffect(() => {
