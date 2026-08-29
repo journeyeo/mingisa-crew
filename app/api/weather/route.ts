@@ -161,7 +161,7 @@ export async function GET() {
   const { date: fDate, time: fTime } = vilageFcstBaseTime(kst);
   const fcstUrl =
     `${BASE}/getVilageFcst` +
-    `?serviceKey=${SERVICE_KEY}&dataType=JSON&numOfRows=1000` +
+    `?serviceKey=${SERVICE_KEY}&dataType=JSON&numOfRows=3000` +
     `&base_date=${fDate}&base_time=${fTime}&nx=${NX}&ny=${NY}`;
   const fcstItems = await govFetch<RawItem>(fcstUrl);
 
@@ -176,7 +176,6 @@ export async function GET() {
   const tomorrowStr = toDateStr(new Date(kst.getTime() + 86_400_000));
 
   const hourly: HourlyForecast[] = Object.entries(bySlot)
-    .filter(([key]) => { const [d] = key.split("_"); return d === todayStr || d === tomorrowStr; })
     .filter(([key]) => key >= kstNowStr)
     .sort(([a], [b]) => a.localeCompare(b))
     .slice(0, 24)
@@ -224,8 +223,8 @@ export async function GET() {
   // 중기는 D+3~D+7 (단기예보 이후)
   const daily: DailyForecast[] = [];
 
-  // 단기 분 (오늘~모레, D+0~D+2)
-  for (let d = 0; d <= 2; d++) {
+  // 단기 분 (오늘~D+4, 중기예보가 D+5부터 시작하므로)
+  for (let d = 0; d <= 4; d++) {
     const date = toDateStr(new Date(kst.getTime() + d * 86_400_000));
     const sd = shortDailyMap[date];
     if (!sd) continue;

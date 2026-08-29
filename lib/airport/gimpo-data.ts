@@ -67,6 +67,7 @@ async function _fetchGimpoFlights(): Promise<GimpoFlightsData> {
 
   const firstUrl = `${BASE}?serviceKey=${SERVICE_KEY}&type=json&numOfRows=${ROWS}&pageNo=1`;
   const firstRes = await fetch(firstUrl, { next: { revalidate: REVALIDATE } });
+  if (!firstRes.ok) throw new Error(`KAC API error: ${firstRes.status}`);
   const firstJson = await firstRes.json();
   const totalCount: number = firstJson?.response?.body?.totalCount ?? ROWS;
   const totalPages = Math.ceil(totalCount / ROWS);
@@ -92,6 +93,8 @@ async function _fetchGimpoFlights(): Promise<GimpoFlightsData> {
 
   const arrivals = deduped.filter((f) => f.io === "I").sort((a, b) => a.std.localeCompare(b.std));
   const departures = deduped.filter((f) => f.io === "O").sort((a, b) => a.std.localeCompare(b.std));
+
+  if (arrivals.length === 0 && departures.length === 0) throw new Error("No GMP flights found");
 
   return { arrivals, departures, todayStr, tomorrowStr, updatedAt: new Date().toISOString() };
 }

@@ -30,7 +30,7 @@ export function TerminalToggle({ terminal }: Props) {
         <button
           key={value}
           onClick={() => update(value)}
-          className={`flex-1 py-3 text-sm font-bold transition-colors border-b-2 -mb-0.5 ${
+          className={`flex-1 py-3 text-[15px] font-bold transition-colors border-b-2 -mb-0.5 ${
             terminal === value
               ? "border-[#E65100] text-[#E65100]"
               : "border-transparent text-gray-400"

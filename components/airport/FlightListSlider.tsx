@@ -137,7 +137,6 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
   }
 
   function changeBasis(b: "exit" | "landing") {
-    scrollToListTop();
     setBasis(b);
   }
 
@@ -226,7 +225,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
       const top = el.getBoundingClientRect().top + window.scrollY - headerH - cardH - 8;
       window.scrollTo({ top, behavior: "smooth" });
     }
-  }, [selectedGroups]);
+  }, [selectedGroups, basis]);
 
   useEffect(() => {
     const el = timeCardRef.current;
@@ -260,7 +259,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
           {(["exit", "landing"] as const).map((b) => (
             <button key={b} onClick={() => changeBasis(b)}
               className={`px-2.5 py-1.5 transition-colors ${basis === b ? "bg-gray-800 text-white" : "bg-white text-gray-600"}`}>
-              {b === "exit" ? "출구기준" : "착륙기준"}
+              {b === "exit" ? "출구기준" : "도착기준"}
             </button>
           ))}
         </div>
@@ -303,10 +302,11 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
         })}
       </div>
     </div>
-    <div className="bg-white rounded-t-2xl border border-gray-100 shadow-sm flex items-center px-4 pt-2 pb-1 gap-3 text-sm font-semibold text-gray-600">
-      <span className="w-20 shrink-0">편명</span>
-      <span className="flex-1">출발지</span>
-      <span className="w-28 text-right">착륙 · 출구 도착</span>
+    <div className="bg-white rounded-t-2xl border border-gray-100 shadow-sm flex items-center px-4 pt-2 pb-1 gap-6 text-sm font-semibold text-gray-600">
+      <span className="w-20 shrink-0">출구 도착</span>
+      <span className="w-14 shrink-0"></span>
+      <span className="flex-1">출발지 · 편명</span>
+      <span className="shrink-0 text-right">상태</span>
     </div>
     </div>
     </div>
@@ -337,72 +337,79 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
                       <span className="text-sm text-[#BF360C] font-semibold">이후 도착편</span>
                     </div>
                   )}
-                  <div className={`flex items-start px-4 py-3 gap-3 ${flight.isDelayed ? "bg-orange-50/60" : isNoTransport ? "bg-orange-50/30" : ""}`}>
-                    <div className="w-20 shrink-0 flex flex-col items-start gap-0.5 pt-0.5">
-                      <div className="flex items-center gap-1">
-                        <span className="text-base font-mono font-bold text-gray-900 leading-tight">{primaryId}</span>
-                        {extraIds.length > 0 && !isExpanded && (
-                          <button onClick={() => setExpandedIds((s) => new Set(s).add(primaryId))}
-                            className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 leading-none">
-                            +{extraIds.length}
-                          </button>
-                        )}
-                      </div>
-                      {extraIds.length > 0 && isExpanded && (
-                        <div className="flex flex-col gap-0.5">
-                          {extraIds.map((id) => <span key={id} className="text-xs font-mono text-gray-500 leading-tight">{id}</span>)}
-                          <button onClick={() => setExpandedIds((s) => { const n = new Set(s); n.delete(primaryId); return n; })}
-                            className="text-[10px] text-gray-400 leading-tight text-left">접기</button>
+                  {(() => {
+                    const exitH = String(flight.exitTime.getHours()).padStart(2, "0");
+                    const exitM = String(flight.exitTime.getMinutes()).padStart(2, "0");
+                    const landH = String(flight.landingTime.getHours()).padStart(2, "0");
+                    const landM = String(flight.landingTime.getMinutes()).padStart(2, "0");
+                    const isLate = flight.isDelayed && flight.landingTime.getTime() > flight.scheduledTime.getTime();
+                    const schedH = String(flight.scheduledTime.getHours()).padStart(2, "0");
+                    const schedM = String(flight.scheduledTime.getMinutes()).padStart(2, "0");
+                    return (
+                      <div className={`flex items-center px-4 py-3 gap-4 ${flight.isDelayed ? "bg-orange-50/60" : isNoTransport ? "bg-orange-50/30" : ""}`}>
+                        {/* 왼쪽: 출구 도착 시각 */}
+                        <div className="w-20 shrink-0 flex flex-col pt-0.5">
+                          <div className="flex items-center gap-1 flex-wrap">
+                            {isNextDay && <NextDayBadge />}
+                            {isNoTransport && <span className="text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 px-1 rounded leading-[1.4]">심야</span>}
+                          </div>
+                          {flight.isDelayed ? (
+                            <>
+                              <span className="text-[15px] tabular-nums text-gray-400 line-through font-bold">{schedH}:{schedM}</span>
+                              <span className="text-[15px] tabular-nums text-orange-500 font-bold">{landH}:{landM} 도착</span>
+                            </>
+                          ) : (
+                            <span className="text-[15px] tabular-nums text-gray-400 font-bold">{landH}:{landM} 도착</span>
+                          )}
+                          <span className="text-[15px] tabular-nums text-gray-900 font-bold">{exitH}:{exitM} 출구</span>
                         </div>
-                      )}
-                      {flight.airline && <span className="text-sm font-medium text-gray-600 leading-tight truncate w-full">{flight.airline.replace(/(?<!대한)항공/, "").trim()}</span>}
-                    </div>
 
-                    <div className="flex-1 flex items-center min-w-0 gap-1.5 pt-0.5">
-                      <DurationBadge code={flight.airportCode} />
-                      <span className="text-base font-semibold text-gray-900 truncate min-w-0">{flight.origin}</span>
-                    </div>
+                        {/* 단축/지연 뱃지 */}
+                        <div className="w-14 shrink-0 flex justify-center">
+                          {flight.isDelayed && (
+                            <span className={`text-sm font-bold text-white px-2 py-0.5 rounded-md leading-none ${isLate ? "bg-[#E65100]" : "bg-blue-400"}`}>
+                              {isLate ? "지연" : "단축"}
+                            </span>
+                          )}
+                        </div>
 
-                    <div className="shrink-0 text-right space-y-0.5">
-                      {flight.isDelayed ? (() => {
-                        const isLate = flight.landingTime.getTime() > flight.scheduledTime.getTime();
-                        const sh = String(flight.scheduledTime.getHours()).padStart(2, "0");
-                        const sm = String(flight.scheduledTime.getMinutes()).padStart(2, "0");
-                        const lh = String(flight.landingTime.getHours()).padStart(2, "0");
-                        const lm = String(flight.landingTime.getMinutes()).padStart(2, "0");
-                        return (
-                          <>
-                            <p className="text-sm tabular-nums whitespace-nowrap text-gray-500 flex items-center justify-end gap-0.5">
-                              {isNextDay && <NextDayBadge />}
-                              {isNoTransport && <span className="text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 px-1 rounded leading-[1.4]">심야</span>}
-                              <span>착륙예정 {sh}:{sm}</span>
-                            </p>
-                            <p className="text-base tabular-nums font-bold whitespace-nowrap flex items-center justify-end gap-1">
-                              <span className={`text-xs font-bold text-white px-2 py-0.5 rounded-md leading-none ${isLate ? "bg-[#E65100]" : "bg-blue-400"}`}>
-                                {isLate ? "지연" : "단축"}
-                              </span>
-                              <span>착륙 </span>
-                              <span className="text-gray-900">{lh}:{lm}</span>
-                            </p>
-                          </>
-                        );
-                      })() : (
-                        <p className="text-base text-gray-900 font-medium whitespace-nowrap flex items-center justify-end gap-0.5">
-                          {isNextDay && <NextDayBadge />}
-                          {isNoTransport && <span className="text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 px-1 rounded leading-[1.4]">심야</span>}
-                          <TimeCell date={flight.landingTime} todayStr={todayStr} prefix="착륙" hideNextDay />
-                        </p>
-                      )}
-                      <p className="text-base font-semibold whitespace-nowrap text-gray-900">
-                        <TimeCell date={flight.exitTime} todayStr={todayStr} prefix={flight.exitGate ? `출구 ${flight.exitGate}` : "출구"} hideNextDay />
-                      </p>
-                      {cong && basis === "exit" && (
-                        <p className="text-xs tabular-nums font-semibold whitespace-nowrap text-[#1B5E36]">
-                          외국인 대기 {cong.foreigner.toLocaleString()}명
-                        </p>
-                      )}
-                    </div>
-                  </div>
+                        {/* 가운데: 출발지 + 편명·항공사 */}
+                        <div className="flex-1 min-w-0 pt-0.5">
+                          <div className="flex items-center gap-1.5 min-w-0">
+                            <DurationBadge code={flight.airportCode} />
+                            <span className="text-base font-semibold text-gray-900 truncate min-w-0">{flight.origin}</span>
+                          </div>
+                          <div className="flex items-center gap-1 mt-0.5">
+                            <span className="text-sm tabular-nums text-gray-400">{primaryId}</span>
+                            {flight.airline && <span className="text-sm text-gray-400">· {flight.airline.replace(/(?<!대한)항공/, "").trim()}</span>}
+                            {extraIds.length > 0 && !isExpanded && (
+                              <button onClick={() => setExpandedIds((s) => new Set(s).add(primaryId))}
+                                className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 leading-none">
+                                +{extraIds.length}
+                              </button>
+                            )}
+                          </div>
+                          {extraIds.length > 0 && isExpanded && (
+                            <div className="flex flex-wrap gap-1 mt-0.5">
+                              {extraIds.map((id) => <span key={id} className="text-xs font-mono text-gray-500">{id}</span>)}
+                              <button onClick={() => setExpandedIds((s) => { const n = new Set(s); n.delete(primaryId); return n; })}
+                                className="text-[10px] text-gray-400">접기</button>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* 오른쪽: 게이트 + 혼잡도 */}
+                        <div className="shrink-0 flex flex-col items-end gap-1 pt-0.5">
+                          {cong?.entrygate && (
+                            <span className="text-sm font-semibold text-gray-500 whitespace-nowrap">게이트 {cong.entrygate}</span>
+                          )}
+                          {cong && basis === "exit" && (
+                            <span className="text-sm tabular-nums font-semibold text-[#1B5E36] text-right whitespace-nowrap">외국인 {cong.foreigner.toLocaleString()}명</span>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })()}
                 </Fragment>
               );
             })}

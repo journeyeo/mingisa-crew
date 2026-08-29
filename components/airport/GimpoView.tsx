@@ -127,6 +127,7 @@ function ListSkeleton() {
 
 export function GimpoView() {
   const [data, setData] = useState<GimpoFlightsData | null>(null);
+  const [error, setError] = useState(false);
   const [tab, setTab] = useState<"arrival" | "depart">("arrival");
   const nowRef = useRef<HTMLDivElement>(null);
 
@@ -139,9 +140,9 @@ export function GimpoView() {
 
   useEffect(() => {
     fetch("/api/gimpo")
-      .then((r) => r.json())
-      .then(setData)
-      .catch(() => {});
+      .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
+      .then((d) => { if (!d.arrivals) throw new Error(); setData(d); })
+      .catch(() => setError(true));
   }, []);
 
   // 블록·탭 변경 시: 현재 시간대면 "지금"으로 스크롤, 아니면 맨 위로
@@ -241,7 +242,11 @@ export function GimpoView() {
 
       <div className="max-w-lg mx-auto px-4">
         {/* 리스트 */}
-        {!data ? (
+        {error ? (
+          <div className="bg-white rounded-b-2xl border-x border-b border-gray-100 shadow-sm px-4 py-10 text-center text-gray-400 text-sm">
+            데이터를 불러오지 못했습니다
+          </div>
+        ) : !data ? (
           <ListSkeleton />
         ) : flights.length === 0 ? (
           <div className="bg-white rounded-b-2xl border-x border-b border-gray-100 shadow-sm px-4 py-10 text-center text-gray-400 text-sm">
