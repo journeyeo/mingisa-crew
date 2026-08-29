@@ -44,6 +44,7 @@ export const EXIT_DELAY = {
 export const TERMINAL_LABEL: Record<Terminal, string> = {
   T1: "제1터미널",
   T2: "제2터미널",
+  GMP: "김포공항",
 };
 
 // 대시보드에서 보여줄 시간 범위 (18시~익일 06시)

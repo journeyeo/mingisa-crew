@@ -1,4 +1,4 @@
-export type Terminal = "T1" | "T2";
+export type Terminal = "T1" | "T2" | "GMP";
 export type TimeBasis = "exit" | "landing";
 
 // 공공데이터포털 공통 응답 래퍼

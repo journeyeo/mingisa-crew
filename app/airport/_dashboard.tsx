@@ -12,6 +12,7 @@ import { TaxiStatusCard } from "@/components/airport/TaxiStatus";
 import { Footer } from "@/components/Footer";
 import type { TaxiStatus } from "@/app/api/airport/taxi/route";
 import { WeatherBadge, WeatherModal, useWeather } from "@/components/weather/WeatherWidget";
+import { GimpoView } from "@/components/airport/GimpoView";
 
 interface Props {
   terminal: Terminal;
@@ -217,11 +218,13 @@ export function AirportDashboard({ terminal }: Props) {
               <button onClick={scrollToTop} className="flex-shrink-0">
                 <img src="/app-icon-crew-512.png" alt="민기사 크루" className="w-7 h-7 rounded-lg object-contain" />
               </button>
-              <h1 className="text-xl font-bold text-gray-900">인천공항 입국 수요</h1>
+              <h1 className="text-xl font-bold text-gray-900">
+                {terminal === "GMP" ? "김포공항 운항 현황" : "인천공항 입국 수요"}
+              </h1>
             </div>
-            {weather && (
-              <WeatherBadge data={weather} onClick={() => setWeatherOpen(true)} />
-            )}
+            <div className={terminal === "GMP" ? "invisible pointer-events-none" : ""}>
+              {weather && <WeatherBadge data={weather} onClick={() => setWeatherOpen(true)} />}
+            </div>
           </div>
           <p className="text-sm text-gray-500 mt-2">
             {now.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" })}
@@ -236,8 +239,11 @@ export function AirportDashboard({ terminal }: Props) {
         </div>
         <TerminalToggle terminal={terminal} />
       </div>
+      {/* ── 김포공항 뷰 ── */}
+      {terminal === "GMP" && <GimpoView />}
+
       {/* ── 현황 탭 ── */}
-      {bottomTab === "status" && (
+      {terminal !== "GMP" && bottomTab === "status" && (
         <div className="max-w-lg mx-auto px-4 pt-4 pb-6 space-y-8" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 80px)" }}>
           {!summary ? <HeaderSkeleton /> : (
             <DashboardHeader
@@ -289,7 +295,7 @@ export function AirportDashboard({ terminal }: Props) {
       )}
 
       {/* ── 운항편 탭 ── */}
-      {bottomTab === "flights" && (
+      {terminal !== "GMP" && bottomTab === "flights" && (
         <div className="max-w-lg mx-auto px-4" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 88px)" }}>
           {!flights ? (
             <FlightsSkeleton />
@@ -311,12 +317,12 @@ export function AirportDashboard({ terminal }: Props) {
       )}
 
       {/* ── 날씨 모달 ── */}
-      {weatherOpen && weather && (
+      {weatherOpen && weather && terminal !== "GMP" && (
         <WeatherModal data={weather} onClose={() => setWeatherOpen(false)} />
       )}
 
-      {/* ── 하단 네비게이션 ── */}
-      <div
+      {/* ── 하단 네비게이션 (인천공항만) ── */}
+      {terminal !== "GMP" && <div
         className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-[0_-1px_8px_rgba(0,0,0,0.06)]"
         style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       >
@@ -347,7 +353,7 @@ export function AirportDashboard({ terminal }: Props) {
             </button>
           ))}
         </div>
-      </div>
+      </div>}
     </main>
   );
 }

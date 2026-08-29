@@ -18,19 +18,25 @@ export function TerminalToggle({ terminal }: Props) {
     });
   }
 
+  const tabs: { value: Terminal; label: string }[] = [
+    { value: "T1", label: "T1 제1터미널" },
+    { value: "T2", label: "T2 제2터미널" },
+    { value: "GMP", label: "김포공항" },
+  ];
+
   return (
     <div className="flex border-b-2 border-gray-100">
-      {(["T1", "T2"] as Terminal[]).map((t) => (
+      {tabs.map(({ value, label }) => (
         <button
-          key={t}
-          onClick={() => update(t)}
-          className={`flex-1 py-3 text-base font-bold transition-colors border-b-2 -mb-0.5 ${
-            terminal === t
+          key={value}
+          onClick={() => update(value)}
+          className={`flex-1 py-3 text-sm font-bold transition-colors border-b-2 -mb-0.5 ${
+            terminal === value
               ? "border-[#E65100] text-[#E65100]"
               : "border-transparent text-gray-400"
           }`}
         >
-          {t === "T1" ? "T1 제1터미널" : "T2 제2터미널"}
+          {label}
         </button>
       ))}
     </div>
