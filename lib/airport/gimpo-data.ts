@@ -51,7 +51,7 @@ function parseItem(i: Record<string, string | null>): GimpoFlight {
 
 async function fetchPage(page: number): Promise<GimpoFlight[]> {
   const url = `${BASE}?serviceKey=${SERVICE_KEY}&type=json&numOfRows=${ROWS}&pageNo=${page}`;
-  const res = await fetch(url, { next: { revalidate: REVALIDATE } });
+  const res = await fetch(url, { cache: "no-store" });
   if (!res.ok) return [];
   const json = await res.json();
   const items = json?.response?.body?.items?.item;
@@ -66,7 +66,7 @@ async function _fetchGimpoFlights(): Promise<GimpoFlightsData> {
   const tomorrowStr = toDateStr(new Date(kst.getTime() + 86_400_000));
 
   const firstUrl = `${BASE}?serviceKey=${SERVICE_KEY}&type=json&numOfRows=${ROWS}&pageNo=1`;
-  const firstRes = await fetch(firstUrl, { next: { revalidate: REVALIDATE } });
+  const firstRes = await fetch(firstUrl, { cache: "no-store" });
   if (!firstRes.ok) throw new Error(`KAC API error: ${firstRes.status}`);
   const firstJson = await firstRes.json();
   const totalCount: number = firstJson?.response?.body?.totalCount ?? ROWS;
