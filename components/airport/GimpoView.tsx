@@ -22,12 +22,16 @@ function currentBlockIdx(kstHour: number): number {
 function StatusBadge({ status }: { status: string | null }) {
   if (!status) return <span className="text-xs text-gray-300">-</span>;
   const color =
-    status.includes("지연") ? "text-orange-500 bg-orange-50" :
-    status.includes("결항") ? "text-red-500 bg-red-50" :
-    status === "도착" || status === "출발" ? "text-gray-400 bg-gray-50" :
-    "text-[#1B5E36] bg-[#1B5E36]/10";
+    status.includes("결항") ? "text-red-600 bg-red-100" :
+    status.includes("지연") ? "text-orange-600 bg-amber-100" :
+    status === "탑승중"     ? "text-emerald-700 bg-emerald-100" :
+    status === "탑승마감"   ? "text-violet-600 bg-violet-100" :
+    status === "운항중"     ? "text-sky-600 bg-sky-100" :
+    status === "도착"       ? "text-blue-600 bg-blue-100" :
+    status === "출발"       ? "text-slate-500 bg-slate-100" :
+    "text-gray-500 bg-gray-100";
   return (
-    <span className={`text-xs font-medium px-1.5 py-0.5 rounded-md ${color}`}>
+    <span className={`text-xs font-semibold px-1.5 py-0.5 rounded-md ${color}`}>
       {status}
     </span>
   );
@@ -67,22 +71,18 @@ function FlightRow({ flight, isNow }: { flight: GimpoFlight; isNow: boolean }) {
       {/* 항공사 + 편명 */}
       <div className="flex-1 min-w-0 px-2">
         <p className="text-base font-semibold text-gray-900 truncate">{city}</p>
-        <p className="text-sm text-gray-400 tabular-nums">{flight.flightId} · {flight.airline}</p>
+        <p className="text-sm text-gray-400 tabular-nums truncate">{flight.flightId} · {flight.airline}</p>
       </div>
 
-      {/* 게이트/수하물 */}
-      <div className="text-right w-11 flex-shrink-0 mr-2">
+      {/* 상태 + 게이트/수하물 */}
+      <div className="flex-shrink-0 text-right flex flex-col items-end gap-0.5">
+        <StatusBadge status={flight.status} />
         {flight.io === "O" && flight.gate && (
-          <p className="text-sm text-gray-500 font-medium">{flight.gate}번</p>
+          <p className="text-xs text-gray-400">게이트 {flight.gate}</p>
         )}
         {flight.io === "I" && flight.baggage && (
-          <p className="text-sm text-gray-500 font-medium">{flight.baggage}번</p>
+          <p className="text-xs text-gray-400">수하물 {flight.baggage}</p>
         )}
-      </div>
-
-      {/* 상태 */}
-      <div className="flex-shrink-0 w-20 text-right">
-        <StatusBadge status={flight.status} />
       </div>
     </div>
   );
@@ -234,8 +234,7 @@ export function GimpoView() {
           <div className="bg-white rounded-t-2xl border border-gray-100 shadow-sm px-4 py-2.5 flex items-center text-sm font-semibold text-gray-400 border-b border-gray-100">
             <span className="w-16">시간</span>
             <span className="flex-1 pl-2">{tab === "arrival" ? "출발지" : "목적지"}</span>
-            <span className="w-11 mr-2 text-right">{tab === "arrival" ? "수하물" : "게이트"}</span>
-            <span className="w-20 text-right">상태</span>
+            <span className="text-right">상태</span>
           </div>
         </div>
       </div>

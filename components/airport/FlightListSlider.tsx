@@ -302,9 +302,8 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
         })}
       </div>
     </div>
-    <div className="bg-white rounded-t-2xl border border-gray-100 shadow-sm flex items-center px-4 pt-2 pb-1 gap-6 text-sm font-semibold text-gray-600">
-      <span className="w-20 shrink-0">출구 도착</span>
-      <span className="w-14 shrink-0"></span>
+    <div className="bg-white rounded-t-2xl border border-gray-100 shadow-sm flex items-center px-4 pt-2 pb-1 gap-2 text-sm font-semibold text-gray-600">
+      <span className="w-16 shrink-0">도착·출구</span>
       <span className="flex-1">출발지 · 편명</span>
       <span className="shrink-0 text-right">상태</span>
     </div>
@@ -346,9 +345,9 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
                     const schedH = String(flight.scheduledTime.getHours()).padStart(2, "0");
                     const schedM = String(flight.scheduledTime.getMinutes()).padStart(2, "0");
                     return (
-                      <div className={`flex items-center px-4 py-3 gap-4 ${flight.isDelayed ? "bg-orange-50/60" : isNoTransport ? "bg-orange-50/30" : ""}`}>
+                      <div className={`flex items-center px-4 py-3 gap-2 ${flight.isDelayed ? "bg-orange-50/60" : isNoTransport ? "bg-orange-50/30" : ""}`}>
                         {/* 왼쪽: 출구 도착 시각 */}
-                        <div className="w-20 shrink-0 flex flex-col pt-0.5">
+                        <div className="w-16 shrink-0 flex flex-col pt-0.5">
                           <div className="flex items-center gap-1 flex-wrap">
                             {isNextDay && <NextDayBadge />}
                             {isNoTransport && <span className="text-[10px] font-bold text-orange-600 bg-orange-50 border border-orange-200 px-1 rounded leading-[1.4]">심야</span>}
@@ -356,21 +355,12 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
                           {flight.isDelayed ? (
                             <>
                               <span className="text-[15px] tabular-nums text-gray-400 line-through font-bold">{schedH}:{schedM}</span>
-                              <span className="text-[15px] tabular-nums text-orange-500 font-bold">{landH}:{landM} 도착</span>
+                              <span className="text-[15px] tabular-nums text-orange-500 font-bold">{landH}:{landM}<span className="text-xs ml-0.5">착</span></span>
                             </>
                           ) : (
-                            <span className="text-[15px] tabular-nums text-gray-400 font-bold">{landH}:{landM} 도착</span>
+                            <span className="text-[15px] tabular-nums text-gray-400 font-bold">{landH}:{landM}<span className="text-xs ml-0.5">착</span></span>
                           )}
-                          <span className="text-[15px] tabular-nums text-gray-900 font-bold">{exitH}:{exitM} 출구</span>
-                        </div>
-
-                        {/* 단축/지연 뱃지 */}
-                        <div className="w-14 shrink-0 flex justify-center">
-                          {flight.isDelayed && (
-                            <span className={`text-sm font-bold text-white px-2 py-0.5 rounded-md leading-none ${isLate ? "bg-[#E65100]" : "bg-blue-400"}`}>
-                              {isLate ? "지연" : "단축"}
-                            </span>
-                          )}
+                          <span className="text-[15px] tabular-nums text-gray-900 font-bold">{exitH}:{exitM}<span className="text-xs ml-0.5">출</span></span>
                         </div>
 
                         {/* 가운데: 출발지 + 편명·항공사 */}
@@ -379,12 +369,12 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
                             <DurationBadge code={flight.airportCode} />
                             <span className="text-base font-semibold text-gray-900 truncate min-w-0">{flight.origin}</span>
                           </div>
-                          <div className="flex items-center gap-1 mt-0.5">
-                            <span className="text-sm tabular-nums text-gray-400">{primaryId}</span>
-                            {flight.airline && <span className="text-sm text-gray-400">· {flight.airline.replace(/(?<!대한)항공/, "").trim()}</span>}
+                          <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+                            <span className="text-sm tabular-nums text-gray-400 shrink-0">{primaryId}</span>
+                            {flight.airline && <span className="text-sm text-gray-400 min-w-0 truncate">· {flight.airline.replace(/(?<!대한)항공/, "").trim()}</span>}
                             {extraIds.length > 0 && !isExpanded && (
                               <button onClick={() => setExpandedIds((s) => new Set(s).add(primaryId))}
-                                className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 leading-none">
+                                className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-gray-100 text-gray-500 leading-none shrink-0">
                                 +{extraIds.length}
                               </button>
                             )}
@@ -398,8 +388,13 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
                           )}
                         </div>
 
-                        {/* 오른쪽: 게이트 + 혼잡도 */}
+                        {/* 오른쪽: 상태 뱃지 + 게이트 + 혼잡도 */}
                         <div className="shrink-0 flex flex-col items-end gap-1 pt-0.5">
+                          {flight.isDelayed && (
+                            <span className={`text-xs font-bold text-white px-1.5 py-0.5 rounded-md leading-none ${isLate ? "bg-[#E65100]" : "bg-blue-400"}`}>
+                              {isLate ? "지연" : "단축"}
+                            </span>
+                          )}
                           {cong?.entrygate && (
                             <span className="text-sm font-semibold text-gray-500 whitespace-nowrap">게이트 {cong.entrygate}</span>
                           )}

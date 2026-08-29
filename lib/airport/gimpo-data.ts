@@ -99,6 +99,19 @@ async function _fetchGimpoFlights(): Promise<GimpoFlightsData> {
   return { arrivals, departures, todayStr, tomorrowStr, updatedAt: new Date().toISOString() };
 }
 
+let _lastGood: GimpoFlightsData | null = null;
+
+async function _fetchWithFallback(): Promise<GimpoFlightsData> {
+  try {
+    const data = await _fetchGimpoFlights();
+    _lastGood = data;
+    return data;
+  } catch (e) {
+    if (_lastGood) return _lastGood;
+    throw e;
+  }
+}
+
 export function getCachedGimpoFlights() {
-  return unstable_cache(_fetchGimpoFlights, ["gimpo-flights"], { revalidate: REVALIDATE })();
+  return unstable_cache(_fetchWithFallback, ["gimpo-flights"], { revalidate: REVALIDATE })();
 }
