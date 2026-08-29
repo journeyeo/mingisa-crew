@@ -11,6 +11,7 @@ import { WeeklyForecast } from "@/components/airport/WeeklyForecast";
 import { TaxiStatusCard } from "@/components/airport/TaxiStatus";
 import { Footer } from "@/components/Footer";
 import type { TaxiStatus } from "@/app/api/airport/taxi/route";
+import { WeatherBadge, WeatherModal, useWeather } from "@/components/weather/WeatherWidget";
 
 interface Props {
   terminal: Terminal;
@@ -151,7 +152,9 @@ export function AirportDashboard({ terminal }: Props) {
   const [taxiT2, setTaxiT2] = useState<TaxiStatus | null>(null);
   const [activeTab, setActiveTab] = useState<"passenger" | "weekly">("passenger");
   const [bottomTab, setBottomTab] = useState<"status" | "flights">("flights");
+  const [weatherOpen, setWeatherOpen] = useState(false);
   const headerRef = useRef<HTMLDivElement>(null);
+  const weather = useWeather();
 
   useEffect(() => {
     const el = headerRef.current;
@@ -209,11 +212,16 @@ export function AirportDashboard({ terminal }: Props) {
         style={{ paddingTop: "env(safe-area-inset-top)" }}
       >
         <div className="pt-4 pb-2">
-          <div className="flex items-center gap-2">
-            <button onClick={scrollToTop} className="flex-shrink-0">
-              <img src="/app-icon-crew-512.png" alt="민기사 크루" className="w-7 h-7 rounded-lg object-contain" />
-            </button>
-            <h1 className="text-xl font-bold text-gray-900">인천공항 입국 수요</h1>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <button onClick={scrollToTop} className="flex-shrink-0">
+                <img src="/app-icon-crew-512.png" alt="민기사 크루" className="w-7 h-7 rounded-lg object-contain" />
+              </button>
+              <h1 className="text-xl font-bold text-gray-900">인천공항 입국 수요</h1>
+            </div>
+            {weather && (
+              <WeatherBadge data={weather} onClick={() => setWeatherOpen(true)} />
+            )}
           </div>
           <p className="text-sm text-gray-500 mt-2">
             {now.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" })}
@@ -302,6 +310,11 @@ export function AirportDashboard({ terminal }: Props) {
         </div>
       )}
 
+      {/* ── 날씨 모달 ── */}
+      {weatherOpen && weather && (
+        <WeatherModal data={weather} onClose={() => setWeatherOpen(false)} />
+      )}
+
       {/* ── 하단 네비게이션 ── */}
       <div
         className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 shadow-[0_-1px_8px_rgba(0,0,0,0.06)]"
@@ -311,7 +324,7 @@ export function AirportDashboard({ terminal }: Props) {
           {(["flights", "status"] as const).map((key) => (
             <button
               key={key}
-              onClick={() => setBottomTab(key)}
+              onClick={() => { setBottomTab(key); (document.scrollingElement ?? document.documentElement).scrollTo({ top: 0, behavior: "instant" }); }}
               className="flex-1 flex flex-col items-center py-2 transition-colors"
             >
               <div className={`flex flex-col items-center gap-1 px-6 py-1.5 rounded-2xl transition-colors ${

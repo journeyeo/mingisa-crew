@@ -252,8 +252,8 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
 
   return (
     <>
-    <div ref={timeCardRef} className="fixed left-0 right-0 z-40 bg-gray-50 px-4 pt-4" style={{ top: "var(--sticky-header-height, 50px)" }}>
-    <div className="max-w-lg mx-auto space-y-3">
+    <div ref={timeCardRef} className="fixed left-0 right-0 z-40 bg-gray-50 pt-4" style={{ top: "var(--sticky-header-height, 50px)" }}>
+    <div className="max-w-lg mx-auto px-4 space-y-3">
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 pt-3 pb-3">
       <div className="flex items-center gap-2 mb-3">
         <div className="flex rounded-lg overflow-hidden border border-gray-300 text-xs font-semibold shrink-0">
@@ -303,7 +303,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
         })}
       </div>
     </div>
-    <div className="bg-white rounded-t-2xl border border-gray-100 flex items-center px-4 pt-2 pb-1 gap-3 text-sm font-semibold text-gray-600">
+    <div className="bg-white rounded-t-2xl border border-gray-100 shadow-sm flex items-center px-4 pt-2 pb-1 gap-3 text-sm font-semibold text-gray-600">
       <span className="w-20 shrink-0">편명</span>
       <span className="flex-1">출발지</span>
       <span className="w-28 text-right">착륙 · 출구 도착</span>
