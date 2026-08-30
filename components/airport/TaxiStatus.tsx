@@ -42,7 +42,7 @@ export function TaxiStatusCard({ t1, t2 }: Props) {
     { label: "경기택시",   key: ["gyenggitaxicnt",   "gyenggistandtime"]   },
     { label: "모범택시",   key: ["besttaxicnt",      "beststandtime"]      },
     { label: "대형택시",   key: ["vantaxicnt",       "vanstandtime"]       },
-    { label: "인터내셔널", key: ["intercitytaxicnt", "intercitystandtime"] },
+    { label: "시계 외",    key: ["intercitytaxicnt", "intercitystandtime"] },
   ] as const;
 
   return (
