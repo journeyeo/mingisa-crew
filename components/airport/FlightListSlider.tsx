@@ -97,7 +97,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
   const [selectedAirlines, setSelectedAirlines] = useState<Set<string> | null>(null);
   const [filterLongHaul, setFilterLongHaul] = useState(false);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
-  const [basis, setBasis] = useState<"exit" | "landing">("exit");
+  const [basis, setBasis] = useState<"exit" | "landing">("landing");
 
   // Slot indices for each fixed block:
   // Blocks 0-1 (00~05시) → tomorrowStr slots; Blocks 2-7 (06~23시) → todayStr slots
@@ -256,7 +256,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 pt-3 pb-3">
       <div className="flex items-center gap-2 mb-3">
         <div className="flex rounded-lg overflow-hidden border border-gray-300 text-xs font-semibold shrink-0">
-          {(["exit", "landing"] as const).map((b) => (
+          {(["landing", "exit"] as const).map((b) => (
             <button key={b} onClick={() => changeBasis(b)}
               className={`px-2.5 py-1.5 transition-colors ${basis === b ? "bg-gray-800 text-white" : "bg-white text-gray-600"}`}>
               {b === "exit" ? "출구기준" : "도착기준"}
