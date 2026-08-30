@@ -251,7 +251,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
 
   return (
     <>
-    <div ref={timeCardRef} className="fixed left-0 right-0 z-40 bg-gray-50 pt-4" style={{ top: "var(--sticky-header-height, 50px)" }}>
+    <div ref={timeCardRef} className="fixed left-0 right-0 z-40 bg-gray-50 pt-4" style={{ top: "calc(var(--sticky-header-height, 50px) - 1px)", paddingTop: "calc(1rem + 1px)", willChange: "transform" }}>
     <div className="max-w-lg mx-auto px-4 space-y-3">
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 pt-3 pb-3">
       <div className="flex items-center gap-2 mb-3">
@@ -411,6 +411,10 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
           </div>
         </div>
       )}
+
+      <p className="text-center text-xs text-gray-300 mt-3" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 24px)" }}>
+        인천국제공항공사 실시간 운항정보 · 5분 갱신
+      </p>
 
       {showFilter && (
         <div className="fixed inset-0 z-50 flex items-end justify-center" onClick={() => { setShowFilter(false); setFilterQuery(""); }}>

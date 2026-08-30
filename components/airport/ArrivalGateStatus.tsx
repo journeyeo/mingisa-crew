@@ -112,6 +112,9 @@ export function ArrivalGateStatus({ congestion }: Props) {
             })}
         </div>
       </div>
+      <p className="text-center text-xs text-gray-300 mt-3">
+        인천국제공항공사 실시간 운항정보 · 5분 갱신
+      </p>
     </div>
   );
 }
