@@ -128,7 +128,7 @@ function ListSkeleton() {
 export function GimpoView() {
   const [data, setData] = useState<GimpoFlightsData | null>(null);
   const [error, setError] = useState(false);
-  const [tab, setTab] = useState<"arrival" | "depart">("arrival");
+  const [tab, setTab] = useState<"domestic" | "international">("domestic");
   const nowRef = useRef<HTMLDivElement>(null);
 
   // 현재 시각 (KST)
@@ -161,8 +161,9 @@ export function GimpoView() {
   const block = TIME_BLOCKS[selectedBlock];
 
   const flights = data
-    ? (tab === "arrival" ? data.arrivals : data.departures)
+    ? data.arrivals
         .filter((f) => f.date === data.todayStr)
+        .filter((f) => f.line === (tab === "domestic" ? "국내" : "국제"))
         .filter((f) => {
           const h = parseInt(f.std.slice(0, 2), 10);
           return h >= block.startH && h <= block.endH;
@@ -182,7 +183,7 @@ export function GimpoView() {
         <div className="max-w-lg mx-auto px-4 pt-3 pb-2 space-y-2">
           {/* 도착/출발 탭 */}
           <div className="flex gap-2">
-            {(["arrival", "depart"] as const).map((t) => (
+            {(["domestic", "international"] as const).map((t) => (
               <button
                 key={t}
                 onClick={() => setTab(t)}
@@ -192,7 +193,7 @@ export function GimpoView() {
                     : "bg-white border border-gray-200 text-gray-500"
                 }`}
               >
-                {t === "arrival" ? "도착" : "출발"}
+                {t === "domestic" ? "국내도착" : "국제도착"}
               </button>
             ))}
           </div>
@@ -223,7 +224,7 @@ export function GimpoView() {
         <div className="max-w-lg mx-auto px-4 pb-2 flex items-center gap-1.5">
           <span className="inline-block w-1 h-4 rounded-full bg-[#1B5E36]" />
           <h2 className="text-xl font-bold text-gray-800">
-            {tab === "arrival" ? "도착 편" : "출발 편"}
+            {tab === "domestic" ? "국내 도착" : "국제 도착"}
           </h2>
           {data && (
             <span className="text-sm text-gray-400 ml-1">{block.label} {flights.length}편</span>
@@ -233,7 +234,7 @@ export function GimpoView() {
         <div className="max-w-lg mx-auto px-4">
           <div className="bg-white rounded-t-2xl border border-gray-100 shadow-sm px-4 py-2.5 flex items-center text-sm font-semibold text-gray-400 border-b border-gray-100">
             <span className="w-16">시간</span>
-            <span className="flex-1 pl-2">{tab === "arrival" ? "출발지" : "목적지"}</span>
+            <span className="flex-1 pl-2">출발지</span>
             <span className="text-right">상태</span>
           </div>
         </div>
