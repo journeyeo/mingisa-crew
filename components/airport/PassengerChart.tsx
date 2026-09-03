@@ -167,7 +167,7 @@ export function PassengerChart({ slots, tomorrowLabel }: Props) {
           <Bar data={data} options={options} plugins={[linePlugin]} />
         </div>
       ) : (
-        <div className="flex-1 min-h-0 overflow-y-auto">
+        <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain">
           <table className="w-full">
             <thead>
               <tr className="text-base text-gray-600 border-b border-gray-100">

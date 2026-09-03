@@ -437,7 +437,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
             <input type="text" value={filterQuery} onChange={(e) => setFilterQuery(e.target.value)}
               placeholder="항공사 검색"
               className="w-full mb-3 px-3 py-2 text-sm border border-gray-200 rounded-xl outline-none focus:border-gray-400 placeholder-gray-300" />
-            <div className="space-y-0.5 max-h-52 overflow-y-auto">
+            <div className="space-y-0.5 max-h-52 overflow-y-auto overscroll-contain">
               {allAirlines.filter((a) => a.includes(filterQuery.trim())).map((airline) => {
                 const checked = selectedAirlines === null || selectedAirlines.has(airline);
                 return (

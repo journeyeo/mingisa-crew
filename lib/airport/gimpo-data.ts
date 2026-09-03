@@ -94,24 +94,22 @@ async function _fetchGimpoFlights(): Promise<GimpoFlightsData> {
   const arrivals = deduped.filter((f) => f.io === "I").sort((a, b) => a.std.localeCompare(b.std));
   const departures = deduped.filter((f) => f.io === "O").sort((a, b) => a.std.localeCompare(b.std));
 
-  if (arrivals.length === 0 && departures.length === 0) throw new Error("No GMP flights found");
-
   return { arrivals, departures, todayStr, tomorrowStr, updatedAt: new Date().toISOString() };
 }
 
+const _cached = unstable_cache(_fetchGimpoFlights, ["gimpo-flights"], { revalidate: REVALIDATE });
+
 let _lastGood: GimpoFlightsData | null = null;
 
-async function _fetchWithFallback(): Promise<GimpoFlightsData> {
+export async function getCachedGimpoFlights(): Promise<GimpoFlightsData> {
   try {
-    const data = await _fetchGimpoFlights();
-    _lastGood = data;
+    const data = await _cached();
+    if (data.arrivals.length > 0 || data.departures.length > 0) {
+      _lastGood = data;
+    }
     return data;
   } catch (e) {
     if (_lastGood) return _lastGood;
     throw e;
   }
-}
-
-export function getCachedGimpoFlights() {
-  return unstable_cache(_fetchWithFallback, ["gimpo-flights"], { revalidate: REVALIDATE })();
 }

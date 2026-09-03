@@ -212,7 +212,7 @@ export function WeatherModal({ data, onClose }: ModalProps) {
 
         {/* 주간 예보 */}
         {tab === "weekly" && (
-          <div className="overflow-y-auto px-6 pt-4 pb-6" style={{ height: "288px" }}>
+          <div className="overflow-y-auto overscroll-contain px-6 pt-4 pb-6" style={{ height: "288px" }}>
             <div className="space-y-4">
               {data.daily.map((d: DailyForecast) => (
                 <div key={d.date} className="flex items-center gap-3">
@@ -241,7 +241,7 @@ export function WeatherModal({ data, onClose }: ModalProps) {
 
         {/* 시간별 예보 */}
         {tab === "hourly" && (
-          <div className="overflow-y-auto" style={{ height: "288px" }}>
+          <div className="overflow-y-auto overscroll-contain" style={{ height: "288px" }}>
             {hourly.map((h: HourlyForecast, i: number) => {
               const showDateDivider = h.date !== lastDate && i > 0;
               lastDate = h.date;

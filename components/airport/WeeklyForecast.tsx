@@ -35,7 +35,7 @@ export function WeeklyForecast({ days }: Props) {
 
   // 표 뷰
   const tableView = (
-    <div className="px-4 pt-3 pb-3 flex-1 min-h-0 overflow-y-auto">
+    <div className="px-4 pt-3 pb-3 flex-1 min-h-0 overflow-y-auto overscroll-contain">
       <table className="w-full">
         <thead>
           <tr className="text-sm font-semibold text-gray-500 border-b border-gray-100">
