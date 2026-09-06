@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useState, useMemo, useRef, useEffect } from "react";
+import { Fragment, useState, useMemo, useRef, useEffect, useLayoutEffect } from "react";
 import type { HourlySlot } from "@/lib/airport/types";
 import { FLIGHT_MINUTES } from "@/lib/airport/flight-minutes";
 
@@ -228,7 +228,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
     }
   }, [selectedGroups, basis]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = timeCardRef.current;
     if (!el) return;
     const update = () => document.documentElement.style.setProperty("--time-card-height", `${el.offsetHeight}px`);
@@ -311,8 +311,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
     </div>
     </div>
 
-    <div style={{ height: "var(--time-card-height, 180px)" }} />
-
+    <div style={{ height: "calc(var(--time-card-height, 180px) - 1px)" }} />
     {totalFlights === 0 ? (
       <div ref={flightListCardRef} className="bg-white rounded-b-2xl border-x border-b border-gray-100 shadow-sm">
         <p className="px-4 py-6 text-gray-400 text-sm text-center">

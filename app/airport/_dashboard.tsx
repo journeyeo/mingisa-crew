@@ -241,6 +241,11 @@ export function AirportDashboard({ terminal }: Props) {
           </div>
           <TerminalToggle terminal={terminal} />
         </div>
+        {flights?.flightFetchError && (
+          <div className="bg-amber-50 border-t border-amber-200 px-4 py-2 text-center text-xs text-amber-800">
+            공공데이터 API 장애로 일부 데이터가 표시되지 않을 수 있습니다.
+          </div>
+        )}
       </div>
       <div style={{ height: "var(--sticky-header-height, 0px)" }} />
       {/* ── 김포공항 뷰 ── */}
@@ -248,7 +253,7 @@ export function AirportDashboard({ terminal }: Props) {
 
       {/* ── 현황 탭 ── */}
       {terminal !== "GMP" && bottomTab === "status" && (
-        <div className="max-w-lg mx-auto px-4 pt-4 space-y-8" style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 140px)" }}>
+        <div className={`max-w-lg mx-auto px-4 space-y-8 ${flights?.flightFetchError ? "pt-3" : "pt-4"}`} style={{ paddingBottom: "calc(env(safe-area-inset-bottom) + 140px)" }}>
           {!summary ? <HeaderSkeleton /> : (
             <DashboardHeader
               terminal={terminal}

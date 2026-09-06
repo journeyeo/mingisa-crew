@@ -6,6 +6,17 @@ import type {
   Terminal,
   WeeklyFlightItem,
 } from "./types";
+import {
+  MOCK_ARRIVALS_T1,
+  MOCK_ARRIVALS_T2,
+  MOCK_FLIGHTS_T1,
+  MOCK_FLIGHTS_T2,
+  MOCK_PASSENGERS,
+  MOCK_WEEKLY,
+} from "./mock-data";
+
+const USE_MOCK = process.env.USE_MOCK === "true";
+const MOCK_FLIGHT_ERROR = process.env.MOCK_FLIGHT_ERROR === "true";
 
 const BASE_URL = "https://apis.data.go.kr/B551177";
 const SERVICE_KEY = process.env.AIRPORT_API_SERVICE_KEY;
@@ -30,6 +41,7 @@ async function govFetch<T>(url: string): Promise<T[]> {
 export async function fetchArrivalsCongestion(
   terminal: Terminal
 ): Promise<ArrivalCongestionItem[]> {
+  if (USE_MOCK) return terminal === "T1" ? MOCK_ARRIVALS_T1 : MOCK_ARRIVALS_T2;
   if (!SERVICE_KEY) return [];
   const url =
     `${BASE_URL}/StatusOfArrivals/getArrivalsCongestion` +
@@ -42,6 +54,10 @@ export async function fetchFlightStatus(
   terminal: Terminal,
   date: string // YYYYMMDD
 ): Promise<FlightStatusItem[]> {
+  if (USE_MOCK) {
+    if (MOCK_FLIGHT_ERROR) throw new Error("mock flight error");
+    return terminal === "T1" ? MOCK_FLIGHTS_T1 : MOCK_FLIGHTS_T2;
+  }
   if (!SERVICE_KEY) throw new Error("no key");
   const t = terminal === "T1" ? "P" : "S";
   const url =
@@ -52,6 +68,7 @@ export async function fetchFlightStatus(
 
 /** 주간 운항현황 — D+0~D+6, 시간대 예측용 */
 export async function fetchWeeklyFlights(terminal: Terminal): Promise<WeeklyFlightItem[]> {
+  if (USE_MOCK) return MOCK_WEEKLY;
   if (!SERVICE_KEY) return [];
   const pt = terminal === "T1" ? "P" : "S";
   const url =
@@ -71,6 +88,7 @@ export async function fetchParking(): Promise<ParkingItem[]> {
 export async function fetchPassengerForecast(
   date: string // YYYYMMDD
 ): Promise<PassengerForecastItem[]> {
+  if (USE_MOCK) return MOCK_PASSENGERS;
   if (!SERVICE_KEY) return [];
   const url =
     `${BASE_URL}/passgrAnncmt/getPassgrAnncmt` +

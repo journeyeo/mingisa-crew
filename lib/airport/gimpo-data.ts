@@ -1,6 +1,7 @@
 import { unstable_cache } from "next/cache";
 
 const SERVICE_KEY = process.env.AIRPORT_API_SERVICE_KEY;
+const USE_MOCK = process.env.USE_MOCK === "true";
 const BASE = "https://apis.data.go.kr/B551178/flight-status/detail";
 const ROWS = 100;
 const REVALIDATE = 300; // 5분
@@ -97,11 +98,50 @@ async function _fetchGimpoFlights(): Promise<GimpoFlightsData> {
   return { arrivals, departures, todayStr, tomorrowStr, updatedAt: new Date().toISOString() };
 }
 
+function hhmm(base: Date, offsetMin = 0): string {
+  const d = new Date(base.getTime() + offsetMin * 60_000);
+  return `${String(d.getUTCHours()).padStart(2, "0")}${String(d.getUTCMinutes()).padStart(2, "0")}`;
+}
+
+function mockGimpoData(): GimpoFlightsData {
+  const kst = new Date(new Date().getTime() + 9 * 3600_000);
+  const todayStr = toDateStr(kst);
+  const tomorrowStr = toDateStr(new Date(kst.getTime() + 86_400_000));
+
+  const domestic: GimpoFlight[] = [
+    { flightId: "KE1201", airline: "대한항공",  io: "I", line: "국내", fromCity: "제주", toCity: "김포", std: hhmm(kst, -90), etd: null,            status: "도착", gate: null, baggage: "1", date: todayStr },
+    { flightId: "OZ8901", airline: "아시아나",  io: "I", line: "국내", fromCity: "부산", toCity: "김포", std: hhmm(kst, -45), etd: null,            status: "도착", gate: null, baggage: "2", date: todayStr },
+    { flightId: "7C101",  airline: "제주항공",  io: "I", line: "국내", fromCity: "제주", toCity: "김포", std: hhmm(kst, -10), etd: hhmm(kst, 5),   status: "지연", gate: null, baggage: null, date: todayStr },
+    { flightId: "KE1205", airline: "대한항공",  io: "I", line: "국내", fromCity: "제주", toCity: "김포", std: hhmm(kst,  20), etd: null,            status: null,   gate: null, baggage: null, date: todayStr },
+    { flightId: "LJ201",  airline: "진에어",    io: "I", line: "국내", fromCity: "대구", toCity: "김포", std: hhmm(kst,  50), etd: null,            status: null,   gate: null, baggage: null, date: todayStr },
+    { flightId: "TW201",  airline: "티웨이",    io: "I", line: "국내", fromCity: "제주", toCity: "김포", std: hhmm(kst,  80), etd: null,            status: null,   gate: null, baggage: null, date: todayStr },
+    { flightId: "BX301",  airline: "에어부산",  io: "I", line: "국내", fromCity: "부산", toCity: "김포", std: hhmm(kst, 110), etd: hhmm(kst, 125), status: "지연", gate: null, baggage: null, date: todayStr },
+    { flightId: "OZ901",  airline: "아시아나",  io: "I", line: "국내", fromCity: "제주", toCity: "김포", std: hhmm(kst, 140), etd: null,            status: null,   gate: null, baggage: null, date: todayStr },
+  ];
+
+  const international: GimpoFlight[] = [
+    { flightId: "KE705",  airline: "대한항공",    io: "I", line: "국제", fromCity: "도쿄(HND)", toCity: "김포", std: hhmm(kst, -60), etd: null,            status: "도착", gate: null, baggage: "3", date: todayStr },
+    { flightId: "NH852",  airline: "ANA",         io: "I", line: "국제", fromCity: "도쿄(HND)", toCity: "김포", std: hhmm(kst,  15), etd: null,            status: null,   gate: null, baggage: null, date: todayStr },
+    { flightId: "OZ102",  airline: "아시아나",    io: "I", line: "국제", fromCity: "베이징(PEK)", toCity: "김포", std: hhmm(kst, 70), etd: hhmm(kst, 90), status: "지연", gate: null, baggage: null, date: todayStr },
+    { flightId: "KE707",  airline: "대한항공",    io: "I", line: "국제", fromCity: "오사카(ITM)", toCity: "김포", std: hhmm(kst, 120), etd: null,          status: null,   gate: null, baggage: null, date: todayStr },
+  ];
+
+  return {
+    arrivals: [...domestic, ...international].sort((a, b) => a.std.localeCompare(b.std)),
+    departures: [],
+    todayStr,
+    tomorrowStr,
+    updatedAt: new Date().toISOString(),
+  };
+}
+
 const _cached = unstable_cache(_fetchGimpoFlights, ["gimpo-flights"], { revalidate: REVALIDATE });
 
 let _lastGood: GimpoFlightsData | null = null;
 
 export async function getCachedGimpoFlights(): Promise<GimpoFlightsData> {
+  if (process.env.MOCK_FLIGHT_ERROR === "true") throw new Error("mock flight error");
+  if (USE_MOCK) return mockGimpoData();
   try {
     const data = await _cached();
     if (data.arrivals.length > 0 || data.departures.length > 0) {

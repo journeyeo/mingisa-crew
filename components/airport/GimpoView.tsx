@@ -270,7 +270,7 @@ export function GimpoView() {
         )}
 
         {/* 출처 */}
-        {data && (
+        {(data || error) && (
           <p className="text-center text-xs text-gray-300 mt-3">
             한국공항공사 실시간 운항정보 · 5분 갱신
           </p>
