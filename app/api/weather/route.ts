@@ -1,3 +1,5 @@
+export const preferredRegion = ["icn1"];
+
 // 기상청 단기예보 + 초단기실황 + 중기예보 — 인천공항 (nx=54, ny=124)
 const SERVICE_KEY = process.env.AIRPORT_API_SERVICE_KEY;
 const BASE = "https://apis.data.go.kr/1360000/VilageFcstInfoService_2.0";

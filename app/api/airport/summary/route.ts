@@ -1,5 +1,7 @@
 import { NextRequest } from "next/server";
 
+export const preferredRegion = ["icn1"];
+
 import { getCachedSummary } from "@/lib/airport/cached-data";
 import type { Terminal } from "@/lib/airport/types";
 

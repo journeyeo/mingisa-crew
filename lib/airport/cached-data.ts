@@ -106,10 +106,11 @@ export function getCachedFlights(terminal: Terminal, todayStr: string, tomorrowS
     async () => {
       const kstHour = new Date(new Date().getTime() + 9 * 3600_000).getUTCHours();
 
+      let flightFetchError = false;
       const [[flightsToday, flightsTomorrow], [forecastsToday, forecastsTomorrow], weeklyItems] =
         await Promise.all([
           Promise.all([
-            fetchFlightStatus(terminal, todayStr),
+            fetchFlightStatus(terminal, todayStr).catch(() => { flightFetchError = true; return [] as import("./types").FlightStatusItem[]; }),
             fetchFlightStatus(terminal, tomorrowStr).catch(() => []),
           ]),
           Promise.all([
@@ -147,6 +148,7 @@ export function getCachedFlights(terminal: Terminal, todayStr: string, tomorrowS
         todayStr,
         tomorrowStr,
         kstHour,
+        flightFetchError,
       };
     },
     ["airport-flights-v3", terminal, todayStr, tomorrowStr],

@@ -59,6 +59,7 @@ interface FlightsData {
   todayStr: string;
   tomorrowStr: string;
   kstHour: number;
+  flightFetchError: boolean;
 }
 
 function deserializeSlot(s: SerializedSlot): HourlySlot {
@@ -318,6 +319,7 @@ export function AirportDashboard({ terminal }: Props) {
                 tomorrowStr={flights.tomorrowStr}
                 kstHour={flights.kstHour}
                 congestion={summary?.arrivalCongestion}
+                flightFetchError={flights.flightFetchError}
               />
             </div>
           )}

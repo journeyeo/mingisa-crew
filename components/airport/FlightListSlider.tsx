@@ -67,6 +67,7 @@ interface Props {
   kstHour: number;
   terminal: string;
   congestion?: CongestionEntry[];
+  flightFetchError?: boolean;
 }
 
 function dateOf(date: Date): string {
@@ -91,7 +92,7 @@ function TimeCell({ date, todayStr, prefix, hideNextDay }: { date: Date; todaySt
   );
 }
 
-export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, kstHour, terminal, congestion }: Props) {
+export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, kstHour, terminal, congestion, flightFetchError }: Props) {
   const [showFilter, setShowFilter] = useState(false);
   const [filterQuery, setFilterQuery] = useState("");
   const [selectedAirlines, setSelectedAirlines] = useState<Set<string> | null>(null);
@@ -314,7 +315,9 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
 
     {totalFlights === 0 ? (
       <div ref={flightListCardRef} className="bg-white rounded-b-2xl border-x border-b border-gray-100 shadow-sm">
-        <p className="px-4 py-6 text-gray-400 text-sm text-center">이 시간대 운항편 없음</p>
+        <p className="px-4 py-6 text-gray-400 text-sm text-center">
+          {flightFetchError ? "데이터를 불러올 수 없습니다" : "이 시간대 운항편 없음"}
+        </p>
       </div>
     ) : (
       <div ref={flightListCardRef} className="bg-white rounded-b-2xl border-x border-b border-gray-100 shadow-sm overflow-hidden">

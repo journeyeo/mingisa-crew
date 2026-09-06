@@ -8,6 +8,12 @@ const config: CapacitorConfig = {
     url: 'https://crew.mingisa.com',
     cleartext: false,
   },
+  ios: {
+    appendUserAgent: 'MinGisaCrewApp',
+  },
+  android: {
+    appendUserAgent: 'MinGisaCrewApp',
+  },
 };
 
 export default config;

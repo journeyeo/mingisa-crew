@@ -1,6 +1,8 @@
 import { NextRequest } from "next/server";
 import { unstable_cache } from "next/cache";
 
+export const preferredRegion = ["icn1"];
+
 const BASE_URL = "https://apis.data.go.kr/B551177";
 const SERVICE_KEY = process.env.AIRPORT_API_SERVICE_KEY;
 
@@ -29,7 +31,12 @@ export interface TaxiStatus {
 async function fetchTaxiStatus(terno: string): Promise<TaxiStatus | null> {
   if (!SERVICE_KEY) return null;
   const url = `${BASE_URL}/StatusOfTaxi/getTaxiStatus?serviceKey=${SERVICE_KEY}&type=json&terno=${terno}`;
-  const res = await fetch(url, { next: { revalidate: 300 } });
+  let res: Response;
+  try {
+    res = await fetch(url, { next: { revalidate: 300 } });
+  } catch {
+    return null;
+  }
   if (!res.ok) return null;
   const json = await res.json();
   const item = json?.response?.body?.items?.[0];
@@ -64,7 +71,11 @@ const getCachedTaxi = unstable_cache(
 );
 
 export async function GET(req: NextRequest) {
-  const terminal = req.nextUrl.searchParams.get("terminal") === "T2" ? "P03" : "P01";
-  const data = await getCachedTaxi(terminal);
-  return Response.json(data);
+  try {
+    const terminal = req.nextUrl.searchParams.get("terminal") === "T2" ? "P03" : "P01";
+    const data = await getCachedTaxi(terminal);
+    return Response.json(data);
+  } catch {
+    return Response.json(null);
+  }
 }
