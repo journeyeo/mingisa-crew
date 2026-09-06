@@ -3,6 +3,9 @@
 import { useState, useEffect, useRef } from "react";
 import type { GimpoFlightsData, GimpoFlight } from "@/app/api/gimpo/route";
 
+let _cache: { data: GimpoFlightsData; ts: number } | null = null;
+const CACHE_MS = 5 * 60 * 1000;
+
 const TIME_BLOCKS = [
   { startH: 6,  endH: 8,  label: "06~08시" },
   { startH: 9,  endH: 11, label: "09~11시" },
@@ -139,9 +142,13 @@ export function GimpoView() {
   const [selectedBlock, setSelectedBlock] = useState<number>(() => currentBlockIdx(kstHour));
 
   useEffect(() => {
+    if (_cache && Date.now() - _cache.ts < CACHE_MS) {
+      setData(_cache.data);
+      return;
+    }
     fetch("/api/gimpo")
       .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
-      .then((d) => { if (!d.arrivals) throw new Error(); setData(d); })
+      .then((d) => { if (!d.arrivals) throw new Error(); _cache = { data: d, ts: Date.now() }; setData(d); })
       .catch(() => setError(true));
   }, []);
 

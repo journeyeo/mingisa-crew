@@ -292,15 +292,13 @@ export function AirportDashboard({ terminal }: Props) {
             </div>
           </div>
           <div>
-            {(taxiT1 || taxiT2) && (
-              <div className="mb-3">
-                <div className="flex items-center gap-1.5 mb-4">
-                  <span className="inline-block w-1 h-4 rounded-full bg-[#1B5E36]" />
-                  <h2 className="text-xl font-bold text-gray-800">택시 승강장</h2>
-                </div>
-                <TaxiStatusCard t1={taxiT1} t2={taxiT2} />
+            <div className="mb-3">
+              <div className="flex items-center gap-1.5 mb-4">
+                <span className="inline-block w-1 h-4 rounded-full bg-[#1B5E36]" />
+                <h2 className="text-xl font-bold text-gray-800">택시 승강장</h2>
               </div>
-            )}
+              <TaxiStatusCard t1={taxiT1} t2={taxiT2} />
+            </div>
             <p className="text-center text-xs text-gray-300 mt-3">
               인천국제공항공사 실시간 운항정보 · 5분 갱신
             </p>
