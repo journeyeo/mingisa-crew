@@ -97,8 +97,9 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
   const [filterQuery, setFilterQuery] = useState("");
   const [selectedAirlines, setSelectedAirlines] = useState<Set<string> | null>(null);
   const [filterLongHaul, setFilterLongHaul] = useState(false);
+  const [filterArriving, setFilterArriving] = useState(false);
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set());
-  const [basis, setBasis] = useState<"exit" | "landing">("landing");
+  const basis = "landing" as const;
 
   // Slot indices for each fixed block:
   // Blocks 0-1 (00~05시) → tomorrowStr slots; Blocks 2-7 (06~23시) → todayStr slots
@@ -137,13 +138,14 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
     setSelectedGroups(new Set([groupIdx]));
   }
 
-  function changeBasis(b: "exit" | "landing") {
-    setBasis(b);
-  }
-
   function toggleLongHaul() {
     scrollToListTop();
     setFilterLongHaul((prev) => !prev);
+  }
+
+  function toggleArriving() {
+    scrollToListTop();
+    setFilterArriving((prev) => !prev);
   }
 
   const selectedSlotSet = useMemo(() => {
@@ -165,15 +167,21 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
     return result.sort((a, b) => a.localeCompare(b, "ko"));
   }, [slots]);
 
-  const effectiveSlots = basis === "exit" ? slots : slotsLanding;
+  const effectiveSlots = slotsLanding;
 
   const selected = effectiveSlots.filter((_, idx) => selectedSlotSet.has(idx));
 
   const isFiltered = selectedAirlines !== null;
   const selectedCount = selectedAirlines?.size ?? allAirlines.length;
 
+  const congestionMap = useMemo(() => {
+    if (!congestion?.length) return new Map<string, CongestionEntry>();
+    return new Map(congestion.map((c) => [c.flightid.toUpperCase(), c]));
+  }, [congestion]);
+
   const allEntries = (() => {
-    const raw = selected.flatMap((s) =>
+    const source = selected;
+    const raw = source.flatMap((s) =>
       s.flights
         .filter((f) => selectedAirlines === null || selectedAirlines.has(f.airline))
         .filter((f) => !filterLongHaul || Math.round((FLIGHT_MINUTES[f.airportCode?.toUpperCase() ?? ""] ?? 0) / 60) >= 7)
@@ -185,24 +193,36 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
       if (seen.has(key)) seen.get(key)!.ids.push(entry.flight.id);
       else seen.set(key, { flight: entry.flight, ids: [entry.flight.id], isNoTransport: entry.isNoTransport });
     }
-    return Array.from(seen.values());
+    const entries = Array.from(seen.values());
+    if (!filterArriving) return entries;
+    return entries.filter(({ ids }) => ids.some((id) => congestionMap.has(id.toUpperCase())));
   })();
   const totalFlights = allEntries.length;
+
+  // 입국중 데이터가 있는 블록 인덱스
+  const arrivingBlockIndices = useMemo(() => {
+    const result = new Set<number>();
+    for (const [flightId] of congestionMap) {
+      for (const slot of effectiveSlots) {
+        const hasFlight = slot.flights.some((f) => f.id.toUpperCase() === flightId);
+        if (hasFlight) {
+          const blockIdx = FIXED_BLOCKS.findIndex(({ startH, endH }) => slot.hour >= startH && slot.hour <= endH);
+          if (blockIdx >= 0) result.add(blockIdx);
+        }
+      }
+    }
+    return result;
+  }, [congestionMap, effectiveSlots]);
 
   // "지금" 구분선: 현재 시각 기준 첫 미래 항공편 위치
   const now = new Date();
   const nowDividerIdx = useMemo(() => {
     const idx = allEntries.findIndex(({ flight }) =>
-      basis === "exit" ? flight.exitTime >= now : flight.landingTime >= now
+      flight.landingTime >= now
     );
     return idx >= 0 ? idx : allEntries.length;
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [allEntries, basis]);
-
-  const congestionMap = useMemo(() => {
-    if (!congestion?.length) return new Map<string, CongestionEntry>();
-    return new Map(congestion.map((c) => [c.flightid.toUpperCase(), c]));
-  }, [congestion]);
+  }, [allEntries]);
 
   const listRef = useRef<HTMLDivElement>(null);
   const dividerRef = useRef<HTMLDivElement>(null);
@@ -256,14 +276,6 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
     <div className="max-w-lg mx-auto px-4 space-y-3">
     <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-4 pt-3 pb-3">
       <div className="flex items-center gap-2 mb-3">
-        <div className="flex rounded-lg overflow-hidden border border-gray-300 text-xs font-semibold shrink-0">
-          {(["landing", "exit"] as const).map((b) => (
-            <button key={b} onClick={() => changeBasis(b)}
-              className={`px-2.5 py-1.5 transition-colors ${basis === b ? "bg-gray-800 text-white" : "bg-white text-gray-600"}`}>
-              {b === "exit" ? "출구기준" : "도착기준"}
-            </button>
-          ))}
-        </div>
         <button
           onClick={toggleLongHaul}
           className={`text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-colors shrink-0 ${
@@ -273,12 +285,12 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
           장거리
         </button>
         <button
-          onClick={() => { setShowFilter(true); setFilterQuery(""); }}
+          onClick={toggleArriving}
           className={`text-xs font-semibold px-2.5 py-1.5 rounded-lg border transition-colors shrink-0 ${
-            isFiltered ? "bg-gray-900 text-white border-gray-900" : "bg-white text-gray-600 border-gray-300"
+            filterArriving ? "bg-[#1B5E36] text-white border-[#1B5E36]" : "bg-white text-gray-600 border-gray-300"
           }`}
         >
-          항공사{isFiltered && <span className="ml-1 opacity-70">{selectedCount}/{allAirlines.length}</span>}
+          입국중
         </button>
         <p className="text-base font-bold text-gray-800 tabular-nums ml-auto shrink-0">
           {totalFlights > 0 ? `${totalFlights}편` : "—"}
@@ -287,24 +299,34 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
       <div className="grid grid-cols-4 gap-2">
         {FIXED_BLOCKS.map(({ label }, blockIdx) => {
           const isSelected = selectedGroups.has(blockIdx);
+          const hasArriving = arrivingBlockIndices.has(blockIdx);
           return (
             <button
               key={blockIdx}
               onClick={() => toggleGroup(blockIdx)}
-              className={`py-2 rounded-xl text-sm font-semibold text-center transition-colors border-2 ${
+              className={`relative py-2 rounded-xl text-sm font-semibold text-center transition-colors border-2 ${
                 isSelected ? "bg-[#1B5E36] text-white border-transparent"
                 : blockIdx === currentBlockIdx ? "bg-gray-100 text-gray-600 border-dashed border-[#1B5E36]"
                 : "bg-gray-100 text-gray-600 border-transparent"
               }`}
             >
               {label}
+              {hasArriving && (
+                <span className={`absolute top-1 right-1.5 w-1.5 h-1.5 rounded-full ${isSelected ? "bg-white" : "bg-[#1B5E36]"}`} />
+              )}
             </button>
           );
         })}
       </div>
+      {arrivingBlockIndices.size > 0 && (
+        <div className="flex items-center gap-1 mt-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#1B5E36] shrink-0" />
+          <span className="text-xs text-gray-400">현재 입국장 승객 있는 시간대</span>
+        </div>
+      )}
     </div>
     <div className="bg-white rounded-t-2xl border border-gray-100 shadow-sm flex items-center px-4 pt-2 pb-1 gap-2 text-sm font-semibold text-gray-600">
-      <span className="w-16 shrink-0">도착·출구</span>
+      <span className="w-16 shrink-0">도착</span>
       <span className="flex-1">출발지 · 편명</span>
       <span className="shrink-0 text-right">상태</span>
     </div>
@@ -360,7 +382,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
                               <span className="text-[15px] tabular-nums text-orange-500 font-bold">{landH}:{landM}<span className="text-xs ml-0.5">착</span></span>
                             </>
                           ) : (
-                            <span className="text-[15px] tabular-nums text-gray-400 font-bold">{landH}:{landM}<span className="text-xs ml-0.5">착</span></span>
+                            <span className="text-[15px] tabular-nums text-orange-500 font-bold">{landH}:{landM}<span className="text-xs ml-0.5">착</span></span>
                           )}
                           <span className="text-[15px] tabular-nums text-gray-900 font-bold">{exitH}:{exitM}<span className="text-xs ml-0.5">출</span></span>
                         </div>
@@ -397,10 +419,10 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
                               {isLate ? "지연" : "단축"}
                             </span>
                           )}
-                          {cong?.entrygate && (
-                            <span className="text-sm font-semibold text-gray-500 whitespace-nowrap">게이트 {cong.entrygate}</span>
+                          {(cong?.entrygate || flight.exitGate) && (
+                            <span className="text-sm font-semibold text-gray-500 whitespace-nowrap">게이트 {cong?.entrygate || flight.exitGate}</span>
                           )}
-                          {cong && basis === "exit" && (
+                          {cong && (
                             <span className="text-sm tabular-nums font-semibold text-[#1B5E36] text-right whitespace-nowrap">외국인 {cong.foreigner.toLocaleString()}명</span>
                           )}
                         </div>
