@@ -134,7 +134,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
   }
 
   function toggleGroup(groupIdx: number) {
-    scrollToListTop();
+    if (groupIdx !== currentBlockIdx) scrollToListTop();
     setSelectedGroups(new Set([groupIdx]));
   }
 
