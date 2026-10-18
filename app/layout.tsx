@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { ServiceWorkerRegister } from "@/components/ServiceWorkerRegister";
+import { VersionWatcher } from "@/components/VersionWatcher";
 import { Analytics } from "@vercel/analytics/next";
 
 const geistSans = Geist({
@@ -37,6 +38,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="min-h-full flex flex-col bg-gray-50">
         <ServiceWorkerRegister />
+        <VersionWatcher />
         {children}
         <Analytics />
       </body>
