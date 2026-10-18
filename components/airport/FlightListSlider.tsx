@@ -231,6 +231,7 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
 
   const isCurrentBlockSelected = selectedGroups.has(currentBlockIdx);
   const isFirstRender = useRef(true);
+  const hasScrolledOnLoad = useRef(false);
 
   useEffect(() => {
     if (isFirstRender.current) { isFirstRender.current = false; return; }
@@ -247,6 +248,19 @@ export function FlightListSlider({ slots, slotsLanding, todayStr, tomorrowStr, k
       window.scrollTo({ top, behavior: "smooth" });
     }
   }, [selectedGroups, basis]);
+
+  // 탭 전환 후 초기 데이터 로드 시 "지금 이후" 위치로 자동 스크롤 (한 번만)
+  useEffect(() => {
+    if (hasScrolledOnLoad.current || totalFlights === 0 || !isCurrentBlockSelected) return;
+    hasScrolledOnLoad.current = true;
+    const dividerEl = dividerRef.current;
+    if (!dividerEl) return;
+    const headerH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--sticky-header-height") || "0");
+    const cardH = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--time-card-height") || "0");
+    const top = dividerEl.getBoundingClientRect().top + window.scrollY - headerH - cardH - 8;
+    window.scrollTo({ top, behavior: "smooth" });
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [totalFlights]);
 
   useLayoutEffect(() => {
     const el = timeCardRef.current;
