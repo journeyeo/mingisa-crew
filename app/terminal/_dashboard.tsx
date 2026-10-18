@@ -298,11 +298,14 @@ export function TerminalDashboard({ terminal }: Props) {
               {now.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" })}
               {" · 5분 갱신"}
               {(() => {
-                const iso = terminal === "GMP" ? gimpoUpdatedAt : summary?.nowISO ?? null;
-                if (!iso) return null;
-                const kst = new Date(new Date(iso).getTime() + 9 * 3600_000);
-                const hh = String(kst.getUTCHours()).padStart(2, "0");
-                const mm = String(kst.getUTCMinutes()).padStart(2, "0");
+                const hasData = terminal === "GMP" ? !!gimpoUpdatedAt : !!summary;
+                if (!hasData) return null;
+                const iso = terminal === "GMP" ? gimpoUpdatedAt! : summary!.nowISO;
+                const serverKst = new Date(new Date(iso).getTime() + 9 * 3600_000);
+                // 5분 단위 내림 (클라이언트 캐시로 인한 불일치 방지)
+                const floored = new Date(Math.floor(serverKst.getTime() / (5 * 60 * 1000)) * (5 * 60 * 1000));
+                const hh = String(floored.getUTCHours()).padStart(2, "0");
+                const mm = String(floored.getUTCMinutes()).padStart(2, "0");
                 return <span className="text-gray-400"> · {hh}:{mm} 업데이트</span>;
               })()}
             </p>
