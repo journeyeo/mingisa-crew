@@ -17,6 +17,17 @@ interface Props {
   terminal: Terminal;
 }
 
+// ── 터미널 클라이언트 캐시 (탭 재방문 시 즉시 표시) ──────────────────────────
+type TerminalCache = {
+  summary: SummaryData;
+  flights: FlightsData;
+  taxiT1: TaxiStatus;
+  taxiT2: TaxiStatus;
+  ts: number;
+};
+const TERMINAL_CACHE_MS = 5 * 60 * 1000;
+const _terminalCache: Partial<Record<"T1" | "T2", TerminalCache>> = {};
+
 type SerializedFlight = Omit<Flight, "scheduledTime" | "landingTime" | "exitTime"> & {
   scheduledTime: string;
   landingTime: string;
@@ -187,6 +198,7 @@ export function TerminalDashboard({ terminal }: Props) {
   const [flights, setFlights] = useState<FlightsData | null>(null);
   const [taxiT1, setTaxiT1] = useState<TaxiStatus | null>(null);
   const [taxiT2, setTaxiT2] = useState<TaxiStatus | null>(null);
+  const [gimpoUpdatedAt, setGimpoUpdatedAt] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<"passenger" | "weekly">("passenger");
   const [bottomTab, setBottomTab] = useState<BottomTab>("flights");
   const [weatherOpen, setWeatherOpen] = useState(false);
@@ -207,29 +219,46 @@ export function TerminalDashboard({ terminal }: Props) {
     const controller = new AbortController();
     const { signal } = controller;
 
+    if (terminal !== "GMP") {
+      const cached = _terminalCache[terminal];
+      if (cached && Date.now() - cached.ts < TERMINAL_CACHE_MS) {
+        setSummary(cached.summary);
+        setFlights(cached.flights);
+        setTaxiT1(cached.taxiT1);
+        setTaxiT2(cached.taxiT2);
+        return () => controller.abort();
+      }
+    }
+
     setSummary(null);
     setFlights(null);
     setTaxiT1(null);
     setTaxiT2(null);
 
-    fetch(`/api/airport/summary?terminal=${terminal}`, { signal })
-      .then((r) => r.json())
-      .then((raw: SummaryData) => setSummary(raw))
-      .catch((e) => { if (e.name !== "AbortError") console.error(e); });
+    if (terminal === "GMP") return () => controller.abort();
 
-    fetch(`/api/airport/flights?terminal=${terminal}`, { signal })
-      .then((r) => r.json())
-      .then((raw: FlightsData) => setFlights(raw))
-      .catch((e) => { if (e.name !== "AbortError") console.error(e); });
+    const t = terminal;
 
-    fetch(`/api/airport/taxi?terminal=T1`, { signal })
-      .then((r) => r.json())
-      .then((raw: TaxiStatus) => setTaxiT1(raw))
-      .catch((e) => { if (e.name !== "AbortError") console.error(e); });
+    const summaryP = fetch(`/api/airport/summary?terminal=${t}`, { signal })
+      .then((r) => r.json() as Promise<SummaryData>)
+      .then((d) => { setSummary(d); return d; });
 
-    fetch(`/api/airport/taxi?terminal=T2`, { signal })
-      .then((r) => r.json())
-      .then((raw: TaxiStatus) => setTaxiT2(raw))
+    const flightsP = fetch(`/api/airport/flights?terminal=${t}`, { signal })
+      .then((r) => r.json() as Promise<FlightsData>)
+      .then((d) => { setFlights(d); return d; });
+
+    const taxiT1P = fetch(`/api/airport/taxi?terminal=T1`, { signal })
+      .then((r) => r.json() as Promise<TaxiStatus>)
+      .then((d) => { setTaxiT1(d); return d; });
+
+    const taxiT2P = fetch(`/api/airport/taxi?terminal=T2`, { signal })
+      .then((r) => r.json() as Promise<TaxiStatus>)
+      .then((d) => { setTaxiT2(d); return d; });
+
+    Promise.all([summaryP, flightsP, taxiT1P, taxiT2P])
+      .then(([summary, flights, taxiT1, taxiT2]) => {
+        _terminalCache[t] = { summary, flights, taxiT1, taxiT2, ts: Date.now() };
+      })
       .catch((e) => { if (e.name !== "AbortError") console.error(e); });
 
     return () => controller.abort();
@@ -268,8 +297,10 @@ export function TerminalDashboard({ terminal }: Props) {
             <p className="text-sm text-gray-500 mt-2">
               {now.toLocaleDateString("ko-KR", { month: "long", day: "numeric", weekday: "short" })}
               {" · 5분 갱신"}
-              {summary && (() => {
-                const kst = new Date(new Date(summary.nowISO).getTime() + 9 * 3600_000);
+              {(() => {
+                const iso = terminal === "GMP" ? gimpoUpdatedAt : summary?.nowISO ?? null;
+                if (!iso) return null;
+                const kst = new Date(new Date(iso).getTime() + 9 * 3600_000);
                 const hh = String(kst.getUTCHours()).padStart(2, "0");
                 const mm = String(kst.getUTCMinutes()).padStart(2, "0");
                 return <span className="text-gray-400"> · {hh}:{mm} 업데이트</span>;
@@ -287,7 +318,7 @@ export function TerminalDashboard({ terminal }: Props) {
       <div style={{ height: "var(--sticky-header-height, 0px)" }} />
 
       {/* ── 김포공항 뷰 ── */}
-      {terminal === "GMP" && bottomTab === "flights" && <GimpoView />}
+      {terminal === "GMP" && bottomTab === "flights" && <GimpoView onUpdatedAt={setGimpoUpdatedAt} />}
 
       {/* ── 채팅 탭 ── */}
       {bottomTab === "chat" && (

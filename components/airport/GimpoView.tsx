@@ -128,7 +128,7 @@ function ListSkeleton() {
 
 // ── 메인 뷰 ──────────────────────────────────────────────────────────────────
 
-export function GimpoView() {
+export function GimpoView({ onUpdatedAt }: { onUpdatedAt?: (iso: string) => void }) {
   const [data, setData] = useState<GimpoFlightsData | null>(null);
   const [error, setError] = useState(false);
   const [tab, setTab] = useState<"domestic" | "international">("domestic");
@@ -144,11 +144,12 @@ export function GimpoView() {
   useEffect(() => {
     if (_cache && Date.now() - _cache.ts < CACHE_MS) {
       setData(_cache.data);
+      onUpdatedAt?.(_cache.data.updatedAt);
       return;
     }
     fetch("/api/gimpo")
       .then((r) => { if (!r.ok) throw new Error(); return r.json(); })
-      .then((d) => { if (!d.arrivals) throw new Error(); _cache = { data: d, ts: Date.now() }; setData(d); })
+      .then((d) => { if (!d.arrivals) throw new Error(); _cache = { data: d, ts: Date.now() }; setData(d); onUpdatedAt?.(d.updatedAt); })
       .catch(() => setError(true));
   }, []);
 
